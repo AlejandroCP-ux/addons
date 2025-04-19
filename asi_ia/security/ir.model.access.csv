@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+asi_ia.access_localai_model,access_localai_model,asi_ia.model_localai_model,base.group_user,1,1,1,1

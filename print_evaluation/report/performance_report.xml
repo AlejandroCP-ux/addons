@@ -1,0 +1,63 @@
+<odoo>
+   
+
+    <template id="report_performance_evaluation">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Resumen de Evaluación del Desempeño</h2>
+                        <p><strong>Período evaluado:</strong> <span t-field="doc.performance_period_id.name"/></p>
+                        <p><strong>Departamento:</strong> <span t-field="doc.department_id.name"/></p>
+                        <p><strong>Trabajador:</strong> <span t-field="doc.employee_id.name"/></p>
+                        <p><strong>Referencia:</strong> <span t-field="doc.name"/></p>
+
+
+
+
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Indicadores</th>
+                                    <th>Valor</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            <tr t-foreach="doc.personal_ev_line_ids" t-as="line">
+                                <td><span t-field="line.name"/></td>
+                                <td><span t-field="line.evaluation"/></td>
+                            </tr>
+                        </tbody>
+                            
+                        </table>
+                        <p><strong>Evaluación:</strong> <span t-field="doc.overall_score"/></p>
+        <div style="width: 100%;">          
+            <div style="float: right; width: 40%;">
+                <p style="margin-bottom: 5px;">Jefe: <span t-field="doc.employee_id.coach_id.name"/></p>
+                <div style="border: 2px solid black; 
+                          height: 125px; 
+                          width: 300px; 
+                          margin-bottom: 10px;
+                          text-align: center;
+                          display: flex;
+                          align-items: center;
+                          justify-content: center;">
+                </div>
+        </div>
+    </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+    <record id="print_evaluation_report" model="ir.actions.report">
+        <field name="name">Reporte de Evaluacio</field>
+        <field name="model">performance.evaluation.program</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">print_evaluation.report_performance_evaluation</field>
+        <field name="report_file">print_evaluation.report_performance_evaluation</field>
+        <field name="print_report_name">'Reporte de Evaluacion'</field>
+        <field name="binding_model_id" ref="performance_evaluation.model_performance_evaluation_program"></field>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

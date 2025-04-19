@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+     <record id="paperformat_us_big_footer" model="report.paperformat">
+            <field name="name">US Letter Big Footer</field>
+            <field name="default" eval="True" />
+            <field name="format">Letter</field>
+            <field name="page_height">0</field>
+            <field name="page_width">0</field>
+            <field name="orientation">Portrait</field>
+            <field name="margin_top">19</field>
+            <field name="margin_bottom">60</field>
+            <field name="margin_left">7</field>
+            <field name="margin_right">7</field>
+            <field name="header_line" eval="False" />
+            <field name="header_spacing">18</field>
+            <field name="dpi">90</field>
+        </record>
+        
+    <record id="sale.action_report_saleorder" model="ir.actions.report">
+        <field name="paperformat_id" ref="paperformat_us_big_footer"/>
+    </record>
+    
+    <record id="account.account_invoices" model="ir.actions.report">
+        <field name="paperformat_id" ref="paperformat_us_big_footer"/>
+    </record>
+        
+    <record id="account.account_invoices_without_payment" model="ir.actions.report">
+        <field name="paperformat_id" ref="paperformat_us_big_footer"/>
+    </record>
+
+    <template id="custom_so_layout" inherit_id="web.external_layout" primary="True">
+        <xpath expr="//t[@t-else='else'][last()]" position="replace"> 
+          <t t-call="custom_invoice_report.custom_so_layout_standard"><t t-out="0"/></t>
+        </xpath>        
+        <xpath expr="//t[@t-if='company.external_report_layout_id']" position="replace" /> 
+    </template>
+    
+    <template id="custom_so_layout_standard" inherit_id="web.external_layout_standard" primary="True">
+        <xpath expr="//ul[hasclass('list-inline')]" position="before">        
+               <t t-call="custom_invoice_report.custom_asi_document_signature" />
+        </xpath>
+        
+         <xpath expr="//div[contains(@class, 'pt-5')]" position="attributes">
+          <attribute name="class">pt-0</attribute>
+        </xpath>
+    </template>
+    
+         
+      <template id="custom_asi_document_signature">
+                          
+                    <div class="row pt-5" style="page-break-inside: avoid;">         
+                      <div class="col-5">
+                        <div class="clearfix mb-4">
+                            <div>
+                                <div class="col-lg-12">
+                                    <table class="table table-sm table-borderless" style="page-break-inside: avoid;">
+                                        <tbody>
+                                            <tr class="border-black">
+                                                <td>
+                                                    <strong>
+                                                      <t t-if="not invoice_header_and_footer">
+                                                          Por la Sociedad:
+                                                      </t>
+                                                      <t t-else="">
+                                                          Comercial                                     
+                                                      </t>
+                                                      </strong>                                              
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                   <span class="text-nowrap">
+                                                     <t t-if="not invoice_header_and_footer">
+                                                     ___________________________________
+                                                     </t>
+                                                      <t t-else="">
+                                                          <span t-field="o.invoice_user_id.name" />                                     
+                                                      </t>
+                                                     </span>
+                                                 </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <span class="text-nowrap">Firma: _______________</span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                     <span class="text-nowrap">Fecha: _______________</span>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-2" />
+                    <div class="col-5">
+                        <div class="clearfix mb-4">
+                            <div>
+                                <div class="col-lg-12">
+                                    <table class="table table-sm table-borderless" style="page-break-inside: avoid;">
+                                        <tbody>
+                                            <tr class="border-black">
+                                                <td>
+                                                    <strong>Por el Cliente:</strong>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                  <span class="text-nowrap"> <t t-esc="o.customer_signer_id and o.customer_signer_id.name or '___________________________________'" /></span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <span class="text-nowrap">Firma: _______________</span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <span class="text-nowrap">Fecha: _______________</span>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        </template>
+        
+     <template id="web.address_layout">
+                <t t-if="not doc" t-set="doc" t-value="o"/>            
+                <div class="address">
+                
+                <h4 class="mt-1">
+                   <strong>Datos de la Sociedad:</strong>
+                 </h4>
+               
+               <table width="100%" class=" mt-0 mb-0">
+                  <tbody>
+                    <tr>                                          
+                       <td>                  
+                           <strong> NIT: </strong>
+                          <span t-field="doc.company_id.partner_id.company_registry" />
+                        </td>                         
+                        <t t-if="doc.company_id.partner_id.commercial_registration_number">     
+                        <td>                  
+                           <strong> IRCC: </strong>
+                          <span t-field="doc.company_id.partner_id.commercial_registration_number" />
+                        </td> 
+                       </t>     
+                      
+                    </tr>                    
+                  </tbody>
+                </table>                     
+                               
+                <h4 class="mt-1">                
+                    <strong>Datos del Cliente </strong>
+                </h4>
+                 
+                <div t-field="doc.partner_id"
+                  t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": True}' />
+                  
+                <table width="100%">
+                  <tbody>
+                    <tr>
+                        <t t-if="doc.partner_id.reeup_code"> 
+                           <td>
+                              <strong>REEUP:</strong>
+                              <span t-field="doc.partner_id.reeup_code" />
+                           </td>
+                        </t>
+                        <t t-if="doc.partner_id.company_registry">     
+                         <td>                  
+                           <strong>NIT:</strong>
+                           <span t-field="doc.partner_id.company_registry" />
+                         </td>
+                        </t>
+                        <t> 
+                          <td>                  
+                            <strong>Contrato:</strong>
+                            <span t-field="doc.partner_id.asi_contract" />
+                          </td>  
+                        </t>                
+                        <t t-if="doc.partner_id.ref"> 
+                          <td>
+                              <strong>Codigo: </strong>
+                              <span t-field="doc.partner_id.ref"/>                        
+                          </td>
+                        </t>        
+                        <t t-if="doc.partner_id.bank_accounts">
+                          <strong>Cuenta Bancaria: </strong>
+                          <span t-field="doc.partner_id.bank_accounts"/>
+                        </t> 
+                         
+                     </tr> 
+                  </tbody>
+                </table>                                
+            </div>
+        </template>
+        
+       
+        
+       <template id="custom_account_report_sale_order_inherit" inherit_id="sale.report_saleorder_document">
+           <xpath expr="//t[@t-call='web.external_layout']" position="attributes">
+               <attribute name="t-call">custom_invoice_report.custom_so_layout</attribute>
+            </xpath>
+            
+        </template>
+        
+        <template id="custom_account_report_invoice" inherit_id="account.report_invoice_document">
+           <xpath expr="//t[@t-call='web.external_layout']" position="before">
+             <t t-set="invoice_header_and_footer" t-value="True" />
+            </xpath>
+           <xpath expr="//t[@t-call='web.external_layout']" position="attributes">
+               <attribute name="t-call">custom_invoice_report.custom_so_layout</attribute>
+            </xpath>            
+        </template>       
+        
+        
+    </data>
+</odoo>
+

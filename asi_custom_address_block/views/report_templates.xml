@@ -1,0 +1,13 @@
+<odoo>
+    <data>
+        <template id="custom_address_block" inherit_id="base.view_partner_address_form">
+            <xpath expr="//field[@name='street2']" position="replace"/>
+            <xpath expr="//field[@name='city']" position="replace"/>
+            <xpath expr="//field[@name='zip']" position="replace"/>
+            <xpath expr="//field[@name='street']" position="after">
+                <field name="reeup_code"/>
+                <field name="nit"/>
+            </xpath>
+        </template>
+    </data>
+</odoo>

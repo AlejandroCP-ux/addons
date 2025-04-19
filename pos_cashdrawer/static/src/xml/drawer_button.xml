@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="OpenCashDrawer" owl="1">
+       <div class="control-button" style="color:red">
+           <i class="fa fa-money"> </i>
+           <span> </span>
+           <span>Open Cash Drawer</span>
+       </div>
+   </t>
+</templates>

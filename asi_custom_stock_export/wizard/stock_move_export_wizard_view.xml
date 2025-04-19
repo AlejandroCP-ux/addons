@@ -1,0 +1,33 @@
+<odoo>
+    <data>
+        <record id="view_stock_move_export_wizard_form" model="ir.ui.view">
+            <field name="name">stock.move.export.wizard.form</field>
+            <field name="model">stock.move.export.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Exportar como movimiento versat">
+                     <group>
+                        <field name="stock_move_ids" invisible="1"/>                        
+                        <field name="z_file" />
+                    </group>
+                    <footer>
+                        <button string="Guardar" class="btn-primary" name="save_ok" type="object"/>
+                        <button string="Cancelar" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+ 
+        <!-- Agregar esta línea para mostrar la acción en el menú contextual -->
+        <record id="action_menu_contextual" model="ir.actions.act_window">
+            <field name="name">Exportar como movimiento stock versat</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">stock.move</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_stock_move_export_wizard_form"/>
+            <field name="context">{'default_stock_move_ids': active_ids}</field>
+            <field name="target">new</field>
+            <field name="binding_model_id" ref="stock.model_stock_move"/>
+            <field name="binding_view_types">list</field>
+        </record>
+    </data>
+</odoo>

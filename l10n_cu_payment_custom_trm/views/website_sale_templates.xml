@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="confirmation" inherit_id="website_sale.confirmation">
+        <xpath expr="//table/tbody/tr" position="after">
+            <tr>
+                <t t-set="tx" t-value="payment_tx_id" />
+                <t t-call="l10n_cu_payment_custom_trm.trm_qr" />
+            </tr>
+        </xpath>
+    </template>
+
+</odoo>

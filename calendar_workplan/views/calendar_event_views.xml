@@ -1,0 +1,86 @@
+<odoo>
+        <!-- explicit list view definition -->
+        <record id="view_calendar_event_tree" model="ir.ui.view">
+                <field name="name">view.calendar.event.tree</field>
+                <field name="model">calendar.event</field>
+                <field name="inherit_id" ref="calendar.view_calendar_event_tree" />
+                <field name="arch" type="xml">
+                        <field name="name" position="after">
+                                <field name="workplan_id" optional="hide" />
+                        </field>
+                </field>
+        </record>
+
+        <record id="view_calendar_event_search" model="ir.ui.view">
+                <field name="name">view.calendar.event.search</field>
+                <field name="model">calendar.event</field>
+                <field name="inherit_id" ref="calendar.view_calendar_event_search" />
+                <field name="arch" type="xml">
+                        <field name="name" position="after">
+                                <field name="workplan_id" />
+                        </field>
+                        <filter name="responsible" position="after">
+                                <filter string="Work Plan" name="group_by_workplan" domain="[]"
+                                        context="{'group_by': 'workplan_id'}" />
+                        </filter>
+                </field>
+        </record>
+
+        <record id="view_calendar_year_mode" model="ir.ui.view">
+                <field name="name">calendar.event.view.calendar.year.mode</field>
+                <field name="model">calendar.event</field>
+                <field name="inherit_id" ref="calendar.view_calendar_event_calendar" />
+                <field name="mode">primary</field>
+                <field name="arch" type="xml">
+                        <calendar position="attributes">
+                                <attribute name="mode">year</attribute>
+                                <attribute name="color" />
+                                <attribute name="js_class" />
+                        </calendar>
+                        <field name="partner_ids" position="replace" />
+                </field>
+        </record>
+
+        <record id="view_calendar_month_mode" model="ir.ui.view">
+                <field name="name">calendar.event.view.calendar.month.mode</field>
+                <field name="model">calendar.event</field>
+                <field name="inherit_id" ref="calendar.view_calendar_event_calendar" />
+                <field name="mode">primary</field>
+                <field name="arch" type="xml">
+                        <calendar position="attributes">
+                                <attribute name="mode">month</attribute>
+                        </calendar>
+                </field>
+        </record>
+
+        <record id="view_calendar_event_form" model="ir.ui.view">
+                <field name="name">view.calendar.event.form</field>
+                <field name="model">calendar.event</field>
+                <field name="inherit_id" ref="calendar.view_calendar_event_form" />
+                <field name="arch" type="xml">
+                        <xpath expr="//div[hasclass('align-items-baseline')]" position="before">
+                                <group string="Add attendees that meet these conditions">
+                                        <field name="channel_ids" widget="many2many_tags"/>
+                                        <field name="attendees_filter_domain" widget="domain"
+                                                options="{'model': 'res.partner'}"
+                                                nolabel="1" colspan="2" />
+                                </group>
+                        </xpath>
+                        <field name="categ_ids" position="after">
+                                <field name="workplan_id" />
+                                <field name="workplan_scope" invisible="1" />
+                                <field name="section_id"
+                                        attrs="{'invisible': [('workplan_scope', '!=', 'annual')]}" />
+                                <field name="priority" widget="priority"/>       
+                        </field>
+                </field>                
+        </record>
+
+        <!-- actions opening views on models -->
+        <record id="calendar_event_action_workplan_meetings" model="ir.actions.act_window">
+                <field name="name">Meetings</field>
+                <field name="res_model">calendar.event</field>
+                <field name="view_mode">calendar,tree,form</field>
+        </record>
+
+</odoo>

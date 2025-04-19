@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Plantilla para mostrar botón de asistencia en la vista de evento -->
+    <template id="invitation_page_with_participation" name="Calendar Invitation Page with Participation">
+        <t t-call="web.layout">
+            <t t-set="head">
+                <t t-call-assets="web.assets_frontend" t-js="false"/>
+                <script type="text/javascript">
+                    function markParticipation(attendeeId) {
+                        var xhr = new XMLHttpRequest();
+                        xhr.open('POST', '/calendar/participation/mark/' + attendeeId, true);
+                        xhr.setRequestHeader('Content-Type', 'application/json');
+                        xhr.onload = function() {
+                            if (xhr.status === 200) {
+                                var response = JSON.parse(xhr.responseText);
+                                if (response.success) {
+                                    document.getElementById('participation_button').style.display = 'none';
+                                    document.getElementById('participation_marked').style.display = 'block';
+                                } else {
+                                    alert(response.error || 'No se pudo registrar la asistencia');
+                                }
+                            }
+                        };
+                        xhr.send(JSON.stringify({
+                            jsonrpc: "2.0",
+                            method: "call",
+                            params: {},
+                            id: Math.floor(Math.random() * 1000000)
+                        }));
+                    }
+                </script>
+            </t>
+
+            <div class="container">
+                <div class="o_logo">
+                    <img t-attf-src="/web/binary/company_logo?company={{ company.id }}" alt="Logo"/>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Invitación de Calendario <small><t t-esc="event.name"/></small></h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="clearfix mb16" t-if="attendee.state != 'needsAction'">
+                            <span class="float-end badge text-bg-info">
+                                <t t-if="attendee.state == 'accepted'">Sí, asistiré.</t>
+                                <t t-if="attendee.state == 'declined'">No, no asistiré.</t>
+                                <t t-if="attendee.state == 'tentative'">Tentativo</t>
+                                <t t-if="attendee.state == 'needsAction'">Sin respuesta aún</t>
+                            </span>
+                        </div>
+
+                        <!-- Sección de asistencia -->
+                        <div class="clearfix mb16" t-if="participation.get('is_ongoing')">
+                            <div id="participation_button" t-if="participation.get('can_mark_participation')" class="alert alert-info">
+                                <p><strong>Este evento está en curso.</strong> Puedes marcar tu asistencia.</p>
+                                <button class="btn btn-primary" t-att-onclick="'markParticipation(%s)' % participation.get('attendee_id')">
+                                    Marcar asistencia
+                                </button>
+                            </div>
+                            <div id="participation_marked" t-if="participation.get('has_participated')" class="alert alert-success">
+                                <p><strong>Has marcado tu asistencia en este evento.</strong></p>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="o_event_table table table-striped">
+                                <tr>
+                                    <th>Invitación para</th>
+                                    <td><t t-esc="attendee.common_name"/> (<t t-esc="attendee.email"/>)</td>
+                                </tr>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <td><t t-esc="event.display_time"/></td>
+                                </tr>
+                                <tr>
+                                    <th>Ubicación</th>
+                                    <td><t t-esc="event.location or '-'"/></td>
+                                </tr>
+                                <tr>
+                                    <th>Asistentes</th>
+                                    <td>
+                                        <ul>
+                                            <li t-foreach="event.attendee_ids" t-as="att" t-attf-class="o_#{att.state}">
+                                                <t t-esc="att.common_name"/>
+                                                <span t-if="att.has_participated" class="badge text-bg-success">Asistió</span>
+                                            </li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Descripción</th>
+                                    <td><t t-esc="event.description or '-'"/></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

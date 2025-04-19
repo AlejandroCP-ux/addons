@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<odoo>
+        <!-- <data noupdate="1"> -->
+        <data>
+
+                <record id="gamification_challenge_demo_goal_1" model="gamification.challenge">
+                        <field name="name">Goal number one</field>
+                </record>
+                <record id="gamification_challenge_demo_goal_2" model="gamification.challenge">
+                        <field name="name">Goal number two</field>
+                </record>
+                <record id="gamification_challenge_demo_goal_3" model="gamification.challenge">
+                        <field name="name">Goal number three</field>
+                </record>
+        </data>
+</odoo>

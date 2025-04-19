@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <!-- 
+        Acción programada para procesar las asistencias durante la pausa del almuerzo a las 3:00 PM
+        Scheduled action for processing lunch break attendances at 3:00 PM
+        -->
+        <record id="ir_cron_lunch_break_attendance_3pm" model="ir.cron">
+            <field name="name">HR Attendance: Pausa para el Almuerzo (3:00 PM)</field>
+            <field name="model_id" ref="model_hr_attendance"/>
+            <field name="state">code</field>
+            <field name="code">model._process_lunch_break_attendances()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="doall" eval="True"/>
+            <field name="active" eval="True"/>
+            <field name="nextcall" eval="(datetime.now().replace(hour=15, minute=0, second=0)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        </record>
+        
+        <!-- 
+        Acción programada para procesar las asistencias durante la pausa del almuerzo a las 5:00 PM
+        Scheduled action for processing lunch break attendances at 5:00 PM
+       
+        <record id="ir_cron_lunch_break_attendance_5pm" model="ir.cron">
+            <field name="name">HR Attendance: Pausa para el Almuerzo (5:00 PM)</field>
+            <field name="model_id" ref="model_hr_attendance"/>
+            <field name="state">code</field>
+            <field name="code">model._process_lunch_break_attendances()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="doall" eval="True"/>
+            <field name="active" eval="True"/>
+            <field name="nextcall" eval="(datetime.now().replace(hour=17, minute=0, second=0)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        </record>
+         -->
+    </data>
+</odoo>

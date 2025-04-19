@@ -1,0 +1,912 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* calendar_workplan
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 16.0-20250131\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-04-02 17:30+0000\n"
+"PO-Revision-Date: 2025-04-02 17:30+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: calendar_workplan
+#: model:mail.template,body_html:calendar_workplan.mail_template_plan_approval_request
+msgid ""
+"\n"
+"                <p>Dear ${object.approved_by_partner_id.name},</p>\n"
+"                <p>The workplan <strong>${object.name}</strong> has been submitted for your approval.</p>\n"
+"                <p>Please review it and take appropriate action.</p>\n"
+"                <p>You can access the plan directly by clicking <a href=\"${object.get_base_url()}/web#id=${object.id}&model=calendar_workplan.plan&view_type=form\">here</a>.</p>\n"
+"                <p>Thank you,</p>\n"
+"                <p>${object.presented_by_partner_id.name}</p>\n"
+"            "
+msgstr ""
+"\n"
+"                <p>Estimado ${object.approved_by_partner_id.name},</p>\n"
+"                <p>El plan de trabajo  <strong>${object.name}</strong> espera por su aprobación.</p>\n"
+"                <p>Por favor, revíselo y tome la acción correspondiente.</p>\n"
+"                <p>Puede acceder directamente dando click aqui --> <a href=\"${object.get_base_url()}/web#id=${object.id}&model=calendar_workplan.plan&view_type=form\">here</a>.</p>\n"
+"                <p>Muchas gracias,</p>\n"
+"                <p>${object.presented_by_partner_id.name}</p>\n"
+"            "
+
+#. module: calendar_workplan
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.calendar_workplan_plan_view_form
+msgid ""
+"<i class=\"fa fa-long-arrow-right mx-2\" aria-label=\"Arrow icon\" "
+"title=\"Arrow\"/>"
+msgstr ""
+
+#. module: calendar_workplan
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.report_workplan
+msgid "<strong>Approved By:</strong>"
+msgstr "Aprobado por:"
+
+#. module: calendar_workplan
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.report_annual_plan
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.report_individual_plan
+msgid "<strong>Aprobado por:</strong>"
+msgstr ""
+
+#. module: calendar_workplan
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.report_workplan
+msgid "<strong>Month:</strong>"
+msgstr "<strong>Mes:</strong>"
+
+#. module: calendar_workplan
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.report_individual_plan
+msgid "<strong>Período:</strong>"
+msgstr ""
+
+#. module: calendar_workplan
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.report_annual_plan
+msgid "<strong>Presentado por:</strong>"
+msgstr ""
+
+#. module: calendar_workplan
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.report_workplan
+msgid "<strong>Presented By:</strong>"
+msgstr "<strong>Presentado por:</strong>"
+
+#. module: calendar_workplan
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.report_workplan
+msgid "<strong>Year:</strong>"
+msgstr "<strong>Año:</strong>"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__message_needaction
+msgid "Action Needed"
+msgstr "Se necesita acción"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__active
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_section__active
+#: model:ir.model.fields,field_description:calendar_workplan.field_gamification_challenge__active
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.calendar_workplan_plan_view_search
+msgid "Active"
+msgstr "Activo"
+
+#. module: calendar_workplan
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.report_individual_plan
+msgid "Actividades Principales"
+msgstr "Actividades principales"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__activity_ids
+msgid "Activities"
+msgstr "Actividades"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__activity_exception_decoration
+msgid "Activity Exception Decoration"
+msgstr ""
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__activity_state
+msgid "Activity State"
+msgstr "Estado"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__activity_type_icon
+msgid "Activity Type Icon"
+msgstr "Icono del tipo de actividad"
+
+#. module: calendar_workplan
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.view_calendar_event_form
+msgid "Add attendees that meet these conditions"
+msgstr "Agregar participantes que cumplan estas condiciones"
+
+#. module: calendar_workplan
+#: model:res.groups,name:calendar_workplan.calendar_workplan_group_manager
+msgid "Administrator"
+msgstr "Administrador"
+
+#. module: calendar_workplan
+#: model:ir.model.fields.selection,name:calendar_workplan.selection__calendar_workplan_plan__scope__annual
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.calendar_workplan_plan_view_search
+msgid "Annual"
+msgstr "Anual"
+
+#. module: calendar_workplan
+#: model:mail.template,subject:calendar_workplan.mail_template_plan_approval_request
+msgid "Approval requested for workplan ${object.name}"
+msgstr "Solicitud de aprobación del plan: ${object.name}"
+
+#. module: calendar_workplan
+#: model:ir.model.fields.selection,name:calendar_workplan.selection__calendar_workplan_plan__state__approved
+msgid "Approved"
+msgstr "Aprobado"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__approved_by_partner_id
+msgid "Approved by"
+msgstr "Aprobado por"
+
+#. module: calendar_workplan
+#. odoo-python
+#: code:addons/calendar_workplan/models/calendar_workplan_plan.py:0
+#, python-format
+msgid "April"
+msgstr "Abril"
+
+#. module: calendar_workplan
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.calendar_workplan_plan_view_form
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.calendar_workplan_plan_view_search
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.calendar_workplan_section_view_search
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.gamification_challenge_view_search
+msgid "Archived"
+msgstr "Archivado"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__message_attachment_count
+msgid "Attachment Count"
+msgstr "Cantidad de anexos"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_event__attendees_filter_domain
+msgid "Attendees filter"
+msgstr "Participantes"
+
+#. module: calendar_workplan
+#. odoo-python
+#: code:addons/calendar_workplan/models/calendar_workplan_plan.py:0
+#, python-format
+msgid "August"
+msgstr "Agosto"
+
+#. module: calendar_workplan
+#: model:ir.model,name:calendar_workplan.model_calendar_event
+msgid "Calendar Event"
+msgstr "Evento de calendario"
+
+#. module: calendar_workplan
+#. odoo-python
+#: code:addons/calendar_workplan/models/calendar_workplan_plan.py:0
+#, python-format
+msgid "Can't delete a posted plan!"
+msgstr "No puede eliminar un plan aprobado!"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_event__channel_ids
+msgid "Canales"
+msgstr "Grupos"
+
+#. module: calendar_workplan
+#. odoo-python
+#: code:addons/calendar_workplan/models/calendar_workplan_plan.py:0
+#, python-format
+msgid ""
+"Cannot create annual workplan: missing planner or approver. Please configure"
+" default planners in company settings."
+msgstr ""
+"No se puede crear el  plan anual: Falta el planificador o el aprobador. Por "
+"favor, configúrelo en los datos de la compañía."
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__child_ids
+msgid "Child Plans"
+msgstr "Planes hijos"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_section__child_ids
+msgid "Child Sections"
+msgstr "Secciones"
+
+#. module: calendar_workplan
+#. odoo-python
+#: code:addons/calendar_workplan/models/calendar_workplan_plan.py:0
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.calendar_workplan_plan_view_form
+#, python-format
+msgid "Child plans"
+msgstr "Planes hijos"
+
+#. module: calendar_workplan
+#: model:ir.model.fields.selection,name:calendar_workplan.selection__calendar_workplan_plan__state__closed
+msgid "Closed"
+msgstr "Cerrado"
+
+#. module: calendar_workplan
+#: model:ir.model,name:calendar_workplan.model_res_company
+msgid "Companies"
+msgstr "Compañías"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__company_id
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.calendar_workplan_plan_view_form
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.calendar_workplan_plan_view_search
+msgid "Company"
+msgstr "Compañia"
+
+#. module: calendar_workplan
+#. odoo-python
+#: code:addons/calendar_workplan/models/calendar_workplan_plan.py:0
+#, python-format
+msgid "Configuración de fecha inválida: %s"
+msgstr ""
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__create_uid
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_section__create_uid
+msgid "Created by"
+msgstr "Creado por"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__create_date
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_section__create_date
+msgid "Created on"
+msgstr "Creado el"
+
+#. module: calendar_workplan
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.report_workplan
+msgid "Day"
+msgstr "Día"
+
+#. module: calendar_workplan
+#. odoo-python
+#: code:addons/calendar_workplan/models/calendar_workplan_plan.py:0
+#, python-format
+msgid "December"
+msgstr "Diciembre"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_res_company__workplan_approver_partner_id
+msgid "Default Workplan Approver"
+msgstr "Aprobador por defecto"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_res_company__workplan_planner_partner_id
+msgid "Default Workplan Planner"
+msgstr "Planificador de la compañia"
+
+#. module: calendar_workplan
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.res_company_view_form_inherit_workplan
+msgid "Default approver for monthly/annual workplans"
+msgstr "Aprobador para planes anuales/mensuales"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,help:calendar_workplan.field_res_company__workplan_approver_partner_id
+msgid "Default partner who approves workplans for this company"
+msgstr "Partner que aprueba los planes para esta compañía"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,help:calendar_workplan.field_res_company__workplan_planner_partner_id
+msgid "Default partner who presents workplans for this company"
+msgstr "Partner que aprueba lso planes de esta compañía"
+
+#. module: calendar_workplan
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.res_company_view_form_inherit_workplan
+msgid "Default presenter for monthly/annual workplans"
+msgstr "Partner que presenta los planes de trabajo mensual y anual"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__display_name
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_section__display_name
+msgid "Display Name"
+msgstr "Nombre mostrado"
+
+#. module: calendar_workplan
+#: model:ir.model.fields.selection,name:calendar_workplan.selection__calendar_workplan_plan__state__draft
+msgid "Draft"
+msgstr "Borrador"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__date_end
+msgid "End Date"
+msgstr "Fecha de fin"
+
+#. module: calendar_workplan
+#. odoo-python
+#: code:addons/calendar_workplan/models/calendar_workplan_plan.py:0
+#, python-format
+msgid "Error fatal al convertir fechas: %s"
+msgstr ""
+
+#. module: calendar_workplan
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.report_workplan
+msgid "Event"
+msgstr "Evento"
+
+#. module: calendar_workplan
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.report_annual_plan
+msgid "Evento"
+msgstr ""
+
+#. module: calendar_workplan
+#. odoo-python
+#: code:addons/calendar_workplan/models/calendar_workplan_plan.py:0
+#, python-format
+msgid "February"
+msgstr "Febrero"
+
+#. module: calendar_workplan
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.report_individual_plan
+msgid "Firma del empleado"
+msgstr ""
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__message_follower_ids
+msgid "Followers"
+msgstr "Seguidores"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__message_partner_ids
+msgid "Followers (Partners)"
+msgstr "Seguidores (Socios)"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,help:calendar_workplan.field_calendar_workplan_plan__activity_type_icon
+msgid "Font awesome icon e.g. fa-tasks"
+msgstr ""
+
+#. module: calendar_workplan
+#: model:ir.model,name:calendar_workplan.model_gamification_challenge
+msgid "Gamification Challenge"
+msgstr "Desafío de gamificación"
+
+#. module: calendar_workplan
+#: model:ir.actions.server,name:calendar_workplan.ir_cron_generate_monthly_plans_ir_actions_server
+#: model:ir.cron,cron_name:calendar_workplan.ir_cron_generate_monthly_plans
+msgid "Generate Monthly and Individual Work Plans"
+msgstr "Generar planes mensual e individual"
+
+#. module: calendar_workplan
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.gamification_challenge_view_search
+msgid "Goal"
+msgstr "Objetivo"
+
+#. module: calendar_workplan
+#: model:ir.actions.act_window,name:calendar_workplan.gamification_challenge_action_workplan_goals
+#: model:ir.ui.menu,name:calendar_workplan.gamification_challenge_menu
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.calendar_workplan_plan_view_form
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.gamification_challenge_view_search
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.gamification_challenge_view_tree
+msgid "Goals"
+msgstr "Desafíos"
+
+#. module: calendar_workplan
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.calendar_workplan_plan_view_search
+msgid "Group By"
+msgstr "Agrupar por"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__has_message
+msgid "Has Message"
+msgstr "Tiene mensaje"
+
+#. module: calendar_workplan
+#: model:ir.module.category,description:calendar_workplan.calendar_workplan_module_category
+msgid ""
+"Helps you manage your work plans and tasks by tracking\n"
+"                        them, generating reports, etc..."
+msgstr ""
+"Te ayuda a administrar tus planes de trabajo y tareas dándoles seguimiento, \n"
+"                         generando reportes, etc..."
+
+#. module: calendar_workplan
+#: model:ir.model.fields.selection,name:calendar_workplan.selection__calendar_event__priority__1
+msgid "High"
+msgstr "Actividad Principal"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__id
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_section__id
+msgid "ID"
+msgstr ""
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__activity_exception_icon
+msgid "Icon"
+msgstr "Icono"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,help:calendar_workplan.field_calendar_workplan_plan__activity_exception_icon
+msgid "Icon to indicate an exception activity."
+msgstr ""
+
+#. module: calendar_workplan
+#: model:ir.model.fields,help:calendar_workplan.field_calendar_workplan_plan__message_needaction
+msgid "If checked, new messages require your attention."
+msgstr ""
+
+#. module: calendar_workplan
+#: model:ir.model.fields,help:calendar_workplan.field_calendar_workplan_plan__message_has_error
+msgid "If checked, some messages have a delivery error."
+msgstr ""
+
+#. module: calendar_workplan
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.calendar_workplan_plan_view_form
+msgid "Imprimir Plan Anual"
+msgstr ""
+
+#. module: calendar_workplan
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.calendar_workplan_plan_view_form
+msgid "Imprimir Plan Individual"
+msgstr ""
+
+#. module: calendar_workplan
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.calendar_workplan_plan_view_form
+msgid "Imprimir Plan Mensual"
+msgstr ""
+
+#. module: calendar_workplan
+#: model:ir.model.fields.selection,name:calendar_workplan.selection__calendar_workplan_plan__scope__individual
+msgid "Individual"
+msgstr ""
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__inherited_meeting_ids
+msgid "Inherited Meetings"
+msgstr "Reuniones heredadas"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__message_is_follower
+msgid "Is Follower"
+msgstr ""
+
+#. module: calendar_workplan
+#. odoo-python
+#: code:addons/calendar_workplan/models/calendar_workplan_plan.py:0
+#, python-format
+msgid "January"
+msgstr "Enero"
+
+#. module: calendar_workplan
+#. odoo-python
+#: code:addons/calendar_workplan/models/calendar_workplan_plan.py:0
+#, python-format
+msgid "July"
+msgstr "Julio"
+
+#. module: calendar_workplan
+#. odoo-python
+#: code:addons/calendar_workplan/models/calendar_workplan_plan.py:0
+#, python-format
+msgid "June"
+msgstr "Junio"
+
+#. module: calendar_workplan
+#: model:ir.model.constraint,message:calendar_workplan.constraint_calendar_workplan_plan_check_valid_tz
+msgid "La zona horaria seleccionada no es válida"
+msgstr ""
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan____last_update
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_section____last_update
+msgid "Last Modified on"
+msgstr ""
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__write_uid
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_section__write_uid
+msgid "Last Updated by"
+msgstr "Actualizado por"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__write_date
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_section__write_date
+msgid "Last Updated on"
+msgstr "Actualizado el "
+
+#. module: calendar_workplan
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.report_workplan
+msgid "Location"
+msgstr "Ubicación"
+
+#. module: calendar_workplan
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.report_annual_plan
+msgid "Lugar"
+msgstr ""
+
+#. module: calendar_workplan
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.report_workplan
+msgid "Main Activities"
+msgstr "Actividades Principales"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__message_main_attachment_id
+msgid "Main Attachment"
+msgstr ""
+
+#. module: calendar_workplan
+#. odoo-python
+#: code:addons/calendar_workplan/models/calendar_workplan_plan.py:0
+#, python-format
+msgid "March"
+msgstr "Marzo"
+
+#. module: calendar_workplan
+#. odoo-python
+#: code:addons/calendar_workplan/models/calendar_workplan_plan.py:0
+#, python-format
+msgid "May"
+msgstr "Mayo"
+
+#. module: calendar_workplan
+#: model:ir.actions.act_window,name:calendar_workplan.calendar_event_action_workplan_meetings
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__meeting_ids
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.calendar_workplan_plan_view_form
+msgid "Meetings"
+msgstr "Reuniones"
+
+#. module: calendar_workplan
+#: model:ir.model.fields.selection,name:calendar_workplan.selection__calendar_workplan_plan__scope__monthly
+msgid "Mensual"
+msgstr ""
+
+#. module: calendar_workplan
+#. odoo-python
+#: code:addons/calendar_workplan/models/calendar_workplan_plan.py:0
+#, python-format
+msgid "Mes inválido. Debe estar entre 1 y 12"
+msgstr ""
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__message_has_error
+msgid "Message Delivery error"
+msgstr "Error en la entrega"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__message_ids
+msgid "Messages"
+msgstr "Mensajes"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__plan_month
+msgid "Month"
+msgstr "Mes"
+
+#. module: calendar_workplan
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.calendar_workplan_plan_view_search
+msgid "Monthly"
+msgstr "Mensual"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__my_activity_date_deadline
+msgid "My Activity Deadline"
+msgstr "Fecha límite de mi actividad"
+
+#. module: calendar_workplan
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.calendar_workplan_plan_view_form
+msgid "Name"
+msgstr "Nombre"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__activity_calendar_event_id
+msgid "Next Activity Calendar Event"
+msgstr "Próxima actividad"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__activity_date_deadline
+msgid "Next Activity Deadline"
+msgstr "Proxima fecha límite"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__activity_summary
+msgid "Next Activity Summary"
+msgstr "Resumen de próximas actividades"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__activity_type_id
+msgid "Next Activity Type"
+msgstr ""
+
+#. module: calendar_workplan
+#: model:ir.model.fields.selection,name:calendar_workplan.selection__calendar_event__priority__0
+msgid "Normal"
+msgstr ""
+
+#. module: calendar_workplan
+#. odoo-python
+#: code:addons/calendar_workplan/models/calendar_workplan_plan.py:0
+#, python-format
+msgid "November"
+msgstr "Noviembre"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__message_needaction_counter
+msgid "Number of Actions"
+msgstr ""
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__message_has_error_counter
+msgid "Number of errors"
+msgstr ""
+
+#. module: calendar_workplan
+#: model:ir.model.fields,help:calendar_workplan.field_calendar_workplan_plan__message_needaction_counter
+msgid "Number of messages requiring action"
+msgstr ""
+
+#. module: calendar_workplan
+#: model:ir.model.fields,help:calendar_workplan.field_calendar_workplan_plan__message_has_error_counter
+msgid "Number of messages with delivery error"
+msgstr ""
+
+#. module: calendar_workplan
+#. odoo-python
+#: code:addons/calendar_workplan/models/calendar_workplan_plan.py:0
+#, python-format
+msgid "October"
+msgstr "Octubre"
+
+#. module: calendar_workplan
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.report_annual_plan
+msgid "Organizador"
+msgstr ""
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__parent_path
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_section__parent_path
+msgid "Parent Path"
+msgstr "Padre"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__parent_id
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.calendar_workplan_plan_view_search
+msgid "Parent Plan"
+msgstr "Plan padre"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_section__parent_id
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.calendar_workplan_section_view_search
+msgid "Parent Section"
+msgstr "Sección padre"
+
+#. module: calendar_workplan
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.report_workplan
+msgid "Participants"
+msgstr "Participantes"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_event__workplan_id
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.calendar_workplan_plan_view_form
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.calendar_workplan_plan_view_search
+msgid "Plan"
+msgstr ""
+
+#. module: calendar_workplan
+#: model:ir.actions.report,name:calendar_workplan.action_report_annual_plan
+msgid "Plan Anual"
+msgstr ""
+
+#. module: calendar_workplan
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.report_annual_plan
+msgid "Plan Anual:"
+msgstr ""
+
+#. module: calendar_workplan
+#: model:ir.actions.report,name:calendar_workplan.action_report_individual_plan
+msgid "Plan Individual"
+msgstr ""
+
+#. module: calendar_workplan
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.report_individual_plan
+msgid "Plan Individual:"
+msgstr ""
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__name
+msgid "Plan Name"
+msgstr "Nombre del Plan"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__plan_sequence
+msgid "Plan Sequence"
+msgstr "Secuencia del plan"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__goal_ids
+msgid "Plan's Goals"
+msgstr "Objetivos"
+
+#. module: calendar_workplan
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.calendar_workplan_plan_view_form
+msgid "Plan's Name"
+msgstr "Nombre del Plan"
+
+#. module: calendar_workplan
+#: model:ir.actions.act_window,name:calendar_workplan.calendar_workplan_plan_action
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_section__workplan_ids
+#: model:ir.ui.menu,name:calendar_workplan.calendar_workplan_plan_menu
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.calendar_workplan_plan_view_search
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.calendar_workplan_plan_view_tree
+msgid "Plans"
+msgstr "Planes"
+
+#. module: calendar_workplan
+#: model:ir.model.fields.selection,name:calendar_workplan.selection__calendar_workplan_plan__state__posted
+msgid "Posted"
+msgstr "Publicado"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__presented_by_partner_id
+msgid "Presented by"
+msgstr "Presenta"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_event__priority
+msgid "Priority"
+msgstr "Actividad Principal"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__activity_user_id
+msgid "Responsible User"
+msgstr "Responsable"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_event__workplan_scope
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__scope
+msgid "Scope"
+msgstr "Alcance"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_event__section_id
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.calendar_workplan_section_view_search
+msgid "Section"
+msgstr "Sección"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_section__name
+msgid "Section Name"
+msgstr "Nombre de Sección"
+
+#. module: calendar_workplan
+#: model:ir.actions.act_window,name:calendar_workplan.calendar_workplan_section_action
+#: model:ir.ui.menu,name:calendar_workplan.calendar_workplan_section_menu
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.calendar_workplan_section_view_search
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.calendar_workplan_section_view_tree
+msgid "Sections"
+msgstr "Secciones"
+
+#. module: calendar_workplan
+#. odoo-python
+#: code:addons/calendar_workplan/models/calendar_workplan_plan.py:0
+#, python-format
+msgid "September"
+msgstr "Septiembre"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_section__sequence
+msgid "Sequence"
+msgstr "Secuencias"
+
+#. module: calendar_workplan
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.calendar_workplan_plan_view_search
+msgid "Since"
+msgstr "Desde"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__date_start
+msgid "Start Date"
+msgstr "Fecha de Inicio"
+
+#. module: calendar_workplan
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.calendar_workplan_plan_view_search
+msgid "State"
+msgstr "Estado"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__state
+msgid "Status"
+msgstr "Estado"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,help:calendar_workplan.field_calendar_workplan_plan__activity_state
+msgid ""
+"Status based on activities\n"
+"Overdue: Due date is already passed\n"
+"Today: Activity date is today\n"
+"Planned: Future activities."
+msgstr ""
+
+#. module: calendar_workplan
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.report_individual_plan
+msgid "T/D:"
+msgstr ""
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__plan_tz
+msgid "Timezone"
+msgstr "Zona Horaria"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,help:calendar_workplan.field_calendar_workplan_plan__activity_exception_decoration
+msgid "Type of the exception activity on record."
+msgstr ""
+
+#. module: calendar_workplan
+#: model:ir.actions.server,name:calendar_workplan.hr_employee_job_title_sync_to_res_partner_function_ir_actions_server
+msgid "Update employee's related contacts function field from job title field"
+msgstr ""
+"Actualizar el campo Función de contactos con el del título del empleado"
+
+#. module: calendar_workplan
+#: model:res.groups,name:calendar_workplan.calendar_workplan_group_user
+msgid "User"
+msgstr "Usuario"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__utc_end
+msgid "Utc End"
+msgstr "Fin (utc)"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__utc_start
+msgid "Utc Start"
+msgstr "Inicio (utc)"
+
+#. module: calendar_workplan
+#: model:ir.model,name:calendar_workplan.model_calendar_workplan_plan
+#: model:ir.module.category,name:calendar_workplan.calendar_workplan_module_category
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.view_calendar_event_search
+msgid "Work Plan"
+msgstr "Plan de Trabajo"
+
+#. module: calendar_workplan
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.calendar_workplan_plan_view_form
+msgid "Work Plan Period"
+msgstr "Período del Plan de Trabajo"
+
+#. module: calendar_workplan
+#: model:ir.actions.report,name:calendar_workplan.action_report_workplan
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.report_workplan
+msgid "Work Plan Report"
+msgstr "Plan de trabajo mensual"
+
+#. module: calendar_workplan
+#: model:ir.model,name:calendar_workplan.model_calendar_workplan_section
+msgid "Work Plan Section"
+msgstr "Sección del Plan de trabajo"
+
+#. module: calendar_workplan
+#: model:ir.ui.menu,name:calendar_workplan.calendar_workplan_menu_config
+msgid "Workplan"
+msgstr "Plan de Trabajo"
+
+#. module: calendar_workplan
+#: model:mail.template,name:calendar_workplan.mail_template_plan_approval_request
+msgid "Workplan Approval Request"
+msgstr "Solicitud de Aprobación"
+
+#. module: calendar_workplan
+#: model_terms:ir.ui.view,arch_db:calendar_workplan.res_company_view_form_inherit_workplan
+msgid "Workplan Configuration"
+msgstr "Configuración del Plan de Trabajo"
+
+#. module: calendar_workplan
+#: model:ir.model.fields,field_description:calendar_workplan.field_calendar_workplan_plan__plan_year
+msgid "Year"
+msgstr "Año"
+
+#. module: calendar_workplan
+#. odoo-python
+#: code:addons/calendar_workplan/models/calendar_workplan_plan.py:0
+#, python-format
+msgid "You cannot create recursive work plans."
+msgstr "Error!!!. Los planes no pueden ser recursivos."

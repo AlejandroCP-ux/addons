@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Heredar el widget de direcciones -->
+    <template id="custom_contact_widget" inherit_id="web.contact">
+        <xpath expr="//div[hasclass('o_address_format')]" position="inside">
+            <div t-if="partner.reeup_code" class="o_address_format">
+                <strong>REEUP:</strong> <span t-esc="partner.reeup_code"/>
+            </div>           
+        </xpath>
+    </template>
+</odoo>

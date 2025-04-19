@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_performance_evaluation_program_config_user,performance.evaluation.program.config.user,model_performance_evaluation_program_config,base.group_user,1,1,1,1
+access_perosnal_line_user,perosnal.line.user,model_perosnal_line,base.group_user,1,1,1,1
+access_performance_evaluation_program_user,performance.evaluation.program.user,model_performance_evaluation_program,base.group_user,1,1,1,1
+access_program_perosnal_line_user,program.perosnal.line.user,model_program_perosnal_line,base.group_user,1,1,1,1
+access_performance_period_user,performance.period.user,model_performance_period,base.group_user,1,1,1,1

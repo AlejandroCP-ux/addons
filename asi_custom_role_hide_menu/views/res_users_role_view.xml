@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_res_users_role_form_inherit" model="ir.ui.view">
+            <field name="name">res.users.role.form.inherit</field>
+            <field name="model">res.users.role</field>
+            <field name="inherit_id" ref="base_user_role.view_res_users_role_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//notebook" position="inside">
+                    <page string="Ocultar Menús de Acceso">
+                        <field name="hidden_menu_access_ids" options="{'no_create':1,'no_create_edit':1}"/>
+                    </page>
+                </xpath>
+            </field>
+        </record>
+
+
+         <record id="role_hide_menu_form_inherit" model="ir.ui.view">
+            <field name="name">role_hide_menu</field>
+            <field name="model">res.users</field>
+            <field name="inherit_id" ref="base.view_users_form"/>
+            <field name="priority" eval="8"/>
+            <field name="arch" type="xml">
+                <xpath expr="//notebook" position="inside">
+                    <page string="Hidden Menues">
+                        <tree>
+                            <field name="hide_menu_access_ids" options="{'no_create':1,'no_create_edit':1}"/>
+                        </tree>
+                    </page>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

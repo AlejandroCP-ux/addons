@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Plantilla del informe -->
+    <template id="report_individual_plan">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Plan Individual: <span t-field="doc.name"/></h2>
+                        <p><strong>Período:</strong> <span t-field="doc.date_start"/> - <span t-field="doc.date_end"/></p>
+                        <p><strong>Aprobado por:</strong> <span t-field="doc.approved_by_partner_id.name"/></p>
+
+                        <!-- Sección de Actividades Principales -->
+                        <h3>Actividades Principales</h3>
+                        <ul>
+                            <t t-set="main_activities" t-value="doc.get_main_activities()"/>
+                            <t t-foreach="main_activities" t-as="activity">
+                                <li>
+                                    <span t-esc="activity['name']"/> 
+                                </li>
+                            </t>
+                        </ul>
+
+                        <!-- Tabla única para todas las semanas -->
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <!-- Encabezado con los días de la semana -->
+                                    <t t-set="weekdays" t-value="['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']"/>
+                                    <t t-foreach="weekdays" t-as="day">
+                                        <th>
+                                            <span t-esc="day"/>
+                                        </th>
+                                    </t>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Iterar sobre las semanas -->
+                                <t t-set="weeks" t-value="doc.get_weeks()"/>
+                                <t t-foreach="weeks" t-as="week">
+                                    <tr>
+                                        <!-- Iterar sobre los días de la semana -->
+                                        <t t-foreach="week" t-as="day">
+                                            <td>
+                                                <!-- Mostrar el número del día -->
+                                                <t t-if="day">
+                                                    <span style="font-weight: bold; background-color: #AEB6BF ;" t-esc="day.strftime('%d')"/>
+                                                </t>
+                                                <!-- Mostrar eventos del día -->
+                                                <t t-if="day">
+                                                    <t t-set="events" t-value="doc.get_events_by_day(day)"/>
+                                                    <t t-foreach="events" t-as="event">
+                                                        <div>
+                                                            <!-- Verificar si el evento es de todo el día -->
+                                                            <t t-if="event.get('allday')">
+                                                                <span style="font-weight: bold; font-size: smaller;">T/D:</span>
+                                                                <span t-esc="event['name']"/>
+                                                            </t>
+                                                            <t t-else="">
+                                                                <span style="font-weight: bold; font-size: smaller;">
+                                                                    <span t-esc="event['start'].strftime('%H:%M')"/> - 
+                                                                    <span t-esc="event['stop'].strftime('%H:%M')"/>:
+                                                                </span>
+                                                                <span t-esc="event['name']"/>
+                                                            </t>
+                                                        </div>
+                                                    </t>
+                                                </t>
+                                            </td>
+                                        </t>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- Acción de informe -->
+    <record id="action_report_individual_plan" model="ir.actions.report">
+        <field name="name">Plan Individual</field>
+        <field name="model">calendar_workplan.plan</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">calendar_workplan.report_individual_plan</field>
+        <field name="report_file">calendar_workplan.report_individual_plan</field>
+        <field name="binding_model_id" ref="model_calendar_workplan_plan"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

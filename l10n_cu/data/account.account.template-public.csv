@@ -1,0 +1,36 @@
+id,name,code,account_type,chart_template_id/id,reconcile,note
+account_public_600,Inversión Estatal,600,equity,l10n_cu_chart_template_public,0,Patrimonio Neto
+account_public_613,Revalorización de Activos Fijos Tangibles,613,equity,l10n_cu_chart_template_public,0,Patrimonio Neto
+account_public_617,Recursos Recibidos,617,equity,l10n_cu_chart_template_public,0,Patrimonio Neto
+account_public_6190010,Recursos Entregados-Minoración de Fondos,619.0010,equity,l10n_cu_chart_template_public,0,Patrimonio Neto
+account_public_6200010,Donaciones Recibidas-Nacionales-Activos Fijos Tangibles,620.0010,equity,l10n_cu_chart_template_public,0,Patrimonio Neto
+account_public_6200020,Donaciones Recibidas-Nacionales-Activos Fijos Intangibles,620.0020,equity,l10n_cu_chart_template_public,0,Patrimonio Neto
+account_public_6200030,Donaciones Recibidas-Nacionales-Medios Monetarios,620.0030,equity,l10n_cu_chart_template_public,0,Patrimonio Neto
+account_public_6200040,Donaciones Recibidas-Nacionales-Insumos,620.0040,equity,l10n_cu_chart_template_public,0,Patrimonio Neto
+account_public_6200050,Donaciones Recibidas-Nacionales-Otros,620.0050,equity,l10n_cu_chart_template_public,0,Patrimonio Neto
+account_public_6210010,Donaciones Recibidas-Exterior-Activos Fijos Tangibles,621.0010,equity,l10n_cu_chart_template_public,0,Patrimonio Neto
+account_public_6210020,Donaciones Recibidas-Exterior-Activos Fijos Intangibles,621.0020,equity,l10n_cu_chart_template_public,0,Patrimonio Neto
+account_public_6210030,Donaciones Recibidas-Exterior-Medios Monetarios,621.0030,equity,l10n_cu_chart_template_public,0,Patrimonio Neto
+account_public_6210040,Donaciones Recibidas-Exterior-Insumos,621.0040,equity,l10n_cu_chart_template_public,0,Patrimonio Neto
+account_public_6210050,Donaciones Recibidas-Exterior-Otros,621.0050,equity,l10n_cu_chart_template_public,0,Patrimonio Neto
+account_public_6260010,Donaciones Entregadas-Nacionales-Activos Fijos Tangibles,626.0010,equity,l10n_cu_chart_template_public,0,Patrimonio Neto
+account_public_6260020,Donaciones Entregadas-Nacionales-Activos Fijos Intangibles,626.0020,equity,l10n_cu_chart_template_public,0,Patrimonio Neto
+account_public_6260030,Medios Monetarios,626.0030,equity,l10n_cu_chart_template_public,0,Patrimonio Neto
+account_public_6260040,Donaciones Entregadas-Nacionales-Insumos,626.0040,equity,l10n_cu_chart_template_public,0,Patrimonio Neto
+account_public_6260050,Donaciones Entregadas-Nacionales-Otros,626.0050,equity,l10n_cu_chart_template_public,0,Patrimonio Neto
+account_public_6270010,Donaciones Entregadas-Exterior-Activos Fijos Tangibles,627.0010,equity,l10n_cu_chart_template_public,0,Patrimonio Neto
+account_public_6270020,Donaciones Entregadas-Exterior-Activos Fijos Intangibles,627.0020,equity,l10n_cu_chart_template_public,0,Patrimonio Neto
+account_public_6270030,Donaciones Entregadas-Exterior-Medios Monetarios,627.0030,equity,l10n_cu_chart_template_public,0,Patrimonio Neto
+account_public_6270040,Donaciones Entregadas-Exterior-Insumos,627.0040,equity,l10n_cu_chart_template_public,0,Patrimonio Neto
+account_public_6270050,Donaciones Entregadas-Exterior-Otros,627.0050,equity,l10n_cu_chart_template_public,0,Patrimonio Neto
+account_public_630,Utilidades Retenidas,630,equity,l10n_cu_chart_template_public,0,Patrimonio Neto
+account_public_635,Subvención por Pérdida,635,equity,l10n_cu_chart_template_public,0,Patrimonio Neto
+account_public_640,Pérdida,640,equity,l10n_cu_chart_template_public,0,Patrimonio Neto
+account_public_645,Reservas para Contingencias,645,equity,l10n_cu_chart_template_public,0,Patrimonio Neto
+account_public_646,Otras Reservas Patrimoniales,646,equity,l10n_cu_chart_template_public,0,Patrimonio Neto
+account_public_688,Fondo de Contravalor para Proyectos de Inversión,688,equity,l10n_cu_chart_template_public,0,Patrimonio Neto
+account_public_690,Pago a Cuenta de las Utilidades,690,equity,l10n_cu_chart_template_public,0,Patrimonio Neto
+account_public_691,Pago a Cuenta de los Dividendos,691,equity,l10n_cu_chart_template_public,0,Patrimonio Neto
+account_public_696,Operaciones entre Dependencias,696,equity,l10n_cu_chart_template_public,0,Patrimonio Neto
+account_public_697,Operaciones entre Dependencias,697,equity,l10n_cu_chart_template_public,0,Patrimonio Neto
+account_public_698,Ganancia o Pérdida no Realizada,698,equity,l10n_cu_chart_template_public,0,Patrimonio Neto

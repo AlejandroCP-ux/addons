@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<odoo>
+   <record id="view_hr_skill_type_form_inherit" model="ir.ui.view">
+    <field name="name">hr.skill.type.form.inherit</field>
+    <field name="model">hr.skill.type</field>
+    <field name="inherit_id" ref="hr_skills.hr_employee_skill_type_view_form"/>
+    <field name="arch" type="xml">
+        <field name="name" position="after">
+            <label for="role_id" string="Roles"/>
+            <field name="role_id" widget="many2many_tags"/>
+        </field>
+    </field>
+</record>
+
+<record id="view_hr_skill_type_inherit" model="ir.ui.view">
+            <field name="name">hr.skill.type.inherit</field>
+            <field name="model">hr.skill.type</field>
+            <field name="inherit_id" ref="hr_skills.hr_skill_type_view_tree"/>
+            <field name="arch" type="xml">
+                <field name="name" position="after">
+                    <field name="role_id" widget="many2many_tags"/>
+                 </field>
+            </field>
+        </record>
+    
+</odoo>

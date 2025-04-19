@@ -1,0 +1,41 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* hr_attendance_lunch
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 16.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-07-15 12:00+0000\n"
+"PO-Revision-Date: 2023-07-15 12:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+"Language: es\n"
+
+#. module: hr_attendance_lunch
+#: model:ir.model,name:hr_attendance_lunch.model_hr_attendance
+msgid "Attendance"
+msgstr "Asistencia"
+
+#. module: hr_attendance_lunch
+#: model:ir.actions.server,name:hr_attendance_lunch.ir_cron_lunch_break_attendance_3pm_ir_actions_server
+#: model:ir.cron,cron_name:hr_attendance_lunch.ir_cron_lunch_break_attendance_3pm
+msgid "HR Attendance: Process Lunch Break Attendances (3:00 PM)"
+msgstr "Asistencias RRHH: Procesar asistencias en pausa de almuerzo (3:00 PM)"
+
+#. module: hr_attendance_lunch
+#: model:ir.actions.server,name:hr_attendance_lunch.ir_cron_lunch_break_attendance_5pm_ir_actions_server
+#: model:ir.cron,cron_name:hr_attendance_lunch.ir_cron_lunch_break_attendance_5pm
+msgid "HR Attendance: Process Lunch Break Attendances (5:00 PM)"
+msgstr "Asistencias RRHH: Procesar asistencias en pausa de almuerzo (5:00 PM)"
+
+#. module: hr_attendance_lunch
+#: code:addons/hr_attendance_lunch/models/hr_attendance_lunch.py:0
+#, python-format
+msgid "Automatic lunch break: Check-out created at 12:00 PM and new check-in at 12:30 PM"
+msgstr "Pausa de almuerzo automática: Salida creada a las 12:00 PM y nueva entrada a las 12:30 PM"
+

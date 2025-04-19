@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record model="ir.ui.view" id="partner_view_asi_fields">
+            <field name="name">partner.view.asi.fields</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="product.view_partner_property_form" />
+            <field name="priority" eval="11"/>
+            <field name="arch" type="xml">
+                <field name="property_product_pricelist" position="after">
+                  <field name="asi_contract" />
+                </field>   
+            </field>
+        </record>
+</odoo>

@@ -1,0 +1,61 @@
+<odoo>
+    <record id="view_hr_attendance_custom_tree" model="ir.ui.view">
+        <field name="name">hr.attendance.custom.tree</field>
+        <field name="model">hr.attendance.custom</field>
+        <field name="arch" type="xml">
+            <tree string="Asistencia Personalizada" default_order="date desc" decoration-warning="total_worked &lt; 9">
+                <field name="date"/>
+                <field name="employee_id"/>
+                <field name="department_id"/>
+                <field name="checkin_morning"/>
+                <field name="checkout_morning"/>
+                <field name="checkin_afternoon"/>
+                <field name="checkout_afternoon"/>
+                <field name="total_worked"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_hr_attendance_custom_search" model="ir.ui.view">
+        <field name="name">hr.attendance.custom.search</field>
+        <field name="model">hr.attendance.custom</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="date"/>
+                <field name="employee_id"/>
+                <field name="department_id"/>
+                <group expand="0" string="Agrupar por">
+                    <filter name="group_by_employee" string="Empleado" domain="[]" context="{'group_by': 'employee_id'}"/>
+                    <filter name="group_by_department" string="Departamento" domain="[]" context="{'group_by': 'department_id'}"/>
+                    <filter name="group_by_month" string="Mes" domain="[]" context="{'group_by': 'date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    
+    <record id="view_hr_attendance_custom_pivot" model="ir.ui.view">
+        <field name="name">hr.attendance.custom.pivot</field>
+        <field name="model">hr.attendance.custom</field>
+        <field name="arch" type="xml">
+            <pivot>
+                <field name="date" type="row"/>
+                <field name="employee_id" type="row"/>
+                <field name="department_id" type="row"/>
+                <field name="total_worked" type="measure"/>                
+            </pivot>
+        </field>
+    </record>
+
+    <record id="action_hr_attendance_custom" model="ir.actions.act_window">
+        <field name="name">Libro de Asistencia</field>
+        <field name="res_model">hr.attendance.custom</field>
+        <field name="view_mode">tree,pivot</field>
+        <field name="context">{'group_by': ['date:month'], 'tree_view_ref': 'module_name.view_hr_attendance_custom_tree'}</field>
+        <field name="help">Vista personalizada de asistencia diaria.</field>
+    </record>
+
+    <menuitem id="menu_hr_attendance_custom"
+              name="Libro de Asistencia"
+              parent="hr_attendance.menu_hr_attendance_root"
+              action="action_hr_attendance_custom"/>
+</odoo>

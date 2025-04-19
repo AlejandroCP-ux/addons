@@ -1,0 +1,64 @@
+/* Estilos para los elementos de participación */
+
+// Badges para la vista de calendario
+.o_calendar_ongoing_badge {
+    display: inline-block;
+    margin-left: 5px;
+    padding: 2px 5px;
+    background-color: #17a2b8; // Info color
+    color: white;
+    border-radius: 3px;
+    font-size: 0.8em;
+}
+
+.o_calendar_participation_badge {
+    display: inline-block;
+    margin-left: 5px;
+    padding: 2px 5px;
+    background-color: #28a745; // Success color
+    color: white;
+    border-radius: 3px;
+    font-size: 0.8em;
+}
+
+// Estilos para eventos en la vista de calendario
+.fc-event.o_calendar_ongoing {
+    border-left: 3px solid #17a2b8 !important; // Info color
+}
+
+.fc-event.o_calendar_participated {
+    border-left: 3px solid #28a745 !important; // Success color
+}
+
+// Estilos para la vista de árbol de asistentes
+.o_list_view {
+    .o_data_row.text-success {
+        color: #28a745;
+    }
+    
+    .o_data_row.text-info {
+        color: #17a2b8;
+    }
+}
+
+// Estilos para botones de participación
+button.o_calendar_participation_button {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+// Estilos para la vista de formulario
+.o_form_view {
+    .o_calendar_participation_stats {
+        margin-top: 10px;
+        
+        .o_stat_text {
+            font-weight: bold;
+        }
+        
+        .o_stat_value {
+            font-size: 1.2em;
+        }
+    }
+}
+

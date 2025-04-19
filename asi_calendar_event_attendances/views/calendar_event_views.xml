@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Modificar vista de formulario de eventos -->
+    <record id="view_calendar_event_form_inherited" model="ir.ui.view">
+        <field name="name">calendar.event.form.inherited</field>
+        <field name="model">calendar.event</field>
+        <field name="inherit_id" ref="calendar.view_calendar_event_form"/>
+        <field name="arch" type="xml">
+            <!-- Añadir información de asistencia en la pestaña de asistentes -->
+            <xpath expr="//field[@name='attendee_ids']/tree" position="inside">
+                <field name="has_participated"/>
+                <field name="can_mark_participation" invisible="1"/>
+                <button name="mark_participation" 
+                        string="Marcar asistencia" 
+                        type="object" 
+                        icon="fa-check-circle" 
+                        attrs="{'invisible': [('can_mark_participation', '=', False)]}"/>
+            </xpath>
+            
+            <!-- Añadir estadísticas de asistencia -->
+            <xpath expr="//page[@name='page_details']" position="after">
+                <page name="page_participation" string="Asistencia" attrs="{'invisible': [('start', '=', False)]}">
+                    <div class="alert alert-info" role="alert" attrs="{'invisible': [('is_in_current_month_until_today', '=', False)]}">
+                        <p><strong>Este evento ocurrió durante el mes actual.</strong> Los asistentes pueden marcar su asistencia.</p>
+                    </div>
+                    <div class="alert alert-secondary" role="alert" attrs="{'invisible': [('is_in_current_month_until_today', '=', True)]}">
+                        <p><strong>Este evento no ocurrió durante el mes actual.</strong> Los asistentes solo pueden marcar su asistencia para eventos que ocurrieron desde el día 1 del mes actual hasta hoy.</p>
+                    </div>
+                    
+                    <group>
+                        <group>
+                            <field name="is_ongoing" invisible="1"/>
+                            <field name="is_in_current_month_until_today" invisible="1"/>
+                            <field name="event_date_display"/>
+                            <label for="participation_count" string="Asistencia"/>
+                            <div>
+                                <field name="participation_count" class="oe_inline"/> / <field name="attendee_ids" widget="statinfo" string="" class="oe_inline"/>
+                                (<field name="participation_percentage" widget="percentage" class="oe_inline"/>)
+                            </div>
+                        </group>
+                    </group>
+                    
+                    <field name="attendee_ids" readonly="1">
+                        <tree>
+                            <field name="partner_id"/>
+                            <field name="email"/>
+                            <field name="state"/>
+                            <field name="has_participated"/>
+                            <field name="can_mark_participation" invisible="1"/>
+                            <button name="mark_participation" 
+                                    string="Marcar asistencia" 
+                                    type="object" 
+                                    icon="fa-check-circle" 
+                                    attrs="{'invisible': [('can_mark_participation', '=', False)]}"/>
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+    
+    <!-- Modificar vista de calendario para mostrar indicador de asistencia -->
+    <record id="view_calendar_event_calendar_inherited" model="ir.ui.view">
+        <field name="name">calendar.event.calendar.inherited</field>
+        <field name="model">calendar.event</field>
+        <field name="inherit_id" ref="calendar.view_calendar_event_calendar"/>
+        <field name="arch" type="xml">
+            <xpath expr="//calendar" position="inside">
+                <field name="is_ongoing" invisible="1"/>
+                <field name="is_in_current_month_until_today" invisible="1"/>
+                <field name="participation_count" invisible="1"/>
+                <field name="participation_percentage" invisible="1"/>
+                <field name="event_date_display" invisible="1"/>
+            </xpath>
+        </field>
+    </record>
+    
+    <!-- Añadir filtro para eventos en curso -->
+    <record id="view_calendar_event_search_inherited" model="ir.ui.view">
+        <field name="name">calendar.event.search.inherited</field>
+        <field name="model">calendar.event</field>
+        <field name="inherit_id" ref="calendar.view_calendar_event_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='mymeetings']" position="after">
+                <separator/>
+                <filter string="En curso" name="ongoing" domain="[('is_ongoing', '=', True)]"/>
+                <filter string="Mes actual hasta hoy" name="current_month_until_today" domain="[('is_in_current_month_until_today', '=', True)]"/>
+                <filter string="Con asistencia" name="with_participation" domain="[('participation_count', '>', 0)]"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

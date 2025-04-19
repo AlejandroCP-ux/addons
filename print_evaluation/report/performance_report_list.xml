@@ -1,0 +1,47 @@
+<odoo>
+   
+
+    <template id="report_performance_evaluation_list">
+        <t t-call="web.html_container">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Resumen de Evaluación del Desempeño</h2>
+                        <p><strong>Período evaluado:</strong> <span t-field="docs.performance_period_id.name"/></p>
+                        <p><strong>Departamento:</strong> <span t-field="docs.department_id.name"/></p>
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Nombre del Evaluado</th>
+                                    <th>Total</th>
+                                    <th>Evaluacion cualitativa</th>
+                                    <th>Observaciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            <tr t-foreach="docs" t-as="doc">
+                                <td><span t-field="doc.employee_id.name"/></td>
+                                <td><span t-field="doc.overall_score"/></td>
+                                <td><span t-field="doc.overall_score_category"/></td>
+                                <td><span t-field="doc.extra_remarks"/></td>
+                            </tr>
+                        </tbody>
+                            
+                        </table>
+                 <p style="margin-bottom: 5px;">Responsable directo: <span t-field="docs.department_id.manager_id"/></p>
+
+        
+                  </div>
+                </t>
+        </t>
+    </template>
+    <record id="print_evaluation_report_list" model="ir.actions.report">
+        <field name="name">Reporte de Evaluacion</field>
+        <field name="model">performance.evaluation.program</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">print_evaluation.report_performance_evaluation_list</field>
+        <field name="report_file">print_evaluation.report_performance_evaluation_list</field>
+        <field name="print_report_name">'Reporte de Evaluacion'</field>
+        <field name="binding_model_id" ref="performance_evaluation.model_performance_evaluation_program"></field>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

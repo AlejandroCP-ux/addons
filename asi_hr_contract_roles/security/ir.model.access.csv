@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_role_group_hr_contract_manager,access_role_group_hr_contract_manager,model_hr_contract_rolelevel,hr_contract.group_hr_contract_manager,1,1,1,1
+access_role_group_user,access_role_group_user,model_hr_contract_rolelevel,base.group_user,1,0,0,0

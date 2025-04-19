@@ -1,0 +1,37 @@
+<odoo>
+        <!-- explicit list view definition -->
+        <record id="gamification_challenge_view_tree" model="ir.ui.view">
+                <field name="name">gamification.challenge.view.tree</field>
+                <field name="model">gamification.challenge</field>
+                <field name="arch" type="xml">
+                        <tree string="Goals" sample="1" editable="top" multi_edit="1" default_order="id desc">
+                                <field name="name" />
+                                <field name="active" widget="boolean_toggle" />
+                        </tree>
+                </field>
+        </record>
+
+        <record id="gamification_challenge_view_search" model="ir.ui.view">
+                <field name="name">gamification.challenge.search</field>
+                <field name="model">gamification.challenge</field>
+                <field name="arch" type="xml">
+                        <search string="Goals">
+                                <field name="name" string="Goal" />
+                                <separator />
+                                <filter string="Archived" name="filter_inactive"
+                                        domain="[('active','=',False)]" />
+                        </search>
+                </field>
+        </record>
+
+        <!-- actions opening views on models -->
+        <record id="gamification_challenge_action_workplan_goals" model="ir.actions.act_window">
+                <field name="name">Goals</field>
+                <field name="res_model">gamification.challenge</field>
+                <field name="view_mode">tree</field>
+                <field name="domain">[('challenge_category', '=', 'hr')]</field>
+                <field name="search_view_id" ref="gamification_challenge_view_search"/>
+                <field name="view_id" ref="gamification_challenge_view_tree"/>
+        </record>
+
+</odoo>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="view_sale_order_form_inherit">
+            <field name="name">sale.order.form.inherit</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='user_id']" position="after">
+                    <field name="project_responsible"/>
+                    <field name="customer_signer_id"/>
+                </xpath>
+            </field>
+        </record>
+        <record id="view_res_partner_filter" model="ir.ui.view">
+            <field name="name">res.partner.filter</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_res_partner_filter"/>
+            <field name="arch" type="xml">
+                <xpath expr="//filter[@name='type_person']" position="after">
+                    <filter name="my_teams" string="My Teams" domain="[('team_id.member_ids', '=', uid)]"/>
+                </xpath>
+            </field>
+        </record>
+        <record id="view_sales_order_filter" model="ir.ui.view">
+            <field name="name">sale.order.filter</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_sales_order_filter"/>
+            <field name="arch" type="xml">
+                <xpath expr="//filter[@name='my_sale_orders_filter']" position="after">
+                    <filter name="my_teams" string="My Teams" domain="[('team_id.member_ids', '=', uid)]"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

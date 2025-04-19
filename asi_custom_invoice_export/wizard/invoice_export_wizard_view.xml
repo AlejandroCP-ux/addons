@@ -1,0 +1,32 @@
+<odoo>
+    <data>
+        <record id="view_invoice_export_wizard_form" model="ir.ui.view">
+            <field name="name">invoice.export.wizard.form</field>
+            <field name="model">invoice.export.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Invoice Export Wizard">
+                    <group>
+                        <field name="invoice_ids" invisible="1"/>                        
+                        <field name="z_file" />
+                    </group>
+                    <footer>
+                        <button string="Save" class="btn-primary" name="save_ok" type="object"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+        
+         <record id="action_export_as_versat_obl_account_move" model="ir.actions.act_window">
+            <field name="name">Exportar como obl</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">invoice.export.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_invoice_export_wizard_form"/>
+            <field name="context">{}</field>
+            <field name="target">new</field>
+            <field name="binding_model_id" ref="account.model_account_move" />
+            <field name="binding_view_types">list</field>
+        </record>
+    </data>
+</odoo>

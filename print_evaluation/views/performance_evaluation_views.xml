@@ -1,0 +1,18 @@
+<!-- Añade esto al final del archivo -->
+<odoo>
+<record id="performance_evaluation_program_view_list" model="ir.ui.view">
+    <field name="name">performance.evaluation.program.list</field>
+    <field name="model">performance.evaluation.program</field>
+    <field name="inherit_id" ref="performance_evaluation.performance_evaluation_program_view_list"/>
+    <field name="arch" type="xml">
+        <xpath expr="//header">
+            <button 
+                string="Imprimir Informe" 
+                name="%(action_open_report_wizard)d"
+                type="action" 
+                class="btn-primary" 
+            />
+        </xpath>
+    </field>
+</record>
+</odoo>

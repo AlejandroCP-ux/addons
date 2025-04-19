@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- Sequences for performance_evaluation-->
+        <record id="seq_performance_evaluation_program" model="ir.sequence">
+            <field name="name">Performance Evaluation Program</field>
+            <field name="code">performance.evaluation.program</field>
+            <field name="prefix">ETM</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="True"/>
+        </record>
+
+    </data>
+</odoo>

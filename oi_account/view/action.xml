@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+	<record id="act_account_payment_method" model="ir.actions.act_window">
+		<field name="name">Payment Methods</field>
+		<field name="res_model">account.payment.method</field>
+		<field name="view_mode">tree,form</field>
+	</record>
+
+	<record id="act_account_payment_method" model="ir.actions.act_window">
+		<field name="name">Payment Methods</field>
+		<field name="res_model">account.payment.method</field>
+		<field name="view_mode">tree,form</field>
+	</record>
+
+</odoo>

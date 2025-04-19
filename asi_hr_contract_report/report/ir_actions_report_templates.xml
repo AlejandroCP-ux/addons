@@ -1,0 +1,452 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <template id="report_hr_contract_header">
+      <h2 class="mt-4 text-center">
+        <span>CONTRATO DE TRABAJO POR TIEMPO <t t-esc="'DETERMINADO' if determined else 'INDETERMINADO'" /></span>                
+      </h2>            
+  </template>
+  
+  <template id="report_hr_contract_partner_one">
+      <p class="text-align: justify;">Al efecto de suscribir el presente contrato de trabajo, el que tiene toda la fuerza legal que en derecho se requiere, comparecen:</p>
+            <p style="text-align: justify;"><strong>DE UNA PARTE:</strong> <u>Yunior Agüero Rodríguez</u> a nombre y en representación de la Entidad: <u><span t-field="doc.employee_id.company_id.name" /></u> perteneciente a la empresa: <u>_____________________</u> que en lo sucesivo, a los efectos del presente contrato, se denominará <strong>El Empleador</strong>, cuyas generales fundamentales son:</p>
+            <table width="100%">
+              <tbody>
+                <tr>
+                  <td>Nivel de subordinación:</td>
+                  <td class="text-end">OACE</td>
+                  <td>____________</td>
+                  <td class="text-end">OSDE</td>
+                  <td>____________</td>
+                </tr>
+                <tr>
+                  <td>Rama:</td>
+                  <td><span t-field="doc.employee_id.company_id.partner_id.industry_id.name" /></td>
+                  <td> </td>
+                  <td>Código Reeup:</td>
+                  <td><span t-field="doc.employee_id.company_id.partner_id.reeup_code" /></td>
+                </tr>
+                <tr>
+                  <td>Dirección:</td>
+                  <td colspan="4"><span t-field="doc.employee_id.company_id.partner_id.street" /></td>
+                </tr>
+                <tr>
+                  <td>Provincia/Municipio:</td>
+                  <td colspan="4"><span t-field="doc.employee_id.company_id.partner_id.state_id.name" /></td>
+                </tr>
+              </tbody>
+            </table>
+  </template>
+  
+  <template id="report_hr_contract_partner_two">
+    <p style="text-align: justify; margin-top: 10px;"><strong>Y DE OTRA PARTE:</strong> <u><span t-field="doc.employee_id.name" /></u> quien concurre por su propia voluntad y cuyos datos personales son:</p>
+            <table width="100%">
+              <tbody>
+                <tr>
+                  <td>Carnét Identidad:</td>
+                  <td class="text-end">No:</td>
+                  <td><span t-field="doc.employee_id.identification_id" /></td>
+                  <td class="text-end">Sexo:</td>
+                  <td><span t-field="doc.employee_id.gender" /></td>
+                </tr>
+                <tr>
+                  <td>Dirección Particular:</td>
+                  <td colspan="4"><span t-field="doc.employee_id.address_home_id.street" /></td>
+                </tr>
+                <tr>
+                  <td>Provincia/Municipio:</td>
+                  <td colspan="4"><span t-field="doc.employee_id.address_home_id.state_id.name" /></td>
+                </tr>
+                <tr>
+                  <td>Profesión u oficio:</td>
+                  <td colspan="4"><span t-field="doc.employee_id.study_field" /></td>
+                </tr>
+              </tbody>
+            </table>
+  </template>
+  
+  <template id="report_hr_contract_clauses">
+    <p style="text-align: justify; margin-top: 10px;">Ambas partes, libre y voluntariamente:</p>
+      <div class="row text-center">
+        <h2 class="mt-4">
+          <span>CONVIENEN:</span>                
+        </h2>
+      </div>
+      <table>
+        <tbody>
+          <tr>
+            <td valign="top"><strong>PRIMERO:</strong></td>
+            <td>
+              <p style="text-align: justify;"><strong>El Trabajador </strong>prestará sus servicios a <strong>El Empleador</strong> bajo los principios:</p>
+            </td>
+          </tr>
+          <tr>
+            <td></td>
+            <td>    
+              <p style="text-align: justify;">a) Desempeñará la ocupación o cargo denominado: <u><span t-field="doc.job_id.name" /></u> y Rol <u><span t-field="doc.role_ids.name" /></u></p>
+              <p style="text-align: justify;">Categoría ocupacional de: <u>Pendiente</u> y que corresponde al Grupo Escala: <u><span t-field="doc.structure_type_id.name" /></u>.</p>
+              <p style="text-align: justify;">Cuyo contenido de trabajo, funciones, responsabilidades y normas de conducta se adjuntan al presente, formando parte íntegra de este documento. Garantizando las condiciones de seguridad y salud en el trabajo como Iluminación, higiene y ventilación.</p>
+              <p style="text-align: justify;">b) La modalidad y lugar del trabajo será ejecutado en:</p>
+              <p style="text-align: justify;">- A Distancia: <u><span t-field="doc.employee_id.company_id.name" /></u> y <u><span t-field="doc.employee_id.company_id.street" /></u>.</p>
+              <p style="text-align: justify;">c) Vienen obligado a laborar una jornada de trabajo de <u><t t-esc="hours_per_week"/></u> horas semanales.</p>
+              <p style="text-align: justify;">El horario de trabajo que está establecido es:</p>
+              <table width="100%" cellspacing="0" cellpadding="0" style="margin-top: 10px;">
+                <tbody>
+                  <tr style="border-bottom: 1px solid;">
+                    <td>
+                    <p><strong>Turno</strong></p>
+                    </td>
+                    <td>
+                    <p><strong>Inicio</strong></p>
+                    </td>
+                    <td>
+                    <p><strong>Fin</strong></p>
+                    </td>
+                    <td>
+                    <p><strong>Horas de trabajo</strong></p>
+                    </td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid;">
+                    <td>
+                    <p>Lunes por la mañana</p>
+                    </td>
+                    <td>
+                    <p>08:00</p>
+                    </td>
+                    <td>
+                    <p>12:30</p>
+                    </td>
+                    <td>
+                    <p>4.5</p>
+                    </td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid;">
+                    <td>
+                    <p>Lunes por la tarde</p>
+                    </td>
+                    <td>
+                    <p>13:00</p>
+                    </td>
+                    <td>
+                    <p>17:30</p>
+                    </td>
+                    <td>
+                    <p>4.5</p>
+                    </td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid;">
+                    <td>
+                    <p>Martes por la mañana</p>
+                    </td>
+                    <td>
+                    <p>08:00</p>
+                    </td>
+                    <td>
+                    <p>12:30</p>
+                    </td>
+                    <td>
+                    <p>4.5</p>
+                    </td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid;">
+                    <td>
+                    <p>Martes por la tarde</p>
+                    </td>
+                    <td>
+                    <p>13:00</p>
+                    </td>
+                    <td>
+                    <p>17:30</p>
+                    </td>
+                    <td>
+                    <p>4.5</p>
+                    </td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid;">
+                    <td>
+                    <p>Miércoles por la mañana</p>
+                    </td>
+                    <td>
+                    <p>08:00</p>
+                    </td>
+                    <td>
+                    <p>12:30</p>
+                    </td>
+                    <td>
+                    <p>4.5</p>
+                    </td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid;">
+                    <td>
+                    <p>Miércoles por la tarde</p>
+                    </td>
+                    <td>
+                    <p>13:00</p>
+                    </td>
+                    <td>
+                    <p>17:30</p>
+                    </td>
+                    <td>
+                    <p>4.5</p>
+                    </td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid;">
+                    <td>
+                    <p>Jueves por la mañana</p>
+                    </td>
+                    <td>
+                    <p>08:00</p>
+                    </td>
+                    <td>
+                    <p>12:30</p>
+                    </td>
+                    <td>
+                    <p>4.5</p>
+                    </td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid;">
+                    <td>
+                    <p>Jueves por la tarde</p>
+                    </td>
+                    <td>
+                    <p>13:00</p>
+                    </td>
+                    <td>
+                    <p>17:30</p>
+                    </td>
+                    <td>
+                    <p>4.5</p>
+                    </td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid;">
+                    <td>
+                    <p>Viernes por la mañana</p>
+                    </td>
+                    <td>
+                    <p>08:00</p>
+                    </td>
+                    <td>
+                    <p>12:30</p>
+                    </td>
+                    <td>
+                    <p>4.5</p>
+                    </td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid;">
+                    <td>
+                    <p>Viernes por la tarde</p>
+                    </td>
+                    <td>
+                    <p>13:00</p>
+                    </td>
+                    <td>
+                    <p>16:30</p>
+                    </td>
+                    <td>
+                    <p>3.5</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                    <p>Franco</p>
+                    </td>
+                    <td>
+                    <p>00:00</p>
+                    </td>
+                    <td>
+                    <p>00:00</p>
+                    </td>
+                    <td>
+                    <p>0.0</p>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td valign="top"><strong>SEGUNDO:</strong></td>
+            <td>
+              <p style="text-align: justify;"><strong>El Empleador</strong> abonará a <strong>El trabajador</strong> su salario con una frecuencia de pago:</p>
+            </td>
+          </tr>
+          <tr>
+            <td></td>
+            <td>    
+              <table width="100%">
+                <tbody>
+                <tr>
+                <td style="text-align: end;">Diario</td>
+                <td>__</td>
+                <td style="text-align: end;">Semanal</td>
+                <td>__</td>
+                <td style="text-align: end;">Quincenal</td>
+                <td>__</td>
+                <td style="text-align: end;">Mensual</td>
+                <td><span style="text-decoration: underline;">x</span></td>
+                </tr>
+                </tbody>
+              </table>
+              <p style="text-align: justify;">según una de las formas siguientes:</p>
+              <p style="text-align: justify;">a)  A Tiempo. En este caso se le abonará un salario ascendente a <u><span t-field="doc.wage" /></u> pesos, condicionado por lo establecido en la Resolucion No <u>29/2020</u> del MTSS.</p>
+              <table width="80%">
+                <tbody>
+                <tr>
+                <td style="text-align: end;">A Sueldo:</td>
+                <td>__</td>
+                <td style="text-align: end;">Por Tarifa Horaria:</td>
+                <td>__</td>                
+                </tr>
+                </tbody>
+              </table>
+              <p style="text-align: justify;">b)<u> X </u>  Por rendimiento.</p>
+              <table width="80%">
+                <tbody>
+                <tr>
+                <td style="text-align: end;">Por Resultado:</td>
+                <td>__</td>
+                <td style="text-align: end;">A Destajo:</td>
+                <td>__</td>                
+                </tr>
+                </tbody>
+              </table>
+              <p style="text-align: justify;">Para el salario se establecen 5 rangos salariales partiendo del salario aprobado al Director de la Empresa, los grupos escala vigente y se asocia a los resultados obtenidos por el trabajador en la Evaluación del trabajo mensual (ETM) y por tanto su salario escala será de:</p>
+              <p style="text-align: justify;">Rango Salarial 1 <u>4.100,00</u> ETM es Deficiente</p>
+              <p style="text-align: justify;">Rango Salarial 2 <u>4.175,00</u> ETM es Regular</p>
+              <p style="text-align: justify;">Rango Salarial 3 <u>4.250,00</u> ETM es Bien</p>
+              <p style="text-align: justify;">Rango Salarial 4 <u>4.360,00</u> ETM es Muy Bien</p>
+              <p style="text-align: justify;">Rango Salarial 5 <u>4.530,00</u> ETM es Excelente</p>
+              <p style="text-align: justify;">Otros pagos:</p>
+              <p style="text-align: justify;">Salario Total:</p>
+              <p style="text-align: justify;">Rango Salarial 1 <u>4100.00</u> ETM es Deficiente</p>
+              <p style="text-align: justify;">Rango Salarial 2 <u>4175.00</u> ETM es Regular</p>
+              <p style="text-align: justify;">Rango Salarial 3 <u>4250.00</u> ETM es Bien</p>
+              <p style="text-align: justify;">Rango Salarial 4 <u>4360.00</u> ETM es Muy Bien</p>
+              <p style="text-align: justify;">Rango Salarial 5 <u>4530.00</u> ETM es Excelente</p>
+              <p style="text-align: justify;">En el pago de salario se adiciona la nocturnidad y horas extra en los cargos que proceda y depende del tiempo trabajado en los períodos de pagos en cada concepto y las tarifas establecidas.</p>
+            </td>
+          </tr>
+          <tr>
+            <td valign="top"><strong>TERCERO:</strong></td>
+            <td>
+              <p style="text-align: justify;">El presente contrato se suscribe por tiempo indeterminado y empieza a surtir efecto a partir del <u><span t-field="doc.date_start" /></u>.</p>
+            </td>
+          </tr>
+          <tr>
+            <td valign="top"><strong>CUARTO:</strong></td>
+            <td>
+              <p style="text-align: justify;"><strong>El Trabajador</strong>, durante el desempeño de su cargo, disfrutará de los beneficios de las vacaciones anuales pagadas y de la seguridad social, siempre que en ambos casos se cumpla los requisitos establecidos por las disposiciones vigentes sobre estas materias, y tendrá los demás derechos laborales enmarcados en la legislación vigente.</p>
+            </td>
+          </tr>
+          <tr>
+            <td valign="top"><strong>QUINTO:</strong></td>
+            <td>
+              <p style="text-align: justify;"><strong>El Empleador</strong> se compromete a abonar al Trabajador su salario en la forma establecida en el presente contrato y a cumplir las normas de seguridad y salud, seguridad social, vacaciones anuales pagadas y las disposiciones vigentes en materia de trabajo.</p>
+            </td>
+          </tr>
+          <tr>
+            <td valign="top"><strong>SEXTO:</strong></td>
+            <td>
+              <p style="text-align: justify;"><strong>El Trabajador</strong> se compromete a cumplir las normas de conductas, funciones y responsabilidades del cargo que desempeñará y que aparecen descritas en documento adjunto que forma parte integrante de éste contrato, con la eficiencia, calidad y productividad requeridas, demostradas en los resultados de su labor y a obedecer las orientaciones que le sean impartidas por su Jefe inmediato que estará debidamente facultado para ello y acatar lo dispuesto en el Convenio Colectivo de Trabajo y el Reglamento disciplinario Interno de la Entidad, así como las demás disposiciones legales vigentes.</p>
+            </td>
+          </tr>
+          <tr>
+            <td valign="top"><strong>SÉPTIMO:</strong></td>
+            <td>
+              <p style="text-align: justify;"><strong>El Empleador</strong> está obligado a preparar al trabajador en todos los temas relacionados con la Seguridad Informática, en tanto <strong>El Trabajador</strong> es responsable del cumplimiento de todos aquellos deberes y obligaciones con esta actividad, respondiendo por los mismos, aún finalizada la relación laboral con la entidad</p>
+            </td>
+          </tr>
+          <tr>
+            <td valign="top"><strong>OCTAVO:</strong></td>
+            <td>
+              <p style="text-align: justify;">Por interés de <strong>El Empleador</strong> se puede trasladar provisionalmente a <strong>El Trabajador</strong> para otro cargo igual o de diferente calificación a la que es objeto por el presente contrato por un período de hasta 180 días ininterrumpidamente al año, período durante el cual cobra el salario del cargo que pasa a desempeñar por situaciones de desastre, de emergencia para evitar la paralización de las labores o eliminar sus efectos, y otras previstas en el Código de Trabajo. Si el salario del cargo para el cual se traslada es inferior, puede recibir el salario escala del cargo de procedencia.</p>
+            </td>
+          </tr>
+          <tr>
+            <td valign="top"><strong>NOVENO:</strong></td>
+            <td>
+              <p style="text-align: justify;">Este contrato de trabajo termina por las causas generales siguientes: acuerdo de las partes; iniciativa de alguna de las partes; jubilación o fallecimiento del trabajador y por extinción de la entidad, cuando no existe otra que se subroga en su lugar.</p>
+            </td>
+          </tr>
+          <tr>
+            <td valign="top"><strong>DÉCIMO:</strong></td>
+            <td>
+              <p style="text-align: justify;">Para la terminación del contrato por voluntad del trabajador, se produce una vez transcurrido el término de aviso previo de hasta treinta días hábiles para las categorías ocupacionales de operario, administrativos, servicios y técnicos de nivel medio. En el caso de los cargos técnicos, que requieran para su desempeño poseer nivel superior, el término de aviso previo es de hasta cuatro meses. El empleador una vez recibido el aviso previo puede acceder a la solicitud, antes de los términos aquí establecidos.</p>
+            </td>
+          </tr>
+          <tr>
+            <td valign="top"><strong>UNDÉCIMO:</strong></td>
+            <td>
+              <p style="text-align: justify;">El contrato de trabajo termina por iniciativa del empleador por: pérdida de la idoneidad demostrada; reubicación definitiva fuera de la entidad del trabajador disponible, o cuando no sea aceptada por éste injustificadamente la propuesta de empleo realizada, o al vencimiento de la garantía salarial sin haber logrado emplearse; reubicación fuera de la entidad al trabajador declarado con invalidez parcial; no aceptación del inválido parcial de una oferta de empleo acorde a su capacidad dentro o fuera de la entidad, o no apruebe la recalificación, en ambos casos injustificadamente; aplicación de medida disciplinaria de separación definitiva de la entidad; cumplimiento del plazo de la licencia de maternidad o, en su caso, de la prestación social o licencia no retribuida por maternidad, de acuerdo a lo establecido en la legislación vigente sin que la trabajadora o trabajador se haya reintegrado al trabajo; sanción de privación de libertad por sentencia firme o medida de seguridad, en ambos casos cuando excede de seis meses y si así lo decide el empleador; no reincorporación al vencimiento de la licencia no retribuida concedida por el empleador; y otras causas previstas en la legislación.</p>
+            </td>
+          </tr>
+          <tr>
+            <td valign="top"><strong>DUODÉDIMO:</strong></td>
+            <td>
+              <p style="text-align: justify;">La suspensión de la relación de trabajo se produce en los términos y por las causas establecidas en la legislación vigente y se reanuda cuando el trabajador se incorpora a su puesto de trabajo por cesar la causa que dio origen a su suspensión.</p>
+            </td>
+          </tr>
+          <tr>
+            <td valign="top"><strong>DÉCIMOTERCERO:</strong></td>
+            <td>
+              <p style="text-align: justify;">A la terminación del contrato de trabajo, el trabajador tiene derecho a percibir el salario por la labor realizada, la cuantía de lo acumulado por concepto de vacaciones anuales pagadas, así como lo correspondiente a la prestación de la seguridad social que hubiere estado percibiendo.</p>
+            </td>
+          </tr>                       
+        </tbody>
+      </table>
+      <p style="text-align: justify;">Ambas partes convienen en lo expresado en el presente documento, comprometiéndose a su más estricto cumplimiento.</p>
+      <p style="text-align: justify;">Y para que conste, se extiende el presente Contrato de trabajo, que suscriben las partes de común acuerdo, en original y dos copias, en el municipio a los <u>1</u> días del mes de <u>Febrero</u> del <u>2023</u>.</p>
+  </template>
+
+  <template id="report_hr_contract_footer">
+    <table width="100%">
+      <tbody>
+        <tr>
+          <td style="border-top:1px solid;"><strong>Yunior Agüero Rodríguez</strong></td>
+          <td> </td>
+          <td style="border-top:1px solid;"><strong><span t-field="doc.employee_id.name" /></strong></td>
+        </tr>
+        <tr>
+          <td></td>
+          <td> </td>
+          <td><strong>El Trabajador</strong></td>
+        </tr>
+        <tr>
+          <td><strong><span t-field="doc.employee_id.company_id.name" /></strong></td>
+          <td> </td>
+          <td> </td>
+        </tr>
+        <tr>
+          <td><strong>El Empleador</strong></td>
+          <td> </td>
+          <td> </td>
+        </tr>
+      </tbody>
+    </table>
+  </template>
+  
+
+  <template id="report_hr_contract_document">
+      <t t-call="web.report_layout">
+          <t t-set="doc" t-value="doc.with_context(lang=doc.env.lang)" />
+          <t t-set="determined" t-value="bool(doc.date_end)" />
+          <t t-set="hours_per_week" t-value="sum([attendance.hour_to - attendance.hour_from for attendance in doc.resource_calendar_id.attendance_ids])" />      
+          <div class="page">
+            <t t-call="asi_hr_contract_report.report_hr_contract_header" />
+            <t t-call="asi_hr_contract_report.report_hr_contract_partner_one" />
+            <t t-call="asi_hr_contract_report.report_hr_contract_partner_two" />
+            <t t-call="asi_hr_contract_report.report_hr_contract_clauses" />
+            <t t-call="asi_hr_contract_report.report_hr_contract_footer" />
+          </div>
+      </t>
+  </template>
+  
+  
+  <template id="report_hr_contract">
+      <t t-call="web.html_container">
+          <t t-foreach="docs" t-as="doc">
+              <t t-call="asi_hr_contract_report.report_hr_contract_document" t-lang="doc.env.lang"/>
+          </t>
+      </t>
+  </template>
+
+</odoo>

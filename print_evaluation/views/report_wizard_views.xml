@@ -1,0 +1,43 @@
+<odoo>
+    <data>
+        <!-- Acción para abrir el wizard -->
+        <act_window 
+            id="action_open_report_wizard"
+            name="Generar Informe de Evaluación"
+            res_model="performance.report.wizard"
+            view_mode="form"
+            target="new"
+        />
+
+        <!-- Vista del wizard -->
+        <record id="view_report_wizard_form" model="ir.ui.view">
+            <field name="name">performance.report.wizard.form</field>
+            <field name="model">performance.report.wizard</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <field name="performance_period_id" />
+                            <field name="department_id"/>
+                        </group>
+                        <footer>
+                            <button 
+                                name="action_generate_report" 
+                                type="object" 
+                                string="Reporte individual" 
+                                class="btn-primary" 
+                            />
+                             <button 
+                                name="action_generate_report_list" 
+                                type="object" 
+                                string="Reporte General" 
+                                class="btn-primary" 
+                            />
+                        </footer>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+    </data>
+</odoo>

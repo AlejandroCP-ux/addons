@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<odoo>
+        <!-- <data noupdate="1"> -->
+        <data>
+
+                <record id="calendar_workplan_plan_demo_annual" model="calendar_workplan.plan">
+                        <field name="name">Annual Work Plan</field>
+                        <field name="date_start" eval="time.strftime('%Y-01-01')" />
+                        <field name="date_end" eval="time.strftime('%Y-12-31')" />
+                        <field name="scope">annual</field>
+                        <field name="plan_tz">America/Havana</field>
+                        <field name="plan_year" eval="time.strftime('%Y')" />
+                        <field name="presented_by_partner_id" ref="hr.work_contact_vad" />
+                        <field name="approved_by_partner_id" ref="base.partner_admin" />
+                        <field name="state">posted</field>
+                        <field name="company_id" ref="base.main_company" />
+                </record>
+
+                <record id="calendar_workplan_plan_demo_january" model="calendar_workplan.plan">
+                        <field name="name">January Work Plan</field>
+                        <field name="parent_id"
+                                ref="calendar_workplan.calendar_workplan_plan_demo_annual" />
+                        <field name="date_start" eval="time.strftime('%Y-01-01')" />
+                        <field name="date_end" eval="time.strftime('%Y-01-31')" />
+                        <field name="scope">monthly</field>
+                        <field name="plan_tz">America/Havana</field>
+                        <field name="plan_month" eval="'1'" />
+                        <field name="presented_by_partner_id" ref="hr.work_contact_vad" />
+                        <field name="approved_by_partner_id" ref="base.partner_admin" />
+                        <field name="state">posted</field>
+                        <field name="company_id" ref="base.main_company" />
+                </record>
+
+
+        </data>
+</odoo>

@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+     <record id="paperformat_report_ASISURL" model="report.paperformat">
+        <field name="name">Sale Order Report ASISURL</field>
+        <field name="default" eval="True"/>
+        <field name="format">custom</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">20</field>
+        <field name="margin_bottom">45</field>
+        <field name="margin_left">7</field>
+        <field name="margin_right">7</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">20</field>
+        <field name="dpi">90</field>
+    </record>
+    
+    <record id="account.account_invoices" model="ir.actions.report">
+        <field name="paperformat_id" ref="paperformat_report_ASISURL"/>
+    </record>
+    
+    <record id="sale.action_report_saleorder" model="ir.actions.report">
+        <field name="paperformat_id" ref="paperformat_report_ASISURL"/>
+    </record>
+    
+    
+                        
+    <!-- Heredar CSS principal -->
+    <template id="custom_report_styles" inherit_id="web.report_layout">
+        <xpath expr="//head" position="inside">
+            <style>
+                /* Eliminar espacios en direcciones 
+                .address.row { 
+                    margin-top: 0 !important;
+                    padding-top: 0 !important;
+                    display: none !important;
+                }
+                */
+                /* Ajustar encabezado */
+                .o_company_1_layout.header {
+                    margin-bottom: 0 !important;
+                }
+            </style>
+            
+     
+        </xpath>
+    </template>
+
+    <!-- Heredar layout estandar -->
+    <template id="custom_external_layout_standard" inherit_id="web.external_layout_standard">
+        <xpath expr="//div[@class='pt-5']" position="replace"/>       
+
+        </template>
+
+
+    <!-- Heredar plantilla de factura -->
+    <template id="custom_invoice_report" inherit_id="web.report_invoice_wizard_preview">
+        <xpath expr="//div[@class='page mt-5']" position="attributes">
+            <attribute name="class">page mt-2</attribute>
+        </xpath>
+    </template>
+    
+    
+             <!-- Plantilla común para el pie de de la Factura  -->
+       <template id="signature_footer_invoice">
+        <div class="signature-footer_invoice">
+            <!-- Sección de firmas con 3 columnas -->
+            <div class="row mt-4 signature-section" style="page-break-inside: avoid;">
+                <!-- Entregado por -->
+                <div class="col-4 mb-4">
+                    <table class="table table-sm table-borderless">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <strong>ENTREGADO POR:</strong>
+                                    <div class="signature-line">
+                                        <div> <span t-esc="o.user_id.name or 'Nombre:'"/>  <!-- Comercial asignado --></div>
+                                        <div>Firma:</div>
+                                        <div>Fecha:</div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+    
+                <!-- Recibido por -->
+                <div class="col-4 mb-4">
+                    <table class="table table-sm table-borderless">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <strong>RECIBIDO POR:</strong>
+                                    <div class="signature-line">
+                                        <div><span t-esc="o.customer_signer_id.name or 'Nombre:'"/></div>
+                                        <div>Firma:</div>
+                                        <div>Fecha:</div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+    
+                <!-- Contabilizado por -->
+                <div class="col-4 mb-4">
+                    <table class="table table-sm table-borderless">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <strong>CONTABILIZADO POR:</strong>
+                                    <div class="signature-line">
+                                        <div>Nombre:</div>
+                                        <div>Firma:</div>
+                                        <div>Fecha:</div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <xpath expr="." position="inside">
+            <style type="text/css">
+                .mt-5 { margin-top: 0 !important; }
+                .mb-5 { margin-bottom: 0 !important; }
+                
+                .signature-line div {
+                    margin-top: 15px;
+                    min-height: 20px;
+                    border-bottom: 1px solid #000;
+                    width: 100%;
+                    padding: 0 5px;
+                }
+                
+               
+                .signature-section strong {
+                    display: block;
+                    margin-bottom: 10px;
+                }
+                
+                .table-borderless td {
+                    border: none !important;
+                    vertical-align: bottom;
+                }
+
+            </style>
+        </xpath>
+    </template>
+    
+      <!-- Plantilla común para el pie de de la Orden de venta -->
+    <template id="signature_footer_so">
+      <div class="signature-footer">
+         <div class="row pt-5" >         
+                      <div class="col-5">
+                        <div class="clearfix mb-0">
+                            <div>
+                                <div class="col-lg-12">
+                                    <table class="table table-sm table-borderless" style="page-break-inside: avoid;">
+                                        <tbody>
+                                            <tr >
+                                                <td>
+                                                    <strong>
+                                                       <t t-if="doc.state == 'sale'">
+                                                               <span>Por la SOCIEDAD:</span>
+                                                        </t>
+                                                          <t t-elif="doc.state == 'draft'">
+                                                              <span>Comercial:</span>
+                                                          </t>
+                                                      </strong>                                              
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                   <span class="text-nowrap">
+                                                        <t t-if="doc.state == 'sale'">
+                                                                <span t-esc="doc.team_id.user_id.name or 'N/A'"/>  <!-- Jefe del equipo de ventas -->
+                                                        </t>
+                                                          <t t-elif="doc.state == 'draft'">
+                                                              <span t-esc="doc.user_id.name or 'N/A'"/>  <!-- Comercial asignado -->
+                                                          </t>
+                                                        <t t-else="">
+                                                          <span>________________________</span>
+                                                        </t>
+                                                        
+                                                     </span>
+                                                 </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <span class="text-nowrap">Firma: _______________</span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                     <span class="text-nowrap">Fecha: _______________</span>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-2" />
+                    <div class="col-5">
+                        <div class="clearfix mb-4">
+                            <div>
+                                <div class="col-lg-12">
+                                    <table class="table table-sm table-borderless" style="page-break-inside: avoid;">
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    <strong>Por el Cliente:</strong>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                  <span class="text-nowrap"> <t t-esc="doc.customer_signer_id and doc.customer_signer_id.name or '___________________________________'" /></span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <span class="text-nowrap">Firma: _______________</span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <span class="text-nowrap">Fecha: _______________</span>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+      </div>
+      <style>
+       .signature-footer {        
+          padding-top: 10px;
+          margin-top: 10px;
+          width: 100%; /* Asegura que el pie de firma ocupe todo el ancho */
+          text-align: center; /* Centra el contenido dentro del div */
+          page-break-inside: avoid; /* Evita que el pie de firma se divida entre páginas en el PDF */
+        }
+        
+        .signature-line {
+          border-bottom: 1px solid #000;
+          width: 250px; /* Línea más larga para mejor visibilidad */
+          margin: 10px auto;
+        }
+         
+        .signature-footer p {
+          margin: 5px 0; /* Reduce el espacio entre líneas para que no se corte */
+          font-size: 11px; /* Reduce el tamaño de la letra si es necesario */
+        }
+                
+      </style>
+      
+    </template>    
+
+    
+    <!-- Heredar el layout estándar para modificar el footer -->
+    <template id="external_layout_standard_inherit" inherit_id="web.external_layout_standard">
+      <!-- Usar el atributo t-attf-class para ubicar el footer -->
+      <xpath expr="//div[contains(@t-attf-class, 'o_standard_footer')]" position="replace">
+        <div t-attf-class="footer o_standard_footer o_company_#{company.id}_layout">
+          <t t-if="doc and doc._name == 'sale.order'">
+            <t t-call="asi_custom_sale.signature_footer_so"/>
+          </t>
+          <t t-elif="o and o._name == 'account.move'">
+            <t t-call="asi_custom_sale.signature_footer_invoice"/>
+          </t>          
+          <t t-else="">
+            <!-- Footer original en caso de no ser una orden de venta -->
+            <div class="text-center" style="border-top: 1px solid black;">
+              <ul class="list-inline mb4">
+                <div t-field="company.report_footer"/>
+              </ul>
+              <div t-if="report_type == 'pdf'" class="text-muted">
+                Page: <span class="page"/> / <span class="topage"/>
+              </div>
+              <div t-if="report_type == 'pdf' and display_name_in_footer" class="text-muted">
+                <span t-field="o.name"/>
+              </div>
+            </div>
+          </t>
+        </div>
+      </xpath>
+    </template>
+    
+    <!-- (Opcional) Para el layout boxed, de forma similar -->
+    <template id="external_layout_boxed_inherit" inherit_id="web.external_layout_boxed">
+      <xpath expr="//div[contains(@t-attf-class, 'o_boxed_footer')]" position="replace">
+        <div t-attf-class="footer o_boxed_footer">
+          <t t-if="doc and doc._name == 'sale.order'">
+            <t t-call="asi_custom_sale.signature_footer_so"/>
+          </t>
+          <t t-elif="o and o._name == 'account.move'">
+            <t t-call="asi_custom_sale.signature_footer_invoice"/>
+          </t>
+          <t t-else=""> 
+            <!-- Footer original -->
+            <div class="text-center">
+              <div t-field="company.report_footer"/>
+              <div t-if="report_type == 'pdf'">
+                Page: <span class="page"/> / <span class="topage"/>
+              </div>
+            </div>
+          </t>
+        </div>
+      </xpath>
+    </template>
+
+    
+    
+    
+    
+    
+
+</odoo>

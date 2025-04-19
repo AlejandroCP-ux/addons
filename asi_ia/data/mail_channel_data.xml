@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record model="mail.channel" id="asi_ia.channel_localai">
+            <field name="name">Local AI</field>
+            <field name="description">Local AI Integration</field>
+            <field name="image_128" type="base64" file="asi_ia/static/description/chatgpt.png"/>
+        </record>
+
+        <record model="mail.message" id="module_install_notification">
+            <field name="model">mail.channel</field>
+            <field name="res_id" ref="asi_ia.channel_localai"/>
+            <field name="message_type">email</field>
+            <field name="subtype_id" ref="mail.mt_comment"/>
+            <field name="subject">Welcome to Local AI Channel!</field>
+            <field name="body"><![CDATA[<p>Welcome to the #Local AI channel.</p>
+            <p>Ask your questions to Local AI</b>.</p>]]></field>
+            <field name="attachment_ids" eval="[]"/>
+        </record>
+
+        <record model="mail.channel.member" id="channel_member_localai_channel_for_admin">
+            <field name="partner_id" ref="base.partner_admin"/>
+            <field name="channel_id" ref="asi_ia.channel_localai"/>
+            <field name="fetched_message_id" ref="asi_ia.module_install_notification"/>
+            <field name="seen_message_id" ref="asi_ia.module_install_notification"/>
+        </record>
+
+        <record model="mail.channel" id="asi_ia.channel_localai">
+            <field name="group_ids" eval="[Command.link(ref('base.group_user'))]"/>
+        </record>
+    </data>
+</odoo>

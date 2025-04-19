@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+        <template id="report_workplan">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="doc">
+                    <t t-call="web.external_layout">
+                        <div class="page">
+                            <h2>Work Plan Report</h2>
+                            <!-- Encabezado con el tipo de plan -->
+                            <p></p>
+                            <p><strong>Year:</strong> <span t-field="doc.plan_year"/></p>
+                            <p><strong>Month:</strong> <span t-field="doc.plan_month"/></p>
+                            <p><strong>Presented By:</strong> <span t-field="doc.presented_by_partner_id.name"/></p>
+                            <p><strong>Approved By:</strong> <span t-field="doc.approved_by_partner_id.name"/></p>
+
+
+                        
+                            <!-- Sección de Actividades Principales -->
+                            <h3>Main Activities</h3>
+                            <ul>
+                                <t t-set="main_activities" t-value="doc.get_main_month_activities()"/>
+                                <t t-foreach="main_activities" t-as="activity">
+                                    <li>
+                                        <span t-esc="activity"/>
+                                    </li>
+                                </t>
+                            </ul>
+                            
+                        <!-- Salto de página despues -->
+                        
+                        <div style="page-break-before: always;"></div>
+                            <!-- Tabla de Eventos -->
+                            <table class="table table-bordered">
+                                <colgroup>
+                                    <col style="width: 15%;"/> 
+                                    <col style="width: 40%;"/> 
+                                    <col style="width: 20%;"/> 
+                                    <col style="width: 25%;"/> 
+                                </colgroup>                            
+                                <thead>
+                                    <tr>
+                                        <th>Day</th>
+                                        <th>Event</th>
+                                        <th>Location</th>
+                                        <th>Participants</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Obtener eventos ordenados -->
+                                   <t t-set="sorted_meetings" t-value="doc.get_sorted_meetings()"/>
+                                        <t t-foreach="sorted_meetings" t-as="meeting">
+                                            <tr>
+                                                <td>
+                                                    <!-- Formato personalizado: hora inicio - hora fin -->
+                                                    <span t-esc="meeting['start'].strftime('%d %H:%M')"/> - 
+                                                    <span t-esc="meeting['stop'].strftime('%H:%M')"/>
+                                                </td>
+                                                <td><span t-esc="meeting['name']"/></td>
+                                                <td><span t-esc="meeting['location']"/></td>
+                                                <td>
+                                                    <!-- Verificar si hay canales definidos -->
+                                                    <t t-if="meeting['channel_ids']">
+                                                        <!-- Mostrar canales -->
+                                                        <t t-foreach="meeting['channel_ids']" t-as="channel">
+                                                            <span t-field="channel.name"/>
+                                                            <t t-if="not channel__last">, </t>
+                                                        </t>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <!-- Mostrar participantes (partner_ids) -->
+                                                        <t t-foreach="meeting['partner_ids']" t-as="partner">
+                                                            <span t-field="partner.name"/>
+                                                            <t t-if="not partner__last">, </t>
+                                                        </t>
+                                                    </t>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                </tbody>
+                            </table>                       
+                        </div>
+                    </t>
+                </t>
+            </t>
+        </template>
+
+    <record id="action_report_workplan" model="ir.actions.report">
+        <field name="name">Work Plan Report</field>
+        <field name="model">calendar_workplan.plan</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">calendar_workplan.report_workplan</field>
+        <field name="report_file">calendar_workplan.report_workplan</field>
+        <field name="binding_model_id" ref="model_calendar_workplan_plan"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

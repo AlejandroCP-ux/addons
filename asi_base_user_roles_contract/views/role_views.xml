@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<odoo>
+       <data>
+           <record model="ir.ui.view" id="res_user_role_form_view_inherit">
+               <field name="name">res.users.role.form.inherit</field>
+               <field name="model">res.users.role</field>
+               <field name="inherit_id" ref="base_user_role.view_res_users_role_form"/>
+               <field name="arch" type="xml">
+                   <field name="name" position="after">
+                       <field name="role_type"/>
+                   </field>
+                   <!-- <xpath expr="//tree/field[@name='date_from']" position="before">
+                        <field name="level_id"/>
+                    </xpath>   -->                      
+               </field>
+           </record>            
+       </data>
+
+</odoo>

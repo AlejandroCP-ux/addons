@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="qwen2_0_5b_instruct" model="localai.model">
+            <field name="name">qwen2-0.5b-instruct</field>
+        </record>   
+        <record id="qwen2_1_5b_instruct" model="localai.model">
+            <field name="name">qwen2-1.5b-instruct</field>
+        </record>      
+    </data>
+</odoo>

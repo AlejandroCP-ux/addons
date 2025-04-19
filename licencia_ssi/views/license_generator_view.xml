@@ -1,0 +1,53 @@
+<odoo>
+    <!-- Vista del formulario -->
+    <record id="view_license_generator_form" model="ir.ui.view">
+        <field name="name">license.generator.form</field>
+        <field name="model">license.generator</field>
+        <field name="arch" type="xml">
+            <form string="Generar Licencia">
+                <sheet>
+                    <group>
+                        <field name="partner_id" options="{'no_create': False}" placeholder="Seleccionar Cliente"/>
+                        <field name="seed"/>
+                        <field name="license_code" readonly="1"/>
+                        <field name="generated_date" readonly="1"/>
+                    </group>
+                    <footer>
+                        <button string="Generar Licencia" type="object" name="generate_license" class="btn-primary"/>
+                        <button string="Close" class="btn-secondary" special="cancel"/>
+                    </footer>
+                    <button string="Generar Licencia" type="object" name="generate_license" class="btn-primary"/>
+
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Vista de lista -->
+    <record id="view_license_generator_tree" model="ir.ui.view">
+        <field name="name">license.generator.tree</field>
+        <field name="model">license.generator</field>
+        <field name="arch" type="xml">
+            <tree string="Generated Licenses">
+                <field name="partner_id" options="{'no_create': False}" placeholder="Seleccionar Cliente"/>
+                <field name="seed"/>
+                <field name="license_code"/>
+                <field name="generated_date"/>
+            </tree>
+            
+        </field>
+    </record>
+
+    
+    <!-- Acción -->
+    <record id="license_generator_action" model="ir.actions.act_window">
+        <field name="name">License Generator</field>
+        <field name="res_model">license.generator</field>
+        <field name="view_mode">tree,form</field>
+        <field name="target">current</field>
+    </record>
+
+    <!-- Menús -->
+    <menuitem id="menu_license_generator_root" name="Generar Licencia SSI" sequence="10"/>
+    <menuitem id="menu_license_generator" name="Generar Licencia" parent="menu_license_generator_root" action="license_generator_action"/>
+</odoo>

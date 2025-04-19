@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<odoo>
+    <record id="hr_contract_role_view_form" model="ir.ui.view">
+        <field name="model">hr.contract</field>
+		<field name="inherit_id" ref="hr_contract.hr_contract_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@id='resource_calendar_warning']" position="after">
+                <field name="role_ids"/>                
+            </xpath>
+            <xpath expr="//group[@name='salary_info']" position="after">
+                <label for="wage_movable"  string="Salario Movible"/>
+                <field name="wage_movable"/>                
+            </xpath>
+        </field>
+    </record>
+
+    <record id="hr_contract_rolelevel_view_form" model="ir.ui.view">
+        <field name="name">hr.contract.rolelevel.view.form</field>
+        <field name="model">hr.contract.rolelevel</field>
+        <field name="arch" type="xml">
+                    <form>
+                        <group>
+                            <field name="name" />
+                            <field name="role_id" />
+                            <field name="readiness_level" />
+                        </group>
+                    </form>
+        </field>
+    </record>
+</odoo>

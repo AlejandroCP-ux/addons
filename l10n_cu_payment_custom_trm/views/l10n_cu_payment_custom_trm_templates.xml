@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+        <template id="trm_transaction_status" inherit_id="payment_custom.custom_transaction_status">
+                <t t-set="qr_code" position="attributes">
+                        <attribute name="t-if">tx.provider_id.sudo().custom_mode == 'custom'</attribute>
+                </t>
+                <t t-set="qr_code" position="after">
+                        <t t-set="qr_code"
+                                t-if="tx.provider_id.sudo().custom_mode == 'transfermovil'"
+                                t-value="'/report/barcode/?barcode_type=%s&amp;value=%s&amp;width=%s&amp;height=%s' %
+                ('QR', tx.sudo().trm_qr_code_str, 150, 150)" />
+                </t>
+        </template>
+
+</odoo>

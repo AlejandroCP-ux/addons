@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="view_res_partner_bank_form_inherit">
+            <field name="name">res.partner.bank.form.inherit</field>
+            <field name="model">res.partner.bank</field>
+            <field name="inherit_id" ref="base.view_partner_bank_form"/>
+            <field name="arch" type="xml">
+                <field name="partner_id" position="after">
+                    <field name="acc_holder_name"/>
+                </field>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="custom_partner_form_view">
+            <field name="name">res.partner.custom_form_view</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+                <field name="arch" type="xml">
+                    <!-- Agregar campos después de 'ref' -->
+                    <xpath expr="//field[@name='ref']" position="after">
+                        <field name="reeup_code"/>
+                        <field name="commercial_registration_number"/>
+                        <field name="subordination"/>
+                        <field name="accreditation_data"/>
+                    </xpath>
+                <field name="property_product_pricelist" position="after">
+                  <field name="asi_contract" />
+                </field>               
+                    <!-- Agregar campo después de 'function' -->
+                    <xpath expr="//field[@name='function']" position="after">
+                        <field name="can_sign_invoices" attrs="{'invisible': [('company_type', '=', 'company')]}"/>
+                        <field name="accreditation_sign_invoices_data" attrs="{'invisible': [('company_type', '=', 'company')]}"/>
+                    </xpath>
+            
+                    <!-- Agregar campo en dirección de contacto -->
+                    <xpath expr="//page[@name='contact_addresses']/field[@name='child_ids']/form//field[@name='function']" position="after">
+                        <field name="can_sign_invoices" attrs="{'invisible': [('type', '!=', 'contact')]}"/>
+                        <field name="accreditation_sign_invoices_data" attrs="{'invisible': [('type', '!=', 'contact')]}"/>
+                    </xpath>
+                </field>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,785 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* performance_evaluation
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 16.0-20230109\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-07-02 12:55+0000\n"
+"PO-Revision-Date: 2024-07-02 12:55+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__message_needaction
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program_config__message_needaction
+msgid "Action Needed"
+msgstr "Acción necesaria"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__active
+msgid "Active"
+msgstr "Activo"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__activity_ids
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program_config__activity_ids
+msgid "Activities"
+msgstr "Actividades"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__activity_exception_decoration
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program_config__activity_exception_decoration
+msgid "Activity Exception Decoration"
+msgstr ""
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__activity_state
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program_config__activity_state
+msgid "Activity State"
+msgstr "Estado"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__activity_type_icon
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program_config__activity_type_icon
+msgid "Activity Type Icon"
+msgstr "Icono Tipo de actividad"
+
+#. module: performance_evaluation
+#: model_terms:ir.ui.view,arch_db:performance_evaluation.performance_evaluation_program_config_view_form
+msgid "Add section for Rating Calculation"
+msgstr "Agregar sección para cálculo de evaluación"
+
+#. module: performance_evaluation
+#: model:ir.actions.act_window,name:performance_evaluation.performance_evaluation_all_program_action
+msgid "All Completed Evaluations"
+msgstr "Evaluaciones completadas"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__annual_leave_balance
+msgid "Annual Leave Balance"
+msgstr "Balance anual de ausencias"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__annual_leave_consumed_this_year
+msgid "Annual Leave Consumed This Year"
+msgstr "Ausencias consumidas este año"
+
+#. module: performance_evaluation
+#: model_terms:ir.ui.view,arch_db:performance_evaluation.performance_evaluation_program_view_form
+msgid "Archived"
+msgstr "Archivado"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__message_attachment_count
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program_config__message_attachment_count
+msgid "Attachment Count"
+msgstr "Cantidad de Adjuntos"
+
+#. module: performance_evaluation
+#: model:ir.model.fields.selection,name:performance_evaluation.selection__performance_evaluation_program__evaluator_relationship__csuite
+#: model:ir.model.fields.selection,name:performance_evaluation.selection__performance_evaluation_program_config__performance_evaluator__csuite
+msgid "C-Suite"
+msgstr ""
+
+#. module: performance_evaluation
+#: model:ir.model.fields.selection,name:performance_evaluation.selection__performance_evaluation_program__evaluator_relationship__colleague
+#: model:ir.model.fields.selection,name:performance_evaluation.selection__performance_evaluation_program_config__performance_evaluator__colleague
+msgid "Colleague"
+msgstr "Colega"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__company_id
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program_config__company_id
+msgid "Company"
+msgstr "Compañía"
+
+#. module: performance_evaluation
+#: model:ir.model.fields.selection,name:performance_evaluation.selection__performance_evaluation_program__state__done
+msgid "Completed"
+msgstr "Completado"
+
+#. module: performance_evaluation
+#: model:ir.ui.menu,name:performance_evaluation.menu_employee_evaluation_program_all_completed
+msgid "Completed Evaluations"
+msgstr "Evaluaciones completadas"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_perosnal_line__config_id
+msgid "Config"
+msgstr "Configuración"
+
+#. module: performance_evaluation
+#: model:ir.actions.act_window,name:performance_evaluation.performance_evaluation_program_config_action
+#: model:ir.ui.menu,name:performance_evaluation.menu_performance_evaluation_program_config_parent
+msgid "Configuration"
+msgstr "Configuración"
+
+#. module: performance_evaluation
+#: model_terms:ir.ui.view,arch_db:performance_evaluation.performance_evaluation_program_view_form
+msgid "Confirm Evaluation"
+msgstr "Confirmar Evaluación"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__create_uid
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program_config__create_uid
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_period__create_uid
+#: model:ir.model.fields,field_description:performance_evaluation.field_perosnal_line__create_uid
+#: model:ir.model.fields,field_description:performance_evaluation.field_program_perosnal_line__create_uid
+msgid "Created by"
+msgstr "Creado por"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__create_date
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program_config__create_date
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_period__create_date
+#: model:ir.model.fields,field_description:performance_evaluation.field_perosnal_line__create_date
+#: model:ir.model.fields,field_description:performance_evaluation.field_program_perosnal_line__create_date
+msgid "Created on"
+msgstr "Creado el"
+
+#. module: performance_evaluation
+#: model_terms:ir.ui.view,arch_db:performance_evaluation.performance_evaluation_program_view_form
+msgid "Current Job Title"
+msgstr "Cargo"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__date_of_evaluation
+msgid "Date Of Evaluation"
+msgstr "Fecha de evaluación"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__date_of_joining
+msgid "Date Of Joining"
+msgstr "Fecha de entrada"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__birthday
+msgid "Date of Birth"
+msgstr "Fecha de Nacimiento"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_hr_employee__default_evaluation_template_id
+msgid "Default Evaluation Template"
+msgstr "Plantilla de evaluación por defecto"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__department_id
+#: model_terms:ir.ui.view,arch_db:performance_evaluation.performance_evaluation_program_filter
+#: model_terms:ir.ui.view,arch_db:performance_evaluation.performance_evaluation_program_view_form
+msgid "Department"
+msgstr "Departamento"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_perosnal_line__name
+#: model:ir.model.fields,field_description:performance_evaluation.field_program_perosnal_line__name
+msgid "Description"
+msgstr "Descripción"
+
+#. module: performance_evaluation
+#: model_terms:ir.ui.view,arch_db:performance_evaluation.performance_evaluation_program_config_view_form
+#: model_terms:ir.ui.view,arch_db:performance_evaluation.performance_evaluation_program_view_form
+msgid "Details"
+msgstr "Detalles"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__disciplinary_action
+msgid "Disciplinary Action"
+msgstr "Medida disciplinaria"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__display_name
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program_config__display_name
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_period__display_name
+#: model:ir.model.fields,field_description:performance_evaluation.field_perosnal_line__display_name
+#: model:ir.model.fields,field_description:performance_evaluation.field_program_perosnal_line__display_name
+msgid "Display Name"
+msgstr "Nombre mostrado"
+
+#. module: performance_evaluation
+#: model:ir.model.fields.selection,name:performance_evaluation.selection__performance_evaluation_program__state__draft
+msgid "Draft"
+msgstr "Borrados"
+
+#. module: performance_evaluation
+#: model_terms:ir.ui.view,arch_db:performance_evaluation.performance_evaluation_program_filter
+msgid "Driver Roster"
+msgstr ""
+
+#. module: performance_evaluation
+#: model:ir.model,name:performance_evaluation.model_hr_employee
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__employee_id
+#: model_terms:ir.ui.view,arch_db:performance_evaluation.performance_evaluation_program_filter
+msgid "Employee"
+msgstr "Empleado"
+
+#. module: performance_evaluation
+#: model:ir.ui.menu,name:performance_evaluation.employee_evaluation_program_menu_root
+msgid "Employee Evaluation"
+msgstr "Evaluación"
+
+#. module: performance_evaluation
+#: model:ir.module.category,name:performance_evaluation.module_performance_evaluation
+msgid "Employee Evaluation Program"
+msgstr "Programa de evaluación del empleado"
+
+#. module: performance_evaluation
+#: model_terms:ir.ui.view,arch_db:performance_evaluation.performance_evaluation_program_view_form
+msgid "Employee Name"
+msgstr "Nombre"
+
+#. module: performance_evaluation
+#: model:ir.actions.act_window,name:performance_evaluation.performance_evaluation_program_action
+#: model:ir.ui.menu,name:performance_evaluation.menu_employee_evaluation_program
+msgid "Employee Performance Evaluation"
+msgstr "Evaluación del desempeño del empleado"
+
+#. module: performance_evaluation
+#: model_terms:ir.ui.view,arch_db:performance_evaluation.performance_evaluation_program_view_form
+msgid "Employee's Name"
+msgstr "Nombre del empleado"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_program_perosnal_line__evaluation
+msgid "Evaluation"
+msgstr "Evaluación"
+
+#. module: performance_evaluation
+#: model_terms:ir.ui.view,arch_db:performance_evaluation.performance_evaluation_program_view_form
+msgid "Evaluation Date"
+msgstr "Fecha de evaluación"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__evaluator_department_id
+msgid "Evaluator Department"
+msgstr "Departamento del evaluador"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__evaluator_department_relationship
+#: model_terms:ir.ui.view,arch_db:performance_evaluation.performance_evaluation_program_filter
+msgid "Evaluator Department Relationship"
+msgstr "Departamento relacionado"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__evaluator_employee_id
+#: model_terms:ir.ui.view,arch_db:performance_evaluation.performance_evaluation_program_filter
+msgid "Evaluator Employee"
+msgstr "Evaluador"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__evaluator_job_id
+msgid "Evaluator Job"
+msgstr "Cargo del evaluador"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__evaluator_relationship
+#: model_terms:ir.ui.view,arch_db:performance_evaluation.performance_evaluation_program_filter
+msgid "Evaluator Relationship"
+msgstr "Relación con el evaluador"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__extra_remarks
+msgid "Extra Remarks"
+msgstr "Observaciones"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__message_follower_ids
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program_config__message_follower_ids
+msgid "Followers"
+msgstr "Seguidores"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__message_partner_ids
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program_config__message_partner_ids
+msgid "Followers (Partners)"
+msgstr "Seguidores (Partners)"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,help:performance_evaluation.field_performance_evaluation_program__activity_type_icon
+#: model:ir.model.fields,help:performance_evaluation.field_performance_evaluation_program_config__activity_type_icon
+msgid "Font awesome icon e.g. fa-tasks"
+msgstr ""
+
+#. module: performance_evaluation
+#: model_terms:ir.ui.view,arch_db:performance_evaluation.performance_evaluation_program_filter
+msgid "Group By"
+msgstr "Agrupar por"
+
+#. module: performance_evaluation
+#: model:ir.ui.menu,name:performance_evaluation.menu_employee_evaluation_program_hr1
+msgid "HR Evaluation"
+msgstr "Evaluación de RRHH"
+
+#. module: performance_evaluation
+#: model:ir.actions.act_window,name:performance_evaluation.performance_evaluation_hr_program_action
+msgid "HR Evaluations"
+msgstr "Evaluaciones de RRHH"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__has_message
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program_config__has_message
+msgid "Has Message"
+msgstr ""
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_perosnal_line__max_value
+msgid "Highest Value"
+msgstr "Mayor valor"
+
+#. module: performance_evaluation
+#: model_terms:ir.ui.view,arch_db:performance_evaluation.performance_evaluation_program_view_form
+msgid "History"
+msgstr ""
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__hr_remarks
+msgid "Hr Remarks"
+msgstr "Observaciones de RRHH"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__id
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program_config__id
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_period__id
+#: model:ir.model.fields,field_description:performance_evaluation.field_perosnal_line__id
+#: model:ir.model.fields,field_description:performance_evaluation.field_program_perosnal_line__id
+msgid "ID"
+msgstr ""
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__activity_exception_icon
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program_config__activity_exception_icon
+msgid "Icon"
+msgstr ""
+
+#. module: performance_evaluation
+#: model:ir.model.fields,help:performance_evaluation.field_performance_evaluation_program__activity_exception_icon
+#: model:ir.model.fields,help:performance_evaluation.field_performance_evaluation_program_config__activity_exception_icon
+msgid "Icon to indicate an exception activity."
+msgstr ""
+
+#. module: performance_evaluation
+#: model:ir.model.fields,help:performance_evaluation.field_performance_evaluation_program__message_needaction
+#: model:ir.model.fields,help:performance_evaluation.field_performance_evaluation_program_config__message_needaction
+msgid "If checked, new messages require your attention."
+msgstr ""
+
+#. module: performance_evaluation
+#: model:ir.model.fields,help:performance_evaluation.field_performance_evaluation_program__message_has_error
+#: model:ir.model.fields,help:performance_evaluation.field_performance_evaluation_program_config__message_has_error
+msgid "If checked, some messages have a delivery error."
+msgstr ""
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__image_1920
+msgid "Image 1920"
+msgstr ""
+
+#. module: performance_evaluation
+#: model:ir.actions.act_window,name:performance_evaluation.performance_evaluation_in_progress_program_action
+#: model:ir.ui.menu,name:performance_evaluation.menu_employee_evaluation_program_in_progress
+msgid "In Progress"
+msgstr "En progreso"
+
+#. module: performance_evaluation
+#: model:ir.model.fields.selection,name:performance_evaluation.selection__performance_evaluation_program__evaluator_department_relationship__inter
+msgid "Inter Department"
+msgstr "Entre Departamentos"
+
+#. module: performance_evaluation
+#: model:ir.model.fields.selection,name:performance_evaluation.selection__performance_evaluation_program__evaluator_department_relationship__intra
+msgid "Intra Department"
+msgstr "Dentro del Departamento"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__message_is_follower
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program_config__message_is_follower
+msgid "Is Follower"
+msgstr ""
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__job_id
+#: model_terms:ir.ui.view,arch_db:performance_evaluation.performance_evaluation_program_filter
+msgid "Job"
+msgstr "Cargo"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__job_category
+msgid "Job Category"
+msgstr "Categoría del cargo"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__job_description
+msgid "Job Description"
+msgstr "Descripción"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__labor_card_days_to_expire
+msgid "Labor Card Days To Expire"
+msgstr ""
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__labor_card_expiry
+msgid "Labor Card Expiry"
+msgstr ""
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program____last_update
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program_config____last_update
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_period____last_update
+#: model:ir.model.fields,field_description:performance_evaluation.field_perosnal_line____last_update
+#: model:ir.model.fields,field_description:performance_evaluation.field_program_perosnal_line____last_update
+msgid "Last Modified on"
+msgstr ""
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__write_uid
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program_config__write_uid
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_period__write_uid
+#: model:ir.model.fields,field_description:performance_evaluation.field_perosnal_line__write_uid
+#: model:ir.model.fields,field_description:performance_evaluation.field_program_perosnal_line__write_uid
+msgid "Last Updated by"
+msgstr ""
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__write_date
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program_config__write_date
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_period__write_date
+#: model:ir.model.fields,field_description:performance_evaluation.field_perosnal_line__write_date
+#: model:ir.model.fields,field_description:performance_evaluation.field_program_perosnal_line__write_date
+msgid "Last Updated on"
+msgstr ""
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__length_of_service
+msgid "Length Of Service"
+msgstr ""
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__location
+msgid "Location"
+msgstr "Ubicación"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_perosnal_line__min_value
+msgid "Lowest Value"
+msgstr "Valor mínimo"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__message_main_attachment_id
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program_config__message_main_attachment_id
+msgid "Main Attachment"
+msgstr ""
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__manager_id
+#: model:ir.model.fields.selection,name:performance_evaluation.selection__performance_evaluation_program__evaluator_relationship__manager
+#: model:ir.model.fields.selection,name:performance_evaluation.selection__performance_evaluation_program_config__performance_evaluator__manager
+msgid "Manager"
+msgstr "Superior"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__manager_remarks
+msgid "Manager Remarks"
+msgstr "Observaciones del superior"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__message_has_error
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program_config__message_has_error
+msgid "Message Delivery error"
+msgstr ""
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__message_ids
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program_config__message_ids
+msgid "Messages"
+msgstr ""
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__my_activity_date_deadline
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program_config__my_activity_date_deadline
+msgid "My Activity Deadline"
+msgstr ""
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_period__name
+msgid "Name"
+msgstr "Nombre"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__country_id
+msgid "Nationality (Country)"
+msgstr "Nacionalidad"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__nature_of_disclipinary_action
+msgid "Nature Of Disclipinary Action"
+msgstr "Tipo de medida disciplinaria"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__negative_points
+msgid "Negative Points"
+msgstr "Puntos negativos"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__activity_calendar_event_id
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program_config__activity_calendar_event_id
+msgid "Next Activity Calendar Event"
+msgstr ""
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__activity_date_deadline
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program_config__activity_date_deadline
+msgid "Next Activity Deadline"
+msgstr ""
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__activity_summary
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program_config__activity_summary
+msgid "Next Activity Summary"
+msgstr ""
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__activity_type_id
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program_config__activity_type_id
+msgid "Next Activity Type"
+msgstr ""
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program_config__email_notify_user_ids
+msgid "Notify Users if New Evaluation Submited and Confirmed"
+msgstr "Notificar nuevas evaluaciones confirmadas"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__message_needaction_counter
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program_config__message_needaction_counter
+msgid "Number of Actions"
+msgstr ""
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__message_has_error_counter
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program_config__message_has_error_counter
+msgid "Number of errors"
+msgstr ""
+
+#. module: performance_evaluation
+#: model:ir.model.fields,help:performance_evaluation.field_performance_evaluation_program__message_needaction_counter
+#: model:ir.model.fields,help:performance_evaluation.field_performance_evaluation_program_config__message_needaction_counter
+msgid "Number of messages which requires an action"
+msgstr ""
+
+#. module: performance_evaluation
+#: model:ir.model.fields,help:performance_evaluation.field_performance_evaluation_program__message_has_error_counter
+#: model:ir.model.fields,help:performance_evaluation.field_performance_evaluation_program_config__message_has_error_counter
+msgid "Number of messages with delivery error"
+msgstr ""
+
+#. module: performance_evaluation
+#: model:ir.model.fields.selection,name:performance_evaluation.selection__performance_evaluation_program__evaluator_relationship__own
+msgid "OWN"
+msgstr "Propietario"
+
+#. module: performance_evaluation
+#: model_terms:ir.ui.view,arch_db:performance_evaluation.performance_evaluation_program_view_form
+msgid "Other Information"
+msgstr ""
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__overall_personal_score
+msgid "Overall Personal Score"
+msgstr "Evaluación"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__overall_score
+msgid "Overall Score"
+msgstr "Evaluación Total"
+
+#. module: performance_evaluation
+#: model:ir.model.fields.selection,name:performance_evaluation.selection__performance_evaluation_program_config__performance_evaluator__own
+msgid "Own"
+msgstr "Propietario"
+
+#. module: performance_evaluation
+#: model:ir.ui.menu,name:performance_evaluation.menu_employee_evaluation_program_parent
+#: model_terms:ir.ui.view,arch_db:performance_evaluation.performance_evaluation_program_view_form
+msgid "Performance Evaluation"
+msgstr "Evaluación del desempeño"
+
+#. module: performance_evaluation
+#: model:res.groups,name:performance_evaluation.group_performance_evaluation_admin
+msgid "Performance Evaluation Admin"
+msgstr "Administrador de Evaluaciones"
+
+#. module: performance_evaluation
+#: model:res.groups,name:performance_evaluation.group_performance_evaluation_manager
+msgid "Performance Evaluation Manager"
+msgstr "Evaluador-Jefe inmediato"
+
+#. module: performance_evaluation
+#: model:ir.model,name:performance_evaluation.model_performance_evaluation_program
+msgid "Performance Evaluation Program"
+msgstr "Programa de Evaluación del desempeño"
+
+#. module: performance_evaluation
+#: model:ir.model,name:performance_evaluation.model_performance_evaluation_program_config
+msgid "Performance Evaluation Program Configuration"
+msgstr "Configuración de Evaluaciones"
+
+#. module: performance_evaluation
+#: model:res.groups,name:performance_evaluation.group_performance_evaluation_program_user
+msgid "Performance Evaluation User"
+msgstr "Usuario de Evaluaciones"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program_config__performance_evaluator
+msgid "Performance Evaluator"
+msgstr "Evaluador"
+
+#. module: performance_evaluation
+#: model:ir.actions.act_window,name:performance_evaluation.performance_period_action
+#: model:ir.model,name:performance_evaluation.model_performance_period
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__performance_period_id
+#: model:ir.ui.menu,name:performance_evaluation.menu_performance_period
+#: model_terms:ir.ui.view,arch_db:performance_evaluation.performance_evaluation_program_filter
+msgid "Performance Period"
+msgstr "Período a evaluar"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__personal_ev_line_ids
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program_config__personal_line_ids
+msgid "Personal Competencies"
+msgstr "Competencias personales"
+
+#. module: performance_evaluation
+#: model:ir.model,name:performance_evaluation.model_perosnal_line
+msgid "Personal Line"
+msgstr "Línea Personal"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program_config__personal_section
+msgid "Personal Section"
+msgstr "Sección Personal"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__positive_points
+msgid "Positive Points"
+msgstr "Aspectos positivos"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_program_perosnal_line__program_id
+msgid "Program"
+msgstr "Programa"
+
+#. module: performance_evaluation
+#: model:ir.model,name:performance_evaluation.model_program_perosnal_line
+msgid "Program Perosnal Line"
+msgstr ""
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__name
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program_config__name
+msgid "Reference"
+msgstr "Referencia"
+
+#. module: performance_evaluation
+#: model_terms:ir.ui.view,arch_db:performance_evaluation.performance_evaluation_program_view_form
+msgid "Reject Evaluation"
+msgstr "Rechazar evaluación"
+
+#. module: performance_evaluation
+#: model:ir.model.fields.selection,name:performance_evaluation.selection__performance_evaluation_program__state__reject
+msgid "Rejected"
+msgstr "Rechazada"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__note
+msgid "Remark"
+msgstr "Observación"
+
+#. module: performance_evaluation
+#: model_terms:ir.ui.view,arch_db:performance_evaluation.performance_evaluation_program_view_form
+msgid "Reset To Draft"
+msgstr "Restablecer a borrador"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__activity_user_id
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program_config__activity_user_id
+msgid "Responsible User"
+msgstr "Responsable"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program_config__hr_email_notify
+msgid "Send Email if HR APPROVE or REJECT Evaluation"
+msgstr "Notificar si RRHH aprueba o rechaza la evaluación"
+
+#. module: performance_evaluation
+#: model_terms:ir.ui.view,arch_db:performance_evaluation.performance_evaluation_program_view_list
+msgid "Send Reminder Email"
+msgstr "Enviar recordatorio por Email"
+
+#. module: performance_evaluation
+#: model_terms:ir.ui.view,arch_db:performance_evaluation.performance_evaluation_program_filter
+msgid "State"
+msgstr "Estado"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__state
+#: model:ir.model.fields,field_description:performance_evaluation.field_program_perosnal_line__state
+msgid "Status"
+msgstr "Estado"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,help:performance_evaluation.field_performance_evaluation_program__activity_state
+#: model:ir.model.fields,help:performance_evaluation.field_performance_evaluation_program_config__activity_state
+msgid ""
+"Status based on activities\n"
+"Overdue: Due date is already passed\n"
+"Today: Activity date is today\n"
+"Planned: Future activities."
+msgstr ""
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__template_id
+#: model_terms:ir.ui.view,arch_db:performance_evaluation.performance_evaluation_program_filter
+msgid "Template"
+msgstr "Plantilla"
+
+#. module: performance_evaluation
+#: model:ir.ui.menu,name:performance_evaluation.menu_snackat_referral_program_config
+msgid "Templates"
+msgstr "Plantillas"
+
+#. module: performance_evaluation
+#: model:res.groups,comment:performance_evaluation.group_performance_evaluation_program_user
+msgid "The user will be able to Create and Submit."
+msgstr "El usuario podrá Crear."
+
+#. module: performance_evaluation
+#: model:res.groups,comment:performance_evaluation.group_performance_evaluation_admin
+msgid "The user will be able to Manage Evaluation Program."
+msgstr "El usuario podrá administrar programas de evaluación"
+
+#. module: performance_evaluation
+#: model:res.groups,comment:performance_evaluation.group_performance_evaluation_manager
+msgid "The user will be able to update evaluation."
+msgstr "El usuario podrá actualizar evaluaciones"
+
+#. module: performance_evaluation
+#: model:ir.model.fields,help:performance_evaluation.field_performance_evaluation_program__activity_exception_decoration
+#: model:ir.model.fields,help:performance_evaluation.field_performance_evaluation_program_config__activity_exception_decoration
+msgid "Type of the exception activity on record."
+msgstr ""
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__visa_days_to_expire
+msgid "Visa Days To Expire"
+msgstr ""
+
+#. module: performance_evaluation
+#: model:ir.model.fields,field_description:performance_evaluation.field_performance_evaluation_program__visa_expire
+msgid "Visa Expire Date"
+msgstr ""

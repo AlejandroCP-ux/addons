@@ -1,0 +1,8 @@
+<odoo>
+    <data>
+        <template id="report_agreement_document_inherited" inherit_id="agreement_legal.report_agreement_document">
+            <xpath expr="//div[@name='description']" position="replace"/>            
+            <xpath expr="//table[@class='table table-condensed']//tr/td[1]" position="replace"/>     
+        </template>
+    </data>
+</odoo>

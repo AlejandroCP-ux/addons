@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_calendar_workplan_plan,calendar_workplan.plan access,model_calendar_workplan_plan,calendar_workplan_group_user,1,0,0,0
+full_calendar_workplan_plan,calendar_workplan.plan full,model_calendar_workplan_plan,calendar_workplan_group_manager,1,1,1,1
+full_gamification_challenge,gamification.challenge full,gamification.model_gamification_challenge,calendar_workplan_group_manager,1,1,1,1
+access_calendar_workplan_section,calendar_workplan.section access,model_calendar_workplan_section,calendar_workplan_group_user,1,0,0,0
+full_calendar_workplan_section,calendar_workplan.section full,model_calendar_workplan_section,calendar_workplan_group_manager,1,1,1,1

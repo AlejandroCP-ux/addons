@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<odoo>
+   <record id="hr_skill_type_form_view_inherit" model="ir.ui.view">
+    <field name="name">hr.skill.type.form.view.inherit</field>
+    <field name="model">hr.skill.type</field>
+    <field name="inherit_id" ref="hr_skill_type.hr_skill_type_form_view"/>
+    <field name="arch" type="xml">
+        <field name="name" position="after">
+            <field name="role_id"/>
+        </field>
+    </field>
+</record>
+</odoo>

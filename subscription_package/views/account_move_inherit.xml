@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <data>
+        <record id="account_move_subscription_smart_button" model="ir.ui.view">
+            <field name="name">accout.move.subscriptions.view.buttons</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_move_form" />
+            <field name="arch" type="xml">
+                <div name="button_box" position="inside">
+                    <button class="oe_stat_button" type="object" name="button_subscriptions"
+                        icon="fa-usd" attrs="{'invisible': [('subscriptions_count','=',0)]}">
+                    <field name="subscriptions_count" widget="statinfo"/>
+                    </button>
+                </div>
+            </field>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+    
+      
+       
+        <template id="report_saleorder_document" inherit_id="sale.report_saleorder_document">
+             <xpath expr="//div[hasclass('page')]" position="inside">
+               <style>
+                .page {
+                    margin: 0 !important;
+                    padding: 0 !important;
+                    font-size: 11pt;
+                }
+                .row {
+                    margin: 0 !important;
+                    padding: 0 !important;
+                }
+                .pt-5, .mt-5, .mb-5 {
+                    padding-top: 0 !important;
+                    margin-top: 0 !important;
+                    margin-bottom: 0 !important;
+                }
+                .article {
+                    margin-top: 0 !important;
+                    padding-top: 0 !important;
+                }
+            
+                /* Contenedor principal */
+                .two-column-container {
+                    width: 100%;
+                    overflow: hidden; /* Clearfix para floats */
+                }
+                
+                /* Columnas para vista HTML */
+                .first-column, .second-column {
+                    width: 48%;
+                    box-sizing: border-box;
+                }
+                
+                .first-column {
+                    float: left;
+                }
+                
+                .second-column {
+                    float: right;
+                }
+                
+                /* Estilos para PDF */
+                @media print {
+                    .first-column, .second-column {
+                        width: 100%;
+                        float: none;
+                        margin-bottom: 10px;
+                    }
+                }
+                
+                /* Estilos comunes */
+                .compact-card {
+                    border: 1px solid #e0e0e0;
+                    border-radius: 3px;
+                    margin-bottom: 5px;
+                    page-break-inside: avoid;
+                }
+                
+                .compact-header {
+                    background-color: #f5f5f5;
+                    padding: 5px 8px;
+                    font-weight: bold;
+                    font-size: 13px;
+                    border-bottom: 1px solid #e0e0e0;
+                }
+                
+                .compact-body {
+                    padding: 8px;
+                }
+                
+                .compact-row {
+                    display: flex;
+                    margin-bottom: 3px;
+                    line-height: 1.3;
+                }
+                
+                .compact-row strong {
+                    min-width: 40%;
+                    font-weight: 500;
+                }
+                
+                .compact-row span {
+                    flex-grow: 1;
+                }
+            </style>
+                   
+                
+                
+          
+                                
+            </xpath>       
+                  
+            <xpath expr="//div[@id='informations']" position="before">
+                       <div class="mt-0 mb-0 two-column-container">
+                <!-- Datos de la Sociedad -->
+                <div class="compact-card first-column">
+                    <div class="compact-header">Datos de la Sociedad</div>
+                    <div class="compact-body">
+                        <div class="compact-row"><strong>Nombre:</strong> <span t-esc="doc.company_id.partner_id.name"/></div>
+                        <div class="compact-row"><strong>Dirección:</strong> <span t-esc="doc.company_id.partner_id.street"/></div>
+                        <t t-if="doc.company_id.partner_id.vat">
+                            <div class="compact-row"><strong>NIT:</strong> <span t-esc="doc.company_id.partner_id.vat"/></div>
+                        </t>
+                        <t t-if="doc.company_id.partner_id.commercial_registration_number">
+                            <div class="compact-row"><strong>IRCC:</strong> <span t-esc="doc.company_id.partner_id.commercial_registration_number"/></div>
+                        </t>
+                        <t t-if="doc.company_id.partner_id.bank_accounts">
+                            <div class="compact-row"><strong>Cuenta Bancaria:</strong> <t t-esc="doc.company_id.partner_id.bank_accounts.split('; ')[0] or 'No especificado'"/></div>
+                        </t>     
+                        
+                    </div>
+                </div>
+
+                <!-- Datos del Cliente -->
+                <div class="compact-card second-column">
+                    <div class="compact-header">Datos del Cliente</div>
+                    <div class="compact-body">
+                        <div class="compact-row"><strong>Nombre:</strong> <span t-esc="doc.partner_id.name"/></div>
+                        <div class="compact-row">
+                            <strong>Dirección:</strong> 
+                            <span>
+                                <t t-esc="doc.partner_id.street"/>
+                                <t t-if="doc.partner_id.state_id">, <t t-esc="doc.partner_id.state_id.name"/></t>
+                            </span>
+                        </div>
+                        <t t-if="doc.partner_id.vat">
+                            <div class="compact-row"><strong>NIT:</strong> <span t-esc="doc.partner_id.vat"/></div>
+                        </t>
+                        <t t-if="doc.partner_id.ref">
+                            <div class="compact-row"><strong>Código:</strong> <span t-esc="doc.partner_id.ref"/></div>
+                        </t>
+                        <t t-if="doc.partner_id.bank_accounts">
+                            <div class="compact-row"><strong>Cuenta Bancaria:</strong> <span t-esc="doc.partner_id.bank_accounts"/></div>
+                        </t>
+                        <t t-if="doc.partner_id.asi_contract">
+                            <div class="compact-row"><strong>Contrato:</strong> <span t-esc="doc.partner_id.asi_contract"/></div>
+                        </t>
+                    </div>
+                </div>
+            </div>  
+        </xpath>
+
+
+        
+        
+            <xpath expr="//h2[@class='mt-4']" position="attributes">
+                <attribute name="class">mt-1</attribute>
+            </xpath>
+            <xpath expr="//div[@name='so_total_summary']" position="after">
+                <div t-if="doc.payment_term_id" style="page-break-inside: avoid;">
+                     <div t-if="doc.payment_term_id"><strong>Plazo de pago: </strong> <t t-esc="doc.payment_term_id.name or 'No especificado'"/></div>            
+                 </div>                 
+            </xpath> 
+
+          
+        </template>
+    </data>
+</odoo>

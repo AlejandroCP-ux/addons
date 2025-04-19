@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+     <record id="payment_provider_custom_trm" model="payment.provider">
+        <field name="name">Transfermovil (Wire Transfer)</field>
+        <field name="display_as">TRM (Wire Transfer)</field>
+        <field name="sequence">30</field>
+        <field name="code">custom</field>
+        <field name="custom_mode">transfermovil</field>
+        <field name="qr_code" eval="True" />
+        <field name="pending_msg" eval="False"/>
+        <field name="redirect_form_view_id" ref="payment_custom.redirect_form"/>
+        <field name="available_country_ids" eval="[(6, 0, [
+                   ref('base.cu'),
+               ])]"/>
+        <field name="image_128"
+               type="base64"
+               file="l10n_cu_payment_custom_trm/static/src/img/transfermovil.png"/>
+        <field name="module_id" ref="base.module_l10n_cu_payment_custom_trm"/>
+     </record>
+     
+     <function model="payment.provider"
+              name="_transfer_ensure_pending_msg_is_set"
+              eval="[[ref('l10n_cu_payment_custom_trm.payment_provider_custom_trm')]]"/>
+
+</odoo>

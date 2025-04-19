@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="0">
+
+	<record model="ir.module.category" id="performance_evaluation.module_performance_evaluation">
+        <field name="name">Employee Evaluation Program</field>
+        <field name="sequence">99</field>
+    </record>
+    
+    <record id="group_performance_evaluation_program_user" model="res.groups">
+        <field name="name">Performance Evaluation User</field>
+        <field name="comment">The user will be able to Create and Submit.</field>
+        <field name="category_id" ref="performance_evaluation.module_performance_evaluation"/>
+    </record>
+    
+    <record id="group_performance_evaluation_manager" model="res.groups">
+        <field name="name">Performance Evaluation Manager</field>
+        <field name="comment">The user will be able to update evaluation.</field>
+        <field name="category_id" ref="performance_evaluation.module_performance_evaluation"/>
+    </record>
+    
+    <record id="group_performance_evaluation_admin" model="res.groups">
+        <field name="name">Performance Evaluation Admin</field>
+        <field name="comment">The user will be able to Manage Evaluation Program.</field>
+        <field name="category_id" ref="performance_evaluation.module_performance_evaluation"/>
+    </record>
+
+    
+    
+    
+</odoo>

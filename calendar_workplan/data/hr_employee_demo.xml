@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<odoo>
+        <!-- <data noupdate="1"> -->
+        <data>
+
+        <!-- Work Plan : demo manger employee -->
+        
+        <function name="toggle_noupdate" model="ir.model.data"
+                        eval="['hr.employee', ref('hr.employee_vad')]" />
+
+        <record id="hr.employee_vad" model="hr.employee">
+            <field name="user_id" ref="calendar_workplan_res_users_manager_demo"/>            
+        </record>       
+        
+        </data>
+</odoo>

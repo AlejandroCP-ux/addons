@@ -1,0 +1,93 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* asi_custom_stock_export
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 16.0-20240603\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-09-05 17:44+0000\n"
+"PO-Revision-Date: 2024-09-05 17:44+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: asi_custom_stock_export
+#: model_terms:ir.ui.view,arch_db:asi_custom_stock_export.view_stock_move_export_wizard_form
+msgid "Cancelar"
+msgstr "Cancelar"
+
+#. module: asi_custom_stock_export
+#: model:ir.model.fields,field_description:asi_custom_stock_export.field_stock_move_export_wizard__create_uid
+msgid "Created by"
+msgstr ""
+
+#. module: asi_custom_stock_export
+#: model:ir.model.fields,field_description:asi_custom_stock_export.field_stock_move_export_wizard__create_date
+msgid "Created on"
+msgstr ""
+
+#. module: asi_custom_stock_export
+#: model:ir.model.fields,field_description:asi_custom_stock_export.field_stock_move_export_wizard__display_name
+msgid "Display Name"
+msgstr "Nombre mostrado"
+
+#. module: asi_custom_stock_export
+#: model:ir.actions.act_window,name:asi_custom_stock_export.action_menu_contextual
+msgid "Exportar como movimiento stock versat"
+msgstr "Exportar a formato Versat"
+
+#. module: asi_custom_stock_export
+#: model_terms:ir.ui.view,arch_db:asi_custom_stock_export.view_stock_move_export_wizard_form
+msgid "Exportar como movimiento versat"
+msgstr "Exportar a formato Versat"
+
+#. module: asi_custom_stock_export
+#: model_terms:ir.ui.view,arch_db:asi_custom_stock_export.view_stock_move_export_wizard_form
+msgid "Guardar"
+msgstr ""
+
+#. module: asi_custom_stock_export
+#: model:ir.model.fields,field_description:asi_custom_stock_export.field_stock_move_export_wizard__id
+msgid "ID"
+msgstr ""
+
+#. module: asi_custom_stock_export
+#: model:ir.model.fields,field_description:asi_custom_stock_export.field_stock_move_export_wizard____last_update
+msgid "Last Modified on"
+msgstr ""
+
+#. module: asi_custom_stock_export
+#: model:ir.model.fields,field_description:asi_custom_stock_export.field_stock_move_export_wizard__write_uid
+msgid "Last Updated by"
+msgstr ""
+
+#. module: asi_custom_stock_export
+#: model:ir.model.fields,field_description:asi_custom_stock_export.field_stock_move_export_wizard__write_date
+msgid "Last Updated on"
+msgstr ""
+
+#. module: asi_custom_stock_export
+#: model:ir.model.fields,field_description:asi_custom_stock_export.field_stock_move_export_wizard__stock_move_ids
+msgid "Stock Moves"
+msgstr "Movimientos"
+
+#. module: asi_custom_stock_export
+#. odoo-python
+#: code:addons/asi_custom_stock_export/wizard/stock_move_export_wizard.py:0
+#, python-format
+msgid "You can only send stock moves."
+msgstr "Sólo de pueden exportar movimientos de stock"
+
+#. module: asi_custom_stock_export
+#: model:ir.model.fields,field_description:asi_custom_stock_export.field_stock_move_export_wizard__z_file
+msgid "Z File"
+msgstr "Archivo .zip"
+
+#. module: asi_custom_stock_export
+#: model:ir.model,name:asi_custom_stock_export.model_stock_move_export_wizard
+msgid "stock move Export Wizard"
+msgstr "Asistente de exportación de datos"

@@ -1,0 +1,25 @@
+<odoo>
+        <!-- Config menu item -->
+        <menuitem name="Workplan"
+                id="calendar_workplan_menu_config"
+                groups="calendar_workplan_group_manager"
+                parent="calendar.mail_menu_calendar" />
+
+        <!-- menu subitems -->
+        <menuitem name="Plans"
+                id="calendar_workplan_plan_menu"
+                parent="calendar_workplan_menu_config"
+                action="calendar_workplan_plan_action"
+        />
+        <menuitem name="Sections"
+                id="calendar_workplan_section_menu"
+                parent="calendar_workplan_menu_config"
+                action="calendar_workplan_section_action"
+        />
+
+        <menuitem name="Goals"
+                id="gamification_challenge_menu"
+                parent="calendar_workplan_menu_config"
+                action="gamification_challenge_action_workplan_goals"
+        />
+</odoo>

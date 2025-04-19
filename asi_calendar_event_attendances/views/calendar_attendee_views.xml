@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista de formulario para asistencia a eventos -->
+    <record id="view_calendar_attendee_participation_form" model="ir.ui.view">
+        <field name="name">calendar.attendee.participation.form</field>
+        <field name="model">calendar.attendee</field>
+        <field name="arch" type="xml">
+            <form string="Asistencia a Eventos">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="event_id" readonly="1"/>
+                        </h1>
+                    </div>
+                    
+                    <group>
+                        <group>
+                            <field name="partner_id" invisible="1"/>
+                            <field name="email" readonly="1"/>
+                            <field name="event_date" readonly="1"/>
+                            <field name="state"/>
+                        </group>
+                        <group>
+                            <field name="has_participated" readonly="1"/>
+                            <field name="can_mark_participation" invisible="1"/>
+                        </group>
+                    </group>
+                    
+                    <div class="alert alert-info" role="alert" attrs="{'invisible': [('can_mark_participation', '=', False)]}">
+                        <p><strong>Este evento ocurrió durante el mes actual.</strong> Puedes marcar tu asistencia ahora.</p>
+                    </div>
+                    
+                    <div class="alert alert-success" role="alert" attrs="{'invisible': [('has_participated', '=', False)]}">
+                        <p><strong>Has marcado tu asistencia en este evento.</strong></p>
+                    </div>
+                    
+                    <div class="alert alert-secondary" role="alert" attrs="{'invisible': ['|', ('can_mark_participation', '=', False ), ('has_participated', '=', False)]}">
+                        <p><strong>No puedes marcar tu asistencia en este momento.</strong> La asistencia solo puede marcarse para eventos que ocurrieron desde el día 1 del mes actual hasta hoy.</p>
+                    </div>
+                </sheet>
+                <footer>
+                    <button name="mark_participation" 
+                            string="Marcar asistencia" 
+                            type="object" 
+                            class="btn-primary" 
+                            attrs="{'invisible': [('can_mark_participation', '=', True)]}"/>
+                    
+                </footer>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Vista de árbol para asistencia a eventos -->
+    <record id="view_calendar_attendee_participation_tree" model="ir.ui.view">
+        <field name="name">calendar.attendee.participation.tree</field>
+        <field name="model">calendar.attendee</field>
+        <field name="arch" type="xml">
+            <tree string="Asistencia a Eventos" decoration-success="has_participated" decoration-info="can_mark_participation and not has_participated">
+                <field name="partner_id" invisible="1"/>
+                <field name="event_id"/>
+                <field name="event_date"/>
+                <field name="state"/>
+                <field name="has_participated"/>
+                <field name="can_mark_participation" invisible="1"/>
+                <button name="mark_participation" 
+                        string="Marcar asistencia" 
+                        type="object" 
+                        icon="fa-check-circle" 
+                        attrs="{'invisible': [('can_mark_participation', '=', False)]}"/>
+            </tree>
+        </field>
+    </record>
+    
+    <!-- Acción para mostrar la asistencia a eventos del usuario actual -->
+    <record id="action_calendar_my_attendances" model="ir.actions.act_window">
+        <field name="name">Mi Asistencia a Eventos</field>
+        <field name="res_model">calendar.attendee</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="view_calendar_attendee_participation_tree"/>
+        <field name="domain">[('partner_id.user_ids', 'in', uid)]</field>
+        <field name="context">{'default_has_participated': False}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No tienes eventos asignados
+            </p>
+            <p>
+                Aquí podrás ver tus eventos y marcar tu asistencia cuando estén en el mes actual.
+            </p>
+        </field>
+    </record>
+    
+    <!-- Menú para acceder a mi asistencia a eventos -->
+    <menuitem id="menu_calendar_my_attendances"
+              name="Mi Asistencia a Eventos"
+              parent="calendar.mail_menu_calendar"
+              action="action_calendar_my_attendances"
+              sequence="16"/>
+
+    <!-- Añadir acción para marcar múltiples asistencias a la vez -->
+    <record id="action_mark_participation_multi" model="ir.actions.server">
+        <field name="name">Marcar asistencia</field>
+        <field name="model_id" ref="model_calendar_attendee"/>
+        <field name="binding_model_id" ref="model_calendar_attendee"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">action = records.mark_participation_multi(records.ids)</field>
+    </record>
+</odoo>

@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<odoo>
+        <!-- <data noupdate="1"> -->
+        <data>
+
+                <record id="calendar_workplan_section_1" model="calendar_workplan.section">
+                        <field name="name">Trabajo político-ideológico y de organización del Partido.</field>
+                </record>
+                <record id="calendar_workplan_section_2" model="calendar_workplan.section">
+                        <field name="name">Funcionamiento y control del Estado.</field>
+                </record>
+                <record id="calendar_workplan_section_3" model="calendar_workplan.section">
+                        <field name="name">Funcionamiento y control del Gobierno.</field>
+                </record>
+                <record id="calendar_workplan_section_4" model="calendar_workplan.section">
+                        <field name="name">Funciones y encargo estatal en los OACE y de las administraciones locales del Poder Popular. Funciones empresariales.</field>
+                </record>
+                <record id="calendar_workplan_section_5" model="calendar_workplan.section">
+                        <field name="name">Funcionamiento Interno.</field>
+                </record>
+                <record id="calendar_workplan_section_6" model="calendar_workplan.section">
+                        <field name="name">Defensa, Orden Interior y Defensa Civil.</field>
+                </record>
+        </data>
+</odoo>

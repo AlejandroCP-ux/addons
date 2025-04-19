@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Formato de papel horizontal -->
+    <record id="paperformat_landscape_custom" model="report.paperformat">
+        <field name="name">Custom Landscape (Letter)</field>
+        <field name="format">Letter</field>
+        <field name="orientation">Landscape</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="margin_top">15</field>
+        <field name="margin_bottom">15</field>
+        <field name="margin_left">15</field>
+        <field name="margin_right">15</field>
+        <field name="header_line" eval="False"/>
+        <field name="dpi">90</field>
+    </record>
+
+    <!-- Plantilla del informe corregida -->
+    <template id="report_individual_plan">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <!-- Contenedor principal en formato Letter horizontal -->
+                    <div class="page" style="
+                        margin: 0;
+                        padding: 15px;
+                        min-width: 279.4mm;
+                        min-height: 215.9mm;
+                    ">
+                        <style>
+                            @page {
+                                size: landscape;
+                                margin: 15mm;
+                            }
+                        </style>
+
+                        <!-- Encabezado -->
+                        <h2>Plan Individual: <span t-field="doc.name"/></h2>
+                        <p><strong>Período:</strong> <span t-field="doc.date_start"/> - <span t-field="doc.date_end"/></p>
+                        <p><strong>Aprobado por:</strong> <span t-field="doc.approved_by_partner_id.name"/></p>
+
+                        <!-- Actividades Principales -->
+                        <h3>Actividades Principales</h3>
+                        <ul>
+                            <t t-set="main_activities" t-value="doc.get_main_activities()"/>
+                            <t t-foreach="main_activities" t-as="activity">
+                                <li><span t-esc="activity"/></li>
+                            </t>
+                        </ul>
+
+                        <!-- Tabla de semanas -->
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <t t-set="weekdays" t-value="['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']"/>
+                                    <t t-foreach="weekdays" t-as="day">
+                                        <th style="background-color: #f8f9fa; text-align: center;">
+                                            <span t-esc="day"/>
+                                        </th>
+                                    </t>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-set="weeks" t-value="doc.get_weeks()"/>
+                                <t t-foreach="weeks" t-as="week">
+                                    <tr>
+                                        <t t-foreach="week" t-as="day">
+                                            <td style="height: 120px;" t-att-style="'background-color: #FFE4E1;' if doc.get_absences_for_day(day) else ''">
+                                                <!-- Número del día -->
+                                                <t t-if="day">
+                                                    <div style="font-weight: bold; background-color: #AEB6BF; padding: 2px 5px; margin: -5px -5px 3px -5px;">
+                                                        <span t-esc="day.strftime('%d')"/>
+                                                    </div>
+                                                </t>
+                                                
+                                                <!-- Ausencias -->
+                                                <t t-set="day_absences" t-value="doc.get_absences_for_day(day)"/>
+                                                <t t-if="day and day_absences">
+                                                    <div style="color: red; font-weight: bold; font-size: 11px;">
+                                                        <span t-esc="', '.join(day_absences)"/>
+                                                    </div>
+                                                </t>
+                                                
+                                                <!-- Eventos -->
+                                                <t t-if="day and not day_absences">
+                                                    <t t-set="events" t-value="doc.get_events_by_day(day)"/>
+                                                    <t t-foreach="events" t-as="event">
+                                                        <div style="margin-bottom: 3px; font-size: 11px;">
+                                                            <t t-if="event.get('allday')">
+                                                                <div style="font-weight: bold;">T/D:</div>
+                                                                <div t-esc="event['name']"/>
+                                                            </t>
+                                                            <t t-else="">
+                                                                <div style="font-weight: bold;">
+                                                                    <span t-esc="event['start'].strftime('%H:%M')"/> - 
+                                                                    <span t-esc="event['stop'].strftime('%H:%M')"/>
+                                                                </div>
+                                                                <div t-esc="event['name']"/>
+                                                            </t>
+                                                        </div>
+                                                    </t>
+                                                </t>
+                                            </td>
+                                        </t>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+
+                        <!-- Sección de firma -->
+                        <div style="page-break-inside: avoid; margin-top: 25px; text-align: center;">
+                            <div style="border: 2px solid #000; width: 300px; height: 100px; display: inline-block; vertical-align: middle;">
+                                <p style="margin-top: 35px; font-size: 14px;">Firma del empleado</p>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- Acción de informe -->
+    <record id="action_report_individual_plan" model="ir.actions.report">
+        <field name="name">Plan Individual</field>
+        <field name="model">calendar_workplan.plan</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">calendar_workplan.report_individual_plan</field>
+        <field name="paperformat_id" ref="paperformat_landscape_custom"/> <!-- Formato asignado -->
+        <field name="binding_model_id" ref="model_calendar_workplan_plan"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>
