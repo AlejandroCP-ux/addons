@@ -3,7 +3,7 @@
 
 {
     'name': 'Participación en Eventos de Calendario',
-    'version': '2.5',
+    'version': '2.6',
     'category': 'Productivity/Calendar',
     'summary': 'Permite a los asistentes marcar su participación en eventos',
     'description': """

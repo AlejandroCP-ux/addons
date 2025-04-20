@@ -22,11 +22,13 @@ class AttendeeFilter(models.Model):
             # Crear el dominio para filtrar eventos del mes actual o con participación
             # Incluimos todos los eventos del día actual, independientemente de la hora
             month_domain = [
+                '&',
+                ('event_id.active', '=', True),
                 '|',
                 ('has_participated', '=', True),
                 '&',
                 ('event_id.start', '>=', first_day_of_month.strftime('%Y-%m-%d 00:00:00')),
-                ('event_id.start', '<=', today)
+                ('event_id.start', '<=', today.strftime('%Y-%m-%d 23:59:59'))
             ]
             
             # Añadir este dominio a los argumentos existentes
