@@ -1,0 +1,20 @@
+<odoo>
+<record id="view_calendar_workplan_plan_form_inherit_eval" model="ir.ui.view">
+    <field name="name">calendar.workplan.plan.form.inherit.eval</field>
+    <field name="model">calendar_workplan.plan</field>
+    <field name="inherit_id" ref="calendar_workplan.calendar_workplan_plan_view_form"/>
+    <field name="arch" type="xml">
+        <xpath expr="//header" position="inside">
+            <button name="action_generate_evaluation"
+                    string="Generar Evaluación IA"
+                    type="object"
+                    class="btn-secondary"
+                    attrs="{'invisible': [('scope', '!=', 'individual')]}"/>
+        </xpath>
+        
+        <xpath expr="//group[@name='work_plan_date_range']" position="after">
+            <field name="qualitative_analysis"/>
+         </xpath>
+    </field>
+</record>
+</odoo>

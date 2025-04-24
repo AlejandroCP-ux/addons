@@ -44,7 +44,7 @@ class Attendee(models.Model):
             # 2. Es el asistente actual
             # 3. Aún no ha marcado su asistencia
             attendee.can_mark_participation = (
-                (attendee.event_id.is_in_current_month_until_today or attendee.event_id.is_ongoing) and 
+                attendee.event_id.is_in_current_month_until_today and 
                 attendee.partner_id == current_partner and
                 not attendee.has_participated
             )

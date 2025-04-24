@@ -88,8 +88,8 @@ class Channel(models.Model):
         url= ICP.get_param('asi_ia.openapi_base_url')
         _logger.warning('***->url del endpoint: %s' % url)      
         client = OpenAI(base_url=url, api_key="noapykey")
-        localai_model_id = ICP.get_param('asi_ia.localai_model_id')
-        _logger.warning('***->tomando parametro localai_model_id : %s' % localai_model_id)  
+        localai_model_id = ICP.get_param('asi_ia.localai_model')
+        
         try:
             if localai_model_id:
                 localai_model = self.env['localai.model'].browse(int(localai_model_id)).name
