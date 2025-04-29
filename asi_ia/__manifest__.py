@@ -12,7 +12,7 @@
     'depends': ['base', 'base_setup', 'mail'],
     'data': [
         'security/ir.model.access.csv',
-        'data/localai_model_data.xml',
+        
         'data/mail_channel_data.xml',
         'data/user_partner_data.xml',
         'views/res_config_settings_views.xml',
