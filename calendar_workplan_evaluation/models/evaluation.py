@@ -30,20 +30,38 @@ class CalendarWorkplanEvaluation(models.Model):
                 f"- [Nombre: {event.name}, "
                 f"Planificado: {event.start.strftime('%Y-%m-%d')}, "
                 f"Realizado: {realizado}, "
-                f"Sección: {event.section_id.name if event.section_id else 'N/A'}]"
+                f"Sección: {event.section_id.name if event.section_id else 'N/A'}, "
+                f"Prioridad: {event.priority}]"
             )
     
-        prompt = (
-            """Evalúa el cumplimiento del siguiente plan de trabajo. 
-             Considera los eventos planificados vs los realizados, su impacto, calidad y distribución mensual. Devuelve:
-             1. Porcentaje de cumplimiento.
-             2. Una puntuación general (0 a 10).   
-             3. Comentarios cualitativos sobre el desempeño.
-             4. Sugerencias para mejorar el cumplimiento.
-          Eventos:
-    """ + "\n".join(event_lines)
-        )
-    
+        prompt_header = f"""
+        Eres un analista experto en productividad y gestión de trabajo asistido por IA.
+        
+        A continuación se listan los eventos principales (prioridad 1) planificados en un plan de trabajo. Cada evento tiene su fecha programada, la sección responsable, y un indicador de si hubo participación registrada (realizado: Sí/No).
+        
+        Tu tarea es evaluar la participación en estos eventos desde dos perspectivas:
+        
+        1. Análisis Cuantitativo:
+           - Calcula el porcentaje general de participación (eventos con participación frente al total).
+           - Indica cuántos eventos se cumplieron y cuántos no.
+           - Desglosa la participación por sección.
+        
+        2. Análisis Cualitativo:
+           - Evalúa la consistencia de la participación a lo largo del tiempo.
+           - Comenta sobre posibles causas del incumplimiento.
+           - Emite observaciones sobre el desempeño general.
+        
+        3. Resultado Esperado:
+           - Porcentaje total de cumplimiento.
+           - Puntuación general (0 a 10).
+           - Comentario cualitativo.
+           - Recomendaciones.
+        
+        Eventos a evaluar:
+        """
+      
+        prompt = prompt_header + "\n" + "\n".join(event_lines)
+          
         # Registrar nota con el prompt
         plan.message_post(
             body=f"<b>Prompt usado para la evaluación IA:</b><br/><pre>{prompt}</pre>",
