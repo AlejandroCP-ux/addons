@@ -36,8 +36,8 @@ class CalendarWorkplanEvaluation(models.Model):
     
         prompt_header = f"""
         Eres un analista experto en productividad y gestión de trabajo asistido por IA.
-        
-        A continuación se listan los eventos principales (prioridad 1) planificados en un plan de trabajo. Cada evento tiene su fecha programada, la sección responsable, y un indicador de si hubo participación registrada (realizado: Sí/No).
+        A continuación se listan los eventos planificados en un plan de trabajo. Cada evento tiene su fecha programada, la sección responsable, y un indicador de si hubo participación registrada (realizado: Sí/No). 
+        Existen eventos con prioridad 1, que son actividades principales dentro del mes.
         
         Tu tarea es evaluar la participación en estos eventos desde dos perspectivas:
         
@@ -51,11 +51,11 @@ class CalendarWorkplanEvaluation(models.Model):
            - Comenta sobre posibles causas del incumplimiento.
            - Emite observaciones sobre el desempeño general.
         
-        3. Resultado Esperado:
+        Con esta información, evalúa el desempeño en el período que comprenden las tareas, haciendo énfasis en:
            - Porcentaje total de cumplimiento.
            - Puntuación general (0 a 10).
            - Comentario cualitativo.
-           - Recomendaciones.
+           - Recomendaciones a tener en cuenta para futuros períodos.
         
         Eventos a evaluar:
         """

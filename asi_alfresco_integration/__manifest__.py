@@ -1,0 +1,17 @@
+{
+    "name": "Alfresco Report Integration",
+    "version": "1.0",
+    "summary": "Upload PDF reports to Alfresco automatically",
+    "category": "Tools",
+    'author': 'Javier',
+    'website': 'https://www.asisurl.cu',
+    "depends": ["base", "web"],
+    "data": [
+        "views/alfresco_config_views.xml",
+        "views/alfresco_report_mapping_views.xml",
+        "security/ir.model.access.csv"
+    ],
+   'images': ['static/description/icon.png'],
+    "installable": True,
+    "application": False,
+}

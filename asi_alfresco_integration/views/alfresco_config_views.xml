@@ -1,0 +1,27 @@
+<odoo>
+    <record id="view_alfresco_config_form" model="ir.ui.view">
+        <field name="name">alfresco.config.form</field>
+        <field name="model">alfresco.config</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="server_url"/>
+                        <field name="username"/>
+                        <field name="password" password="True"/>
+                        <field name="repo_id"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_alfresco_config" model="ir.actions.act_window">
+        <field name="name">Configuración Alfresco</field>
+        <field name="res_model">alfresco.config</field>
+        <field name="view_mode">form</field>
+    </record>
+
+    <menuitem id="menu_alfresco_root" name="Alfresco"/>
+    <menuitem id="menu_alfresco_config" name="Configuración" parent="menu_alfresco_root" action="action_alfresco_config"/>
+</odoo>

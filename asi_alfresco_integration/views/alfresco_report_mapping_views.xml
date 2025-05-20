@@ -1,0 +1,26 @@
+<odoo>
+    <record id="view_alfresco_report_mapping_form" model="ir.ui.view">
+        <field name="name">alfresco.report.mapping.form</field>
+        <field name="model">alfresco.report.mapping</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="report_id"/>
+                        <field name="folder_selection"/>
+                        <field name="folder_name" invisible="1"/>
+                        <field name="folder_node_id" invisible="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_alfresco_report_mapping" model="ir.actions.act_window">
+        <field name="name">Mapeo de Reportes</field>
+        <field name="res_model">alfresco.report.mapping</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_alfresco_mapping" name="Mapeo de Reportes" parent="menu_alfresco_root" action="action_alfresco_report_mapping"/>
+</odoo>

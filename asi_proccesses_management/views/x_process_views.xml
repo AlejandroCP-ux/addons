@@ -1,0 +1,53 @@
+<odoo>
+    <record id="view_x_process_form" model="ir.ui.view">
+        <field name="name">x.process.form</field>
+        <field name="model">x.process</field>
+        <field name="arch" type="xml">
+            <form string="Proceso Interno">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="department_id"/>
+                        <field name="user_id"/>
+                        <field name="objective"/>                        
+                    </group>
+                    <notebook>
+                        <page string="Eventos del Calendario">
+                            <field name="event_ids">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="start"/>
+                                    <field name="stop"/>
+                                    <field name="recurrency"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_x_process_tree" model="ir.ui.view">
+        <field name="name">x.process.tree</field>
+        <field name="model">x.process</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="department_id"/>
+                <field name="user_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="calendar_event_search_inherit_process" model="ir.ui.view">
+        <field name="name">calendar.event.search.process</field>
+        <field name="model">calendar.event</field>
+        <field name="inherit_id" ref="calendar.view_calendar_event_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='my']" position="after">
+                <filter string="Proceso" name="x_process_id" domain="['|',('x_process_id','!=',False),('x_process_id','=',False)]" context="{'group_by': 'x_process_id'}"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

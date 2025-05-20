@@ -1,0 +1,19 @@
+<odoo>
+<record id="view_task_search_process" model="ir.ui.view">
+    <field name="name">project.task.search.process</field>
+    <field name="model">project.task</field>
+    <field name="inherit_id" ref="project.view_task_search_form"/>
+    <field name="arch" type="xml">
+        <xpath expr="//filter[@name='my_tasks']" position="after">
+            <filter name="process" string="By Process" context="{'group_by':'asi_process_id'}"/>
+        </xpath>
+    </field>
+</record>
+<record id="action_tasks_by_process" model="ir.actions.act_window">
+    <field name="name">Process Tasks</field>
+    <field name="res_model">project.task</field>
+    <field name="view_mode">tree,form</field>
+    <field name="domain">[('asi_process_id', '=', active_id)]</field>
+</record>
+
+</odoo>

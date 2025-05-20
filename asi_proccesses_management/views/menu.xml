@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+  <menuitem id="menu_process_root" name="Gestor de Procesos"/>
+  <menuitem id="menu_process" name="Procesos" parent="menu_process_root" action="action_asi_process"/>
+</odoo>
