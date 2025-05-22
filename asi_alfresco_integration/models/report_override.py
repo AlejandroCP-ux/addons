@@ -1,38 +1,51 @@
 import logging
 import requests
 from odoo import models
-from odoo.tools.safe_eval import safe_eval
 
 _logger = logging.getLogger(__name__)
 
 class Report(models.Model):
     _inherit = 'ir.actions.report'
 
-    def _render_qweb_pdf(self, report_ref, docids, data=None):
-        pdf_content, report_type = super()._render_qweb_pdf(report_ref, docids, data)
+    def _render_qweb_pdf(self, report_ref, res_ids=None, data=None, **kwargs):
+        # Llamamos al super con los mismos nombres de parámetro
+        pdf_content, report_type = super(Report, self)._render_qweb_pdf(
+            report_ref, res_ids=res_ids, data=data, **kwargs
+        )
 
-        config = self.env['alfresco.config'].search([], limit=1)
-        mapping = self.env['alfresco.report.mapping'].search([('report_id.report_name', '=', report_ref)], limit=1)
+        # Obtenemos el mapeo
+        mapping = self.env['alfresco.report.mapping'].search([
+            ('report_id.report_name', '=', report_ref),
+        ], limit=1)
 
-        if not config or not mapping:
-            _logger.warning("Configuración o mapeo de reporte no encontrados para Alfresco.")
+        # Si no hay URL o mapeo, devolvemos el PDF tal cual
+        RCS = self.env['ir.config_parameter'].sudo()
+        url = RCS.get_param('asi_alfresco_integration.alfresco_server_url')
+        user = RCS.get_param('asi_alfresco_integration.alfresco_username')
+        pwd  = RCS.get_param('asi_alfresco_integration.alfresco_password')
+        if not url or not mapping:
+            _logger.warning("No hay configuración o mapeo para subir a Alfresco.")
             return pdf_content, report_type
+        _logger.warning(" ************ user: %s ****  PAss %s",user,pwd )
+        # Construimos el nombre de archivo
+        filename = f"{report_ref}_{'_'.join(map(str, res_ids or []))}.pdf"
 
         try:
-            url = f"{config.server_url}/alfresco/api/-default-/public/alfresco/versions/1/nodes/{mapping.folder_node_id}/children"
-            filename = f"{report_ref}_{'_'.join(map(str, docids))}.pdf"
+            endpoint = (
+                f"{url}/alfresco/api/-default-/public/"
+                f"alfresco/versions/1/nodes/{mapping.folder_node_id}/children"
+            )
             files = {'filedata': (filename, pdf_content)}
             params = {'autoRename': 'true'}
-
-            response = requests.post(
-                url,
+            resp = requests.post(
+                endpoint,
                 files=files,
                 params=params,
-                auth=(config.username, config.password)
+                auth=(user, pwd),
             )
-            response.raise_for_status()
-            _logger.info(f"PDF subido correctamente a Alfresco: {response.json()}")
+            resp.raise_for_status()
+            _logger.info("*************************************** PDF subido a Alfresco: %s", resp.json())
         except Exception as e:
-            _logger.error(f"Error subiendo PDF a Alfresco: {e}")
+            _logger.error("********************  Error subiendo PDF a Alfresco: %s", e)
 
         return pdf_content, report_type

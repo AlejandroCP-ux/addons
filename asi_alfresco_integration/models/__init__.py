@@ -1,1 +1,1 @@
-from . import alfresco_config, alfresco_report_mapping, report_override
+from . import res_config_settings, alfresco_report_mapping, report_override

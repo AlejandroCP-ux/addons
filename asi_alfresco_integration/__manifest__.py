@@ -7,7 +7,7 @@
     'website': 'https://www.asisurl.cu',
     "depends": ["base", "web"],
     "data": [
-        "views/alfresco_config_views.xml",
+        "views/res_config_settings_views.xml",
         "views/alfresco_report_mapping_views.xml",
         "security/ir.model.access.csv"
     ],

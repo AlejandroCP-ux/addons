@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="alfresco_integration_res_config_settings_view" model="ir.ui.view">
+        <field name="name">res.config.settings.form.inherit.alfresco.integration</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[hasclass('settings')]" position="inside">
+                <div class="app_settings_block"
+                     data-string="Integración con Alfresco"
+                     string="Integración con Alfresco"
+                     data-key="asi_alfresco_integration">
+
+                    <h2>Conexión con Alfresco</h2>
+                    <div class="row mt16">
+                        <div class="col-12 col-lg-6">
+                            <div class="o_setting_left_pane">
+                                <h3>Configuración del Servidor</h3>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <field name="alfresco_server_url"
+                                       string="URL del Servidor Alfresco"/>
+                                <field name="alfresco_username"
+                                       string="Usuario de Alfresco"/>
+                                <field name="alfresco_password"
+                                       string="Contraseña de Alfresco"
+                                       password="True"/>
+                                <field name="alfresco_repo_id"
+                                       string="ID del Repositorio Raíz"/>
+
+                                <div class="mt16">
+                                    <button name="action_test_alfresco_connection"
+                                            type="object"
+                                            string="Probar Conexión"
+                                            class="btn btn-secondary"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>

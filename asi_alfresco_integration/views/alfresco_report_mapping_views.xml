@@ -1,4 +1,18 @@
 <odoo>
+    <!-- Vista tree para el mapeo de reportes -->
+    <record id="view_alfresco_report_mapping_tree" model="ir.ui.view">
+        <field name="name">alfresco.report.mapping.tree</field>
+        <field name="model">alfresco.report.mapping</field>
+        <field name="arch" type="xml">
+            <tree string="Mapeo de Reportes a Alfresco">
+                <field name="report_id"/>
+                <field name="folder_name" string="Nombre de Carpeta"/>
+                <field name="folder_node_id" string="ID de Carpeta"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vista form existente (no cambia) -->
     <record id="view_alfresco_report_mapping_form" model="ir.ui.view">
         <field name="name">alfresco.report.mapping.form</field>
         <field name="model">alfresco.report.mapping</field>
@@ -16,11 +30,18 @@
         </field>
     </record>
 
+    <!-- Acción para abrir tree + form -->
     <record id="action_alfresco_report_mapping" model="ir.actions.act_window">
         <field name="name">Mapeo de Reportes</field>
         <field name="res_model">alfresco.report.mapping</field>
         <field name="view_mode">tree,form</field>
-    </record>
+        <field name="view_id" ref="view_alfresco_report_mapping_tree"/>
+    </record> 
 
-    <menuitem id="menu_alfresco_mapping" name="Mapeo de Reportes" parent="menu_alfresco_root" action="action_alfresco_report_mapping"/>
+    <!-- Menús -->
+    <menuitem id="menu_alfresco_root" name="Alfresco"/>
+    <menuitem id="menu_alfresco_mapping"
+              name="Mapeo de Reportes"
+              parent="menu_alfresco_root"
+              action="action_alfresco_report_mapping"/>
 </odoo>
