@@ -8,10 +8,10 @@ _logger = logging.getLogger(__name__)
 class ResConfigSettings(models.TransientModel):
     _inherit = "res.config.settings"
 
-    alfresco_server_url = fields.Char(string="URL del Servidor Alfresco", config_parameter="asi_alfresco_integration.alfresco_server_url")
+    alfresco_server_url = fields.Char(string="URL", config_parameter="asi_alfresco_integration.alfresco_server_url")
     alfresco_username = fields.Char(string="Usuario", config_parameter="asi_alfresco_integration.alfresco_username")
     alfresco_password = fields.Char(string="Contraseña",  config_parameter="asi_alfresco_integration.alfresco_password")
-    alfresco_repo_id = fields.Char(string="ID del repositorio Alfresco",  config_parameter="asi_alfresco_integration.alfresco_repo_id")
+    alfresco_repo_id = fields.Char(string="Repo ID",  config_parameter="asi_alfresco_integration.alfresco_repo_id")
 
   
     def set_values(self):

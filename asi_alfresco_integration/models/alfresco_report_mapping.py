@@ -62,4 +62,5 @@ class AlfrescoReportMapping(models.Model):
 
     def _set_folder_options(self):
         folders = self.get_alfresco_folders()
+        _logger.error("********************************* --------------Se ejecuta %s,",folders)
         self._fields['folder_selection'].selection = folders
