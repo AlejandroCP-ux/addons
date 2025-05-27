@@ -1,0 +1,138 @@
+ 
+ 
+==== Archivo: C:\Users\javier\Documents\GitHub\addons_antasi\asi_alfresco_integration\security\ir.model.access.csv ==== 
+ 
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_alfresco_report_mapping,access_alfresco_report_mapping,model_alfresco_report_mapping,,1,1,1,1
+ 
+ 
+==== Archivo: C:\Users\javier\Documents\GitHub\addons_antasi\asi_alfresco_integration\views\alfresco_config_views.xml ==== 
+ 
+<odoo>
+    <record id="view_alfresco_config_form" model="ir.ui.view">
+        <field name="name">alfresco.config.form</field>
+        <field name="model">alfresco.config</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="server_url"/>
+                        <field name="username"/>
+                        <field name="password" password="True"/>
+                        <field name="repo_id"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_alfresco_config" model="ir.actions.act_window">
+        <field name="name">Configuración Alfresco</field>
+        <field name="res_model">alfresco.config</field>
+        <field name="view_mode">form</field>
+    </record>
+
+    <menuitem id="menu_alfresco_root" name="Alfresco"/>
+    <menuitem id="menu_alfresco_config" name="Configuración" parent="menu_alfresco_root" action="action_alfresco_config"/>
+</odoo>
+ 
+ 
+==== Archivo: C:\Users\javier\Documents\GitHub\addons_antasi\asi_alfresco_integration\views\alfresco_report_mapping_views.xml ==== 
+ 
+<odoo>
+    <!-- Vista tree para el mapeo de reportes -->
+    <record id="view_alfresco_report_mapping_tree" model="ir.ui.view">
+        <field name="name">alfresco.report.mapping.tree</field>
+        <field name="model">alfresco.report.mapping</field>
+        <field name="arch" type="xml">
+            <tree string="Mapeo de Reportes a Alfresco">
+                <field name="report_id"/>
+                <field name="folder_name" string="Nombre de Carpeta"/>
+                <field name="folder_node_id" string="ID de Carpeta"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vista form existente (no cambia) -->
+    <record id="view_alfresco_report_mapping_form" model="ir.ui.view">
+        <field name="name">alfresco.report.mapping.form</field>
+        <field name="model">alfresco.report.mapping</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="report_id"/>
+                        <field name="folder_selection"/>
+                        <field name="folder_name" invisible="1"/>
+                        <field name="folder_node_id" invisible="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Acción para abrir tree + form -->
+    <record id="action_alfresco_report_mapping" model="ir.actions.act_window">
+        <field name="name">Mapeo de Reportes</field>
+        <field name="res_model">alfresco.report.mapping</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="view_alfresco_report_mapping_tree"/>
+    </record> 
+
+    <!-- Menús -->
+    <menuitem id="menu_alfresco_root" name="Alfresco"/>
+    <menuitem id="menu_alfresco_mapping"
+              name="Mapeo de Reportes"
+              parent="menu_alfresco_root"
+              action="action_alfresco_report_mapping"/>
+</odoo>
+ 
+ 
+==== Archivo: C:\Users\javier\Documents\GitHub\addons_antasi\asi_alfresco_integration\views\res_config_settings_views.xml ==== 
+ 
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="alfresco_res_config_settings_view" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.alfresco.integration.inherit</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[hasclass('settings')]" position="inside">
+                <div class="app_settings_block" string="Alfresco" data-key="asi_alfresco_integration">
+                    <h2>Integración con Alfresco</h2>
+
+                    <div class="row">
+                        <!-- Columna izquierda -->
+                        <div class="col-lg-6">
+                            <div class="o_setting_box">
+                                    <label  string="Base URL: " for="alfresco_server_url"/>
+                                    <field name="alfresco_server_url"/>
+                                    <p></p>
+                                     <label  string="Repo ID: " for="alfresco_repo_id"/>
+                                    <field name="alfresco_repo_id"/>
+                               
+                            </div>
+                        </div>
+
+                        <!-- Columna derecha -->
+                        <div class="col-lg-6">
+                            <div class="o_setting_box">
+                                <div class="o_setting_right_pane">
+                                    <label  string="User Name: " for="alfresco_username"/>
+                                    <field name="alfresco_username"/><p></p>
+                                    <label  string="Password: " for="alfresco_password"/>
+                                    <field name="alfresco_password" password="True"/><p></p>
+                                    <button name="action_test_alfresco_connection"
+                                            type="object"
+                                            string="Test connection"
+                                            class="btn btn-secondary mt16"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>
+ 

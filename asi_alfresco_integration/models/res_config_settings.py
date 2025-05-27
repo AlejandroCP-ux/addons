@@ -1,4 +1,4 @@
-from odoo import models, fields, api
+from odoo import models, fields, api, _
 import requests
 from odoo.exceptions import UserError
 import logging
@@ -56,3 +56,33 @@ class ResConfigSettings(models.TransientModel):
         except Exception as e:
             _logger.error("Error al conectar con Alfresco: %s", e)
             raise UserError(f"Error al conectar con Alfresco:\n{e}")        
+            
+
+    def action_sync_alfresco_users(self):
+        """Sincroniza todos los usuarios de Odoo con Alfresco"""
+        try:
+            # Obtener todos los usuarios activos (no compartidos)
+            users = self.env['res.users'].search([
+                ('active', '=', True),
+                ('share', '=', False)
+            ])
+            
+            if not users:
+                raise UserError(_("No hay usuarios activos para sincronizar"))
+            
+            # Ejecutar la sincronización usando el método existente
+            result = users.create_alfresco_user()
+            
+            # Mostrar notificación
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': 'Proceso finalizado',
+                    'sticky': False,
+                }
+                }
+                
+        except Exception as e:
+            _logger.error("Error en sincronización: %s", str(e))                                   
+            raise UserError(_("Error durante la sincronización: %s") % str(e))            
