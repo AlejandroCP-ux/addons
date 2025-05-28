@@ -29,7 +29,10 @@ class Report(models.Model):
         _logger.warning(" ************ user: %s ****  PAss %s",user,pwd )
         # Construimos el nombre de archivo
         filename = f"{report_ref}_{'_'.join(map(str, res_ids or []))}.pdf"
-
+        for record in self:
+          filename = f"{record.name}.pdf"
+          _logger.info("**************** record  %s **************************** ",record)
+        
         try:
             endpoint = (
                 f"{url}/alfresco/api/-default-/public/"
@@ -44,7 +47,7 @@ class Report(models.Model):
                 auth=(user, pwd),
             )
             resp.raise_for_status()
-            _logger.info("*************************************** PDF subido a Alfresco: %s", resp.json())
+            _logger.info("***********%s **************************** PDF subido a Alfresco: %s",filename, resp.json())
         except Exception as e:
             _logger.error("********************  Error subiendo PDF a Alfresco: %s", e)
 
