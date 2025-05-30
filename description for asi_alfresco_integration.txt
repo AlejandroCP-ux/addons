@@ -26,7 +26,7 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_alfresco_report_mapping,access_alfresco_report_mapping,model_alfresco_report_mapping,,1,1,1,1
 access_alfresco_folder,access_alfresco_folder,model_alfresco_folder,,1,1,1,1
- 
+access_alfresco_file,alfresco.file,model_alfresco_file,,1,1,1,1 
  
 ==== Archivo: C:\Users\javier\Documents\GitHub\addons_antasi\asi_alfresco_integration\views\alfresco_config_views.xml ==== 
  
@@ -109,6 +109,56 @@ access_alfresco_folder,access_alfresco_folder,model_alfresco_folder,,1,1,1,1
               action="action_alfresco_report_mapping"/>
 </odoo>
  
+ 
+==== Archivo: C:\Users\javier\Documents\GitHub\addons_antasi\asi_alfresco_integration\views\alfresco_views.xml ==== 
+ 
+<odoo>
+    <record id="view_alfresco_folder_tree" model="ir.ui.view">
+        <field name="name">alfresco.folder.tree</field>
+        <field name="model">alfresco.folder</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_alfresco_folder_form" model="ir.ui.view">
+        <field name="name">alfresco.folder.form</field>
+        <field name="model">alfresco.folder</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_open_subfolders" type="object" class="oe_stat_button" icon="fa-folder">
+                        <field name="subfolder_count" widget="statinfo" string="Subcarpetas"/>
+                    </button>
+                    <button name="action_open_files" type="object" class="oe_stat_button" icon="fa-file">
+                        <field name="file_count" widget="statinfo" string="Archivos"/>
+                    </button>
+                </header>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="node_id"/>
+                        <field name="parent_id"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_alfresco_folders" model="ir.actions.act_window">
+        <field name="name">Carpetas Alfresco</field>
+        <field name="res_model">alfresco.folder</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_alfresco_root" name="Alfresco"/>
+    <menuitem id="menu_alfresco_folders"
+              name="Carpetas"
+              parent="menu_alfresco_root"
+              action="action_alfresco_folders"/>
+</odoo> 
  
 ==== Archivo: C:\Users\javier\Documents\GitHub\addons_antasi\asi_alfresco_integration\views\res_config_settings_views.xml ==== 
  

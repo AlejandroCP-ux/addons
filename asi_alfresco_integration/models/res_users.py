@@ -54,7 +54,7 @@ class ResUsers(models.Model):
         name_parts = user.name.split(' ', 1)
         first_name = name_parts[0] or "Nombre"
         last_name = name_parts[1] if len(name_parts) > 1 else "Apellido"
-        _logger.info("********************************************************* *******************************   Tratando de crear %s", user.login)
+        _logger.info("*********   Tratando de crear %s", user.login)
         return {
             "id": user.login,
             "firstName": first_name,
