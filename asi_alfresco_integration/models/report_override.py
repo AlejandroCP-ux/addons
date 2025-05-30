@@ -4,45 +4,63 @@ import re
 import json
 from odoo import models
 from datetime import datetime
+from io import BytesIO
+
+
 _logger = logging.getLogger(__name__)
- 
+
+
 class Report(models.Model):
     _inherit = 'ir.actions.report'
 
+
     def _render_qweb_pdf(self, report_ref, res_ids=None, data=None, **kwargs):
-        # Llamamos al super con los mismos nombres de parámetro
-        pdf_content, report_type = super(Report, self)._render_qweb_pdf(
+        pdf_content, report_type = super()._render_qweb_pdf(
             report_ref, res_ids=res_ids, data=data, **kwargs
         )
 
-        # Obtenemos el mapeo
         mapping = self.env['alfresco.report.mapping'].search([
             ('report_id.report_name', '=', report_ref),
         ], limit=1)
 
-        # Si no hay URL o mapeo, devolvemos el PDF tal cual
-        RCS = self.env['ir.config_parameter'].sudo()
-        url = RCS.get_param('asi_alfresco_integration.alfresco_server_url')
-        user = RCS.get_param('asi_alfresco_integration.alfresco_username')
-        pwd  = RCS.get_param('asi_alfresco_integration.alfresco_password')
+        config = self.env['ir.config_parameter'].sudo()
+        url = config.get_param('asi_alfresco_integration.alfresco_server_url')
+        user = config.get_param('asi_alfresco_integration.alfresco_username')
+        pwd = config.get_param('asi_alfresco_integration.alfresco_password')
+
         if not url or not mapping:
-            _logger.warning("No hay configuración o mapeo para subir a Alfresco.")
+            _logger.warning("Falta configuración o mapeo para Alfresco.")
             return pdf_content, report_type
-        
-        filename = False
-        metadata = {}
-        properties = {}  # Inicializar propiedades
-        
-        ###################################Facturas#####################################################
-        # 1. Verificar si es un reporte de factura (account.move)
+
+        filename, properties = self._build_metadata(report_ref, res_ids)
+        if not filename:
+            filename = f"{report_ref}_{'_'.join(map(str, res_ids or []))}.pdf"
+
+        try:
+            node_id = self._find_existing_file(url, user, pwd, filename, mapping.folder_node_id)
+            if node_id:
+                # Comparar contenido. Temporalmente obvio esta opcion y siempre sube una version porque no tenemos la herramienta para comparar pdfs
+                existing_content = self._download_existing_content(url, user, pwd, node_id)
+                if  True:
+                    self._update_existing_file(url, user, pwd, node_id, pdf_content, filename)
+                else:
+                    _logger.info("El contenido es idéntico. No se sube nueva versión.")
+            else:
+                self._upload_new_file(url, user, pwd, mapping.folder_node_id, filename, pdf_content, properties)
+
+        except Exception as e:
+            _logger.error("Error durante subida a Alfresco: %s", e)
+
+        return pdf_content, report_type
+
+    def _build_metadata(self, report_ref, res_ids):
+        filename = None
+        properties = {}
         report = self._get_report(report_ref)
         if report.model == 'account.move' and res_ids:
-            # 2. Obtener el registro de la factura
             invoice = self.env['account.move'].browse(res_ids[0])
             if invoice.exists():
-                # 3. Usar el nombre de la factura y limpiar caracteres
                 filename = re.sub(r'[\\/*?:"<>|]', '_', invoice.name) + ".pdf"
-                
                 if invoice.partner_id:
                     properties = {
                         "cliente_id": str(invoice.partner_id.id),
@@ -53,104 +71,53 @@ class Report(models.Model):
                         "factura_total": float(invoice.amount_total),
                         "fecha_subida": datetime.now().isoformat()
                     }
-        # Si no es factura o no se pudo obtener el nombre, usar nombre genérico
-        if not filename:
-            filename = f"{report_ref}_{'_'.join(map(str, res_ids or []))}.pdf"
-        ################################################################################################
-        
-        try:
-            # Intentar crear el documento por primera vez
-            endpoint = (
-                f"{url}/alfresco/api/-default-/public/"
-                f"alfresco/versions/1/nodes/{mapping.folder_node_id}/children"
-            )
-            # ESPECIFICAR TIPO MIME Y ENCABEZADOS
-            files = {'filedata': (filename, pdf_content, 'application/pdf')}
-            params = {'autoRename': 'true'}
-            json_data = {
-                "name": filename,
-                "nodeType": "cm:content",
-                "properties": properties
-            }
-            resp = requests.post(
-                endpoint,
-                files=files,
-                params=params,
-                data={"json": json.dumps(json_data)},
-                auth=(user, pwd),
-                # AÑADIR ENCABEZADO EXPLÍCITO
-                headers={'Content-Type': 'multipart/form-data'}
-            )
-            resp.raise_for_status()
-            _logger.info(f"Documento creado: {filename}")
-            
-        except requests.exceptions.HTTPError as e:
-            if e.response.status_code == 409:
-                # Documento ya existe, actualizar versión
-                try:
-                    # Buscar el documento existente por nombre
-                    list_url = f"{url}/alfresco/api/-default-/public/alfresco/versions/1/nodes/{mapping.folder_node_id}/children"
-                    list_resp = requests.get(
-                        list_url,
-                        auth=(user, pwd),
-                        headers={'Content-Type': 'application/json'}
-                    )
-                    list_resp.raise_for_status()
-                    
-                    # Buscar el documento por nombre
-                    node_id = None
-                    for entry in list_resp.json().get('list', {}).get('entries', []):
-                        if entry['entry'].get('name') == filename:
-                            node_id = entry['entry']['id']
-                            break
-                    
-                    if not node_id:
-                        _logger.error("Documento existente no encontrado para actualizar")
-                        return pdf_content, report_type
-                    
-                    # Actualizar contenido del documento usando el endpoint específico
-                    update_url = f"{url}/alfresco/api/-default-/public/alfresco/versions/1/nodes/{node_id}/content"
-                    
-                    # SOLUCIÓN AL ERROR 415 - ESPECIFICAR TIPO MIME Y ENCABEZADOS
-                    update_resp = requests.put(
-                        update_url,
-                        files={'filedata': (filename, pdf_content, 'application/pdf')},
-                        auth=(user, pwd),
-                        # ENCABEZADO CRÍTICO PARA EVITAR ERROR 415
-                        headers={'Content-Type': 'multipart/form-data'}
-                    )
-                    update_resp.raise_for_status()
-                    
-                    # Actualizar propiedades del documento
-                    props_url = f"{url}/alfresco/api/-default-/public/alfresco/versions/1/nodes/{node_id}"
-                    props_resp = requests.put(
-                        props_url,
-                        json={"properties": properties},
-                        auth=(user, pwd),
-                        headers={'Content-Type': 'application/json'}
-                    )
-                    props_resp.raise_for_status()
-                    
-                    _logger.info(f"Documento actualizado: {filename} (ID: {node_id})")
-                    
-                except requests.exceptions.HTTPError as update_http_error:
-                    # Manejo específico de errores HTTP en actualización
-                    if update_http_error.response.status_code == 415:
-                        _logger.error("ERROR 415: Tipo de contenido no soportado")
-                        _logger.error(f"URL: {update_url}")
-                        _logger.error(f"Encabezados enviados: {update_http_error.request.headers}")
-                        _logger.error(f"Respuesta de Alfresco: {update_http_error.response.text}")
-                    else:
-                        _logger.error(f"Error HTTP {update_http_error.response.status_code} actualizando documento: {update_http_error.response.text}")
-                    
-                except Exception as update_error:
-                    _logger.error(f"**** Error actualizando documento existente: {update_error}")
-                    
-            else:
-                # Manejar otros errores HTTP
-                _logger.error(f"Error HTTP {e.response.status_code} subiendo PDF: {e.response.text}")
-                
-        except Exception as e:
-            _logger.error(f"Error general subiendo PDF a Alfresco: {str(e)}")
+        return filename, properties
 
-        return pdf_content, report_type
+    def _find_existing_file(self, url, user, pwd, filename, folder_node_id):
+        search_url = f"{url}/alfresco/api/-default-/public/search/versions/1/search"
+        query = {
+            "query": {
+                "language": "afts",
+                "query": f'cm:name:"{filename}" AND ANCESTOR:"workspace://SpacesStore/{folder_node_id}"'
+            },
+            "include": ["properties"],
+            "paging": {"maxItems": 1, "skipCount": 0}
+        }
+        response = requests.post(
+            search_url,
+            headers={"Content-Type": "application/json"},
+            data=json.dumps(query),
+            auth=(user, pwd),
+        )
+        response.raise_for_status()
+        results = response.json().get('list', {}).get('entries', [])
+        return results[0]['entry']['id'] if results else None
+
+    def _download_existing_content(self, url, user, pwd, node_id):
+        download_url = f"{url}/alfresco/api/-default-/public/alfresco/versions/1/nodes/{node_id}/content"
+        response = requests.get(download_url, auth=(user, pwd))
+        response.raise_for_status()
+        return response.content
+
+    def _upload_new_file(self, url, user, pwd, folder_node_id, filename, pdf_content, properties):
+        endpoint = f"{url}/alfresco/api/-default-/public/alfresco/versions/1/nodes/{folder_node_id}/children"
+        files = {'filedata': (filename, pdf_content)}
+        data = {"json": json.dumps({
+            "name": filename,
+            "nodeType": "cm:content",
+            "properties": properties
+        })}
+        response = requests.post(endpoint, files=files, data=data, params={'autoRename': 'true'}, auth=(user, pwd))
+        response.raise_for_status()
+        _logger.info("Archivo nuevo subido a Alfresco: %s", filename)
+
+    def _update_existing_file(self, url, user, pwd, node_id, pdf_content, filename):
+        update_url = f"{url}/alfresco/api/-default-/public/alfresco/versions/1/nodes/{node_id}/content"
+        response = requests.put(
+            update_url,
+            headers={"Content-Type": "application/pdf"},
+            data=pdf_content,
+            auth=(user, pwd),
+        )
+        response.raise_for_status()
+        _logger.info("Versión actualizada correctamente para el archivo %s", filename)

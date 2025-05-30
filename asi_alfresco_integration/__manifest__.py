@@ -9,6 +9,7 @@
     "data": [
         "views/res_config_settings_views.xml",
         "views/alfresco_report_mapping_views.xml",
+        "views/alfresco_views.xml",
         "security/ir.model.access.csv",
         'data/cron_sync_alfresco.xml',
     ],

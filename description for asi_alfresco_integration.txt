@@ -1,9 +1,31 @@
  
  
+==== Archivo: C:\Users\javier\Documents\GitHub\addons_antasi\asi_alfresco_integration\data\cron_sync_alfresco.xml ==== 
+ 
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+  <data noupdate="1">
+    <!-- Cron que lanza cada hora la sincronización de carpetas -->
+    <record id="ir_cron_sync_alfresco_folders" model="ir.cron">
+      <field name="name">Sync Alfresco Folders</field>
+      <field name="model_id" ref="model_alfresco_folder"/>
+      <field name="state">code</field>
+      <field name="code">model.sync_from_alfresco()</field>
+      <field name="interval_number">1</field>
+      <field name="interval_type">hours</field>
+      <field name="numbercall">-1</field>
+      <field name="active">True</field>
+      <field name="user_id" ref="base.user_root"/>  <!-- o el usuario Odoo que prefieras -->
+    </record>
+  </data>
+</odoo>
+ 
+ 
 ==== Archivo: C:\Users\javier\Documents\GitHub\addons_antasi\asi_alfresco_integration\security\ir.model.access.csv ==== 
  
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_alfresco_report_mapping,access_alfresco_report_mapping,model_alfresco_report_mapping,,1,1,1,1
+access_alfresco_folder,access_alfresco_folder,model_alfresco_folder,,1,1,1,1
  
  
 ==== Archivo: C:\Users\javier\Documents\GitHub\addons_antasi\asi_alfresco_integration\views\alfresco_config_views.xml ==== 
@@ -125,7 +147,11 @@ access_alfresco_report_mapping,access_alfresco_report_mapping,model_alfresco_rep
                                     <button name="action_test_alfresco_connection"
                                             type="object"
                                             string="Test connection"
-                                            class="btn btn-secondary mt16"/>
+                                            class="btn btn-secondary mt16"/>                                            
+                                    <button name="action_sync_alfresco_users"
+                                            type="object"
+                                            string="Sincronizar usuarios con Alfresco"
+                                            class="btn btn-secondary mt16"/>        
                                 </div>
                             </div>
                         </div>
