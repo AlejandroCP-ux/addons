@@ -5,14 +5,13 @@ import json
 from odoo import models
 from datetime import datetime
 from io import BytesIO
-
+from PyPDF2 import PdfReader
 
 _logger = logging.getLogger(__name__)
 
 
 class Report(models.Model):
     _inherit = 'ir.actions.report'
-
 
     def _render_qweb_pdf(self, report_ref, res_ids=None, data=None, **kwargs):
         pdf_content, report_type = super()._render_qweb_pdf(
@@ -39,12 +38,14 @@ class Report(models.Model):
         try:
             node_id = self._find_existing_file(url, user, pwd, filename, mapping.folder_node_id)
             if node_id:
-                # Comparar contenido. Temporalmente obvio esta opcion y siempre sube una version porque no tenemos la herramienta para comparar pdfs
                 existing_content = self._download_existing_content(url, user, pwd, node_id)
-                if  True:
+                existing_text = self._extract_text_from_pdf(existing_content)
+                new_text = self._extract_text_from_pdf(pdf_content)
+
+                if existing_text != new_text:
                     self._update_existing_file(url, user, pwd, node_id, pdf_content, filename)
                 else:
-                    _logger.info("El contenido es idéntico. No se sube nueva versión.")
+                    _logger.info("El contenido del PDF no cambió. No se sube nueva versión.")
             else:
                 self._upload_new_file(url, user, pwd, mapping.folder_node_id, filename, pdf_content, properties)
 
@@ -120,4 +121,15 @@ class Report(models.Model):
             auth=(user, pwd),
         )
         response.raise_for_status()
-        _logger.info("Versión actualizada correctamente para el archivo %s", filename)
+        _logger.info("Version actualizada correctamente para el archivo %s", filename)
+
+    def _extract_text_from_pdf(self, pdf_content):
+        try:
+            reader = PdfReader(BytesIO(pdf_content))
+            text = ''
+            for page in reader.pages:
+                text += page.extract_text() or ''
+            return text.strip()
+        except Exception as e:
+            _logger.error("Error extrayendo texto del PDF: %s", e)
+            return ''
