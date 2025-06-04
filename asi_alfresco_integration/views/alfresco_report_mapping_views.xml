@@ -6,8 +6,7 @@
         <field name="arch" type="xml">
             <tree string="Mapeo de Reportes a Alfresco">
                 <field name="report_id"/>
-                <field name="folder_name" string="Nombre de Carpeta"/>
-                <field name="folder_node_id" string="ID de Carpeta"/>
+                <field name="folder_id"/>
             </tree>
         </field>
     </record>
@@ -21,9 +20,7 @@
                 <sheet>
                     <group>
                         <field name="report_id"/>
-                        <field name="folder_selection"/>
-                        <field name="folder_name" invisible="1"/>
-                        <field name="folder_node_id" invisible="1"/>
+                        <field name="folder_id"/>
                     </group>
                 </sheet>
             </form>

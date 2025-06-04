@@ -9,46 +9,12 @@ class AlfrescoReportMapping(models.Model):
     _name = 'alfresco.report.mapping'
     _description = 'Mapeo de reportes a carpetas Alfresco'
 
-    report_id = fields.Many2one('ir.actions.report', string="Reporte", required=True)
-    folder_selection = fields.Selection(
-        string="Seleccionar Carpeta",
-        selection=lambda self: self.env['alfresco.folder'].search([], order='complete_path').mapped(lambda r: (r.node_id, r.complete_path)),
-        required=True
-    )
-    folder_node_id = fields.Char(
-        compute='_compute_folder_info',
-        store=True,
-        string="ID de Carpeta en Alfresco",
-        readonly=True
-    )
-    folder_name = fields.Char(
-        compute='_compute_folder_info',
-        store=True,
-        string="Nombre de Carpeta",
-        readonly=True
-    )
+    report_id = fields.Many2one('ir.actions.report', string='Reporte')
+    folder_id = fields.Many2one('alfresco.folder', string='Carpeta Alfresco')
 
-    @api.onchange('report_id')
-    def _onchange_report_id(self):
-        self._set_folder_options()
+    folder_name = fields.Char(string='Nombre de Carpeta', compute='_compute_folder_info', store=True)
+    folder_node_id = fields.Char(string='ID de Carpeta', compute='_compute_folder_info', store=True)
 
-    @api.depends('folder_selection')
-    def _compute_folder_info(self):
-        folders = dict(self.env['alfresco.folder'].search([], order='complete_path').mapped(lambda r: (r.node_id, r.complete_path)))
-        for rec in self:
-            if rec.folder_selection:
-                rec.folder_node_id = rec.folder_selection
-                rec.folder_name = folders.get(rec.folder_selection)
-            else:
-                rec.folder_node_id = False
-                rec.folder_name = False
-
-    def _set_folder_options(self):
-        """
-        Refresca las opciones del campo folder_selection desde el modelo local.
-        """
-        options = self.env['alfresco.folder'].search([], order='complete_path').mapped(lambda r: (r.node_id, r.complete_path))
-        self._fields['folder_selection'].selection = options
 
     @api.model
     def _alfresco_get_children(self, repo_id, node_id, skip=0, max_items=100):

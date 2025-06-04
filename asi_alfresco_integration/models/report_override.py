@@ -5,7 +5,7 @@ import json
 from odoo import models
 from datetime import datetime
 from io import BytesIO
-from PyPDF2 import PdfReader
+#from PyPDF2 import PdfReader
 
 _logger = logging.getLogger(__name__)
 
@@ -42,7 +42,7 @@ class Report(models.Model):
                 existing_text = self._extract_text_from_pdf(existing_content)
                 new_text = self._extract_text_from_pdf(pdf_content)
 
-                if existing_text != new_text:
+                if existing_text != new_text and False:
                     self._update_existing_file(url, user, pwd, node_id, pdf_content, filename)
                 else:
                     _logger.info("El contenido del PDF no cambió. No se sube nueva versión.")
@@ -125,11 +125,12 @@ class Report(models.Model):
 
     def _extract_text_from_pdf(self, pdf_content):
         try:
-            reader = PdfReader(BytesIO(pdf_content))
+            reader = '' #PdfReader(BytesIO(pdf_content))
             text = ''
             for page in reader.pages:
                 text += page.extract_text() or ''
             return text.strip()
         except Exception as e:
             _logger.error("Error extrayendo texto del PDF: %s", e)
-            return ''
+            return 
+        return ''    
