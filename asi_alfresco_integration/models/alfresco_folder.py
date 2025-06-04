@@ -8,6 +8,10 @@ _logger = logging.getLogger(__name__)
 class AlfrescoFolder(models.Model):
     _name = 'alfresco.folder'
     _description = 'Carpeta de Alfresco'
+    
+    # Indica a Odoo que 'parent_id' es el campo padre en una estructura de árbol
+    _parent_name = 'parent_id'
+    _parent_store = True
     _order = 'complete_path'
 
     name = fields.Char(string='Nombre', required=True)

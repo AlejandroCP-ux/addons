@@ -3,8 +3,16 @@
         <field name="name">alfresco.folder.tree</field>
         <field name="model">alfresco.folder</field>
         <field name="arch" type="xml">
-            <tree>
+            <tree string="Carpetas Alfresco"  parent="parent_id">
+                <!-- Odoo detecta automáticamente parent_id y child_ids
+                     gracias a _parent_name = 'parent_id' en el modelo  -->
                 <field name="name"/>
+                <field name="complete_path"/>
+                <field name="node_id"/>
+                <field name="subfolder_count"/>
+                <field name="file_count"/>
+                <!-- parent_id no es necesario mostrarlo, se usa internamente -->
+                <field name="parent_id" invisible="1"/>
             </tree>
         </field>
     </record>

@@ -12,10 +12,6 @@ class AlfrescoReportMapping(models.Model):
     report_id = fields.Many2one('ir.actions.report', string='Reporte')
     folder_id = fields.Many2one('alfresco.folder', string='Carpeta Alfresco')
 
-    folder_name = fields.Char(string='Nombre de Carpeta', compute='_compute_folder_info', store=True)
-    folder_node_id = fields.Char(string='ID de Carpeta', compute='_compute_folder_info', store=True)
-
-
     @api.model
     def _alfresco_get_children(self, repo_id, node_id, skip=0, max_items=100):
         RCS = self.env['ir.config_parameter'].sudo()
