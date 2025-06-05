@@ -17,6 +17,7 @@ class AlfrescoFolder(models.Model):
     name = fields.Char(string='Nombre', required=True)
     node_id = fields.Char(string='Node ID', required=True, index=True)
     parent_id = fields.Many2one('alfresco.folder', string='Carpeta Padre', ondelete='cascade')
+    parent_path = fields.Char(index=True)  # <-- CAMPO REQUERIDO
     complete_path = fields.Char(string='Ruta completa', compute='_compute_complete_path', store=True)
     child_ids = fields.One2many('alfresco.folder', 'parent_id', string='Subcarpetas')
     file_ids = fields.One2many('alfresco.file', 'folder_id', string='Archivos')
