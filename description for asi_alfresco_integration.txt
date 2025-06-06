@@ -62,51 +62,28 @@ access_alfresco_file,alfresco.file,model_alfresco_file,,1,1,1,1
 ==== Archivo: C:\Users\javier\Documents\GitHub\addons_antasi\asi_alfresco_integration\views\alfresco_report_mapping_views.xml ==== 
  
 <odoo>
-    <!-- Vista tree para el mapeo de reportes -->
-    <record id="view_alfresco_report_mapping_tree" model="ir.ui.view">
-        <field name="name">alfresco.report.mapping.tree</field>
-        <field name="model">alfresco.report.mapping</field>
+
+    <record id="view_report_action_form_inherit" model="ir.ui.view">
+        <field name="name">ir.actions.report.form.inherit.alfresco</field>
+        <field name="model">ir.actions.report</field>
+        <!-- Cambiar la referencia a la vista correcta de reportes en Odoo 16 -->
+        <field name="inherit_id" ref="base.act_report_xml_view"/>
         <field name="arch" type="xml">
-            <tree string="Mapeo de Reportes a Alfresco">
-                <field name="report_id"/>
-                <field name="folder_name" string="Nombre de Carpeta"/>
-                <field name="folder_node_id" string="ID de Carpeta"/>
-            </tree>
+            <xpath expr="//field[@name='model']" position="after">
+                <field name="folder_id"/>
+                <field name="metadata_field_ids"
+                 widget="many2many_tags"
+                 options="{'no_create': True}"
+                 domain="[('model', '=', model)]"
+                 placeholder="Seleccionar campos de metadata"/>
+            </xpath>
         </field>
     </record>
-
-    <!-- Vista form existente (no cambia) -->
-    <record id="view_alfresco_report_mapping_form" model="ir.ui.view">
-        <field name="name">alfresco.report.mapping.form</field>
-        <field name="model">alfresco.report.mapping</field>
-        <field name="arch" type="xml">
-            <form>
-                <sheet>
-                    <group>
-                        <field name="report_id"/>
-                        <field name="folder_selection"/>
-                        <field name="folder_name" invisible="1"/>
-                        <field name="folder_node_id" invisible="1"/>
-                    </group>
-                </sheet>
-            </form>
-        </field>
-    </record>
-
-    <!-- Acción para abrir tree + form -->
-    <record id="action_alfresco_report_mapping" model="ir.actions.act_window">
-        <field name="name">Mapeo de Reportes</field>
-        <field name="res_model">alfresco.report.mapping</field>
-        <field name="view_mode">tree,form</field>
-        <field name="view_id" ref="view_alfresco_report_mapping_tree"/>
-    </record> 
+    
 
     <!-- Menús -->
     <menuitem id="menu_alfresco_root" name="Alfresco"/>
-    <menuitem id="menu_alfresco_mapping"
-              name="Mapeo de Reportes"
-              parent="menu_alfresco_root"
-              action="action_alfresco_report_mapping"/>
+   
 </odoo>
  
  
@@ -117,8 +94,16 @@ access_alfresco_file,alfresco.file,model_alfresco_file,,1,1,1,1
         <field name="name">alfresco.folder.tree</field>
         <field name="model">alfresco.folder</field>
         <field name="arch" type="xml">
-            <tree>
+            <tree string="Carpetas Alfresco" >
+                <!-- Odoo detecta automáticamente parent_id y child_ids
+                     gracias a _parent_name = 'parent_id' en el modelo  -->
                 <field name="name"/>
+                <field name="complete_path"/>
+                <field name="node_id"/>
+                <field name="subfolder_count"/>
+           
+                <!-- parent_id no es necesario mostrarlo, se usa internamente -->
+                <field name="parent_id" invisible="1"/>
             </tree>
         </field>
     </record>
@@ -132,9 +117,7 @@ access_alfresco_file,alfresco.file,model_alfresco_file,,1,1,1,1
                     <button name="action_open_subfolders" type="object" class="oe_stat_button" icon="fa-folder">
                         <field name="subfolder_count" widget="statinfo" string="Subcarpetas"/>
                     </button>
-                    <button name="action_open_files" type="object" class="oe_stat_button" icon="fa-file">
-                        <field name="file_count" widget="statinfo" string="Archivos"/>
-                    </button>
+                   
                 </header>
                 <sheet>
                     <group>

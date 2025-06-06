@@ -2,7 +2,7 @@ import logging
 import requests
 import re
 import json
-from odoo import models, fields, api
+from odoo import models, fields, api,_
 from datetime import datetime
 from io import BytesIO
 from pypdf import PdfReader
@@ -19,6 +19,15 @@ class Report(models.Model):
             string='Carpeta Alfresco',
             help="Carpeta destino en Alfresco para este reporte"
         )
+    metadata_field_ids = fields.Many2many(
+        'ir.model.fields',
+        'report_metadata_rel',
+        'report_id',
+        'field_id',
+        string='Campos de Metadata',
+        domain="[('model', '=', model)]"
+    )     
+        
     def _render_qweb_pdf(self, report_ref, res_ids=None, data=None, **kwargs):
         """
         Para cada ID en res_ids:
@@ -105,9 +114,12 @@ class Report(models.Model):
                     _logger.error("Error actualizando '%s' (node_id=%s): %s", filename, node_id, e_update)
             else:
                 try:
+                    # Construir metadatos para este registro
+                    _, metadata = self._build_metadata(report_ref, [rid])
+                    _logger.info("Metadatos asociados al reporte: %s  | Diccionario: %s", rid, metadata)
                     self._upload_new_file(
                         url, user, pwd, folder.node_id,
-                        filename, pdf_content_single, []
+                        filename, pdf_content_single, metadata
                     )
                     _logger.info("Nuevo PDF subido a Alfresco: %s", filename)
                 except Exception as e_upload:
@@ -142,37 +154,53 @@ class Report(models.Model):
 
     def _build_metadata(self, report_ref, res_ids):
         """
-        Construye metadatos (properties) para Alfresco segun el tipo de reporte.
-        Actualmente, si el modelo es 'account.move', agrega datos de factura.
+        Construye los metadatos a partir de los campos definidos en metadata_field_ids.
+        Cada campo es evaluado sobre el primer registro de res_ids.
         """
         filename = None
         properties = {}
         report = self._get_report(report_ref)
-
+    
         if not report or not res_ids:
             return None, {}
-
+    
         Model = self.env[report.model]
         record = Model.browse(res_ids[0])
         if not record.exists():
             return None, {}
-
-        # Generar metadatos especificos si es factura
-        if report.model == 'account.move':
-            properties = {
-                "cliente_id": str(record.partner_id.id),
-                "cliente_nombre": record.partner_id.name or "",
-                "cliente_nif": record.partner_id.vat or "",
-                "factura_numero": record.name,
-                "factura_fecha": record.invoice_date.isoformat() if record.invoice_date else "",
-                "factura_total": float(record.amount_total),
-                "fecha_subida": datetime.now().isoformat()
-            }
-
-        # Devolvemos None como filename aqui, porque normalmente _evaluate_report_filename
-        # ya construye el nombre. Pero devolvemos properties utiles.
+    
+        for field in report.metadata_field_ids:
+            field_name = field.name
+            value = getattr(record, field_name, None)
+    
+            if value is None:
+                properties[field_name] = ""
+            elif field.ttype in ['char', 'text', 'selection']:
+                properties[field_name] = str(value)
+            elif field.ttype == 'boolean':
+                properties[field_name] = bool(value)
+            elif field.ttype in ['integer', 'float', 'monetary']:
+                properties[field_name] = float(value)
+            elif field.ttype == 'date':
+                properties[field_name] = value.isoformat() if value else ""
+            elif field.ttype == 'datetime':
+                properties[field_name] = value.isoformat() if value else ""
+            elif field.ttype == 'many2one':
+                # Usamos el nombre legible o el ID
+                properties[field_name] = value.name or str(value.id)
+            elif field.ttype == 'many2many':
+                # Concatenar nombres o IDs separados por comas
+                properties[field_name] = ', '.join(v.name or str(v.id) for v in value)
+            else:
+                # Tipo no controlado, usar string
+                properties[field_name] = str(value)
+    
+        # También podemos agregar un timestamp de subida
+        properties['fecha_subida'] = datetime.now().isoformat()
+    
         return filename, properties
-
+    
+    
     def _find_existing_file(self, url, user, pwd, filename, folder_node_id):
         """
         Busca en Alfresco usando CMIS‐AFTS si ya existe un archivo con ese nombre
