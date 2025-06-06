@@ -1,66 +1,55 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-  <data>
-
-    <!-- Vista tipo tree JERÁRQUICA -->
-    <record id="view_alfresco_folder_tree_hierarchy" model="ir.ui.view">
-      <field name="name">alfresco.folder.tree.hierarchy</field>
-      <field name="model">alfresco.folder</field>
-      <field name="arch" type="xml">
-        <tree string="Carpetas Alfresco">
-          <!-- Campos MPTT que debe detectar el cliente web para mostrar ►/▼ -->
-          <field name="parent_left"  invisible="1"/>
-          <field name="parent_right" invisible="1"/>
-          <field name="parent_id"     invisible="1"/>
-
-          <!-- Campos a mostrar al usuario -->
-          <field name="name"/>
-          <field name="complete_path"/>
-          <field name="node_id"/>
-          <field name="subfolder_count"/>
-
-        </tree>
-      </field>
+    <record id="view_alfresco_folder_tree" model="ir.ui.view">
+        <field name="name">alfresco.folder.tree</field>
+        <field name="model">alfresco.folder</field>
+        <field name="arch" type="xml">
+            <tree string="Carpetas Alfresco" >
+                <!-- Odoo detecta automáticamente parent_id y child_ids
+                     gracias a _parent_name = 'parent_id' en el modelo  -->
+                <field name="name"/>
+                <field name="complete_path"/>
+                <field name="node_id"/>
+                <field name="subfolder_count"/>
+                <field name="file_count"/>
+                <!-- parent_id no es necesario mostrarlo, se usa internamente -->
+                <field name="parent_id" invisible="1"/>
+            </tree>
+        </field>
     </record>
 
-    <!-- (Opcional) Vista form si quieres editar registros -->
     <record id="view_alfresco_folder_form" model="ir.ui.view">
-      <field name="name">alfresco.folder.form</field>
-      <field name="model">alfresco.folder</field>
-      <field name="arch" type="xml">
-        <form string="Carpeta Alfresco">
-          <header>
-            <button name="action_open_subfolders" type="object" class="oe_stat_button" icon="fa-folder">
-              <field name="subfolder_count" widget="statinfo" string="Subcarpetas"/>
-            </button>
-           
-          </header>
-          <sheet>
-            <group>
-              <field name="name"/>
-              <field name="node_id"/>
-              <field name="parent_id"/>
-            </group>
-          </sheet>
-        </form>
-      </field>
+        <field name="name">alfresco.folder.form</field>
+        <field name="model">alfresco.folder</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_open_subfolders" type="object" class="oe_stat_button" icon="fa-folder">
+                        <field name="subfolder_count" widget="statinfo" string="Subcarpetas"/>
+                    </button>
+                    <button name="action_open_files" type="object" class="oe_stat_button" icon="fa-file">
+                        <field name="file_count" widget="statinfo" string="Archivos"/>
+                    </button>
+                </header>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="node_id"/>
+                        <field name="parent_id"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
     </record>
 
-    <!-- Acción que abre la vista árbol JERÁRQUICA -->
-    <record id="action_alfresco_folder_hierarchy" model="ir.actions.act_window">
-      <field name="name">Jerarquía de Carpetas</field>
-      <field name="res_model">alfresco.folder</field>
-      <!-- Con sólo "tree" (o "tree,form") el cliente usará los campos MPTT para mostrar jerarquía -->
-      <field name="view_mode">tree,form</field>
-      <field name="view_id"   ref="view_alfresco_folder_tree_hierarchy"/>
+    <record id="action_alfresco_folders" model="ir.actions.act_window">
+        <field name="name">Carpetas Alfresco</field>
+        <field name="res_model">alfresco.folder</field>
+        <field name="view_mode">tree,form</field>
     </record>
 
-    <!-- Menú -->
     <menuitem id="menu_alfresco_root" name="Alfresco"/>
     <menuitem id="menu_alfresco_folders"
-              name="Jerarquía de Carpetas"
+              name="Carpetas"
               parent="menu_alfresco_root"
-              action="action_alfresco_folder_hierarchy"/>
-
-  </data>
+              action="action_alfresco_folders"/>
 </odoo>
