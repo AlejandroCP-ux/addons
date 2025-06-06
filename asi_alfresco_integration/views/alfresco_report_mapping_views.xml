@@ -8,6 +8,11 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='model']" position="after">
                 <field name="folder_id"/>
+                <field name="metadata_field_ids"
+                 widget="many2many_tags"
+                 options="{'no_create': True}"
+                 domain="[('model', '=', model)]"
+                 placeholder="Seleccionar campos de metadata"/>
             </xpath>
         </field>
     </record>

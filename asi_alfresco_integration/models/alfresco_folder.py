@@ -1,6 +1,8 @@
 import requests
 import logging
+import time 
 from odoo import models, fields, api, _
+from odoo.exceptions import ValidationError
 from requests.exceptions import RequestException
 
 _logger = logging.getLogger(__name__)
@@ -8,34 +10,44 @@ _logger = logging.getLogger(__name__)
 class AlfrescoFolder(models.Model):
     _name = 'alfresco.folder'
     _description = 'Carpeta de Alfresco'
-    
-    # Indica a Odoo que 'parent_id' es el campo padre en una estructura de árbol
-    _parent_name = 'parent_id'
-    _parent_store = True
     _order = 'complete_path'
 
     name = fields.Char(string='Nombre', required=True)
     node_id = fields.Char(string='Node ID', required=True, index=True)
-    parent_id = fields.Many2one('alfresco.folder', string='Carpeta Padre', ondelete='cascade')
-    parent_path = fields.Char(index=True)  # <-- CAMPO REQUERIDO
+    parent_id = fields.Many2one('alfresco.folder', string='Carpeta Padre', ondelete='cascade', index=True)
+    parent_left = fields.Integer(index=True)
+    parent_right = fields.Integer(index=True) 
     complete_path = fields.Char(string='Ruta completa', compute='_compute_complete_path', store=True)
     child_ids = fields.One2many('alfresco.folder', 'parent_id', string='Subcarpetas')
-    file_ids = fields.One2many('alfresco.file', 'folder_id', string='Archivos')
-    file_count = fields.Integer(compute="_compute_counts")
-    subfolder_count = fields.Integer(compute="_compute_counts")
+    subfolder_count = fields.Integer(compute='_compute_counts', string='Subcarpetas')
+ 
+    _sql_constraints = [
+        ('unique_node_id', 'unique(node_id)', 'El Node ID debe ser unico.'),
+        ('unique_complete_path', 'unique(complete_path)', 'La ruta completa debe ser unica.')
+    ]
+
+    @api.constrains('node_id')
+    def _check_node_id(self):
+        pass
 
     @api.depends('name', 'parent_id.complete_path')
     def _compute_complete_path(self):
         for rec in self:
             if rec.parent_id:
-                rec.complete_path = f"{rec.parent_id.complete_path}/{rec.name}"
+                rec.complete_path = '/'.join(filter(None, [rec.parent_id.complete_path, rec.name]))
             else:
                 rec.complete_path = f"/{rec.name}"
 
+    @api.depends('child_ids')
     def _compute_counts(self):
+        grouped = self.env['alfresco.folder'].read_group(
+            [('parent_id', 'in', self.ids)],
+            ['parent_id'],
+            ['parent_id']
+        )
+        count_map = {group['parent_id'][0]: group['__count'] for group in grouped}
         for rec in self:
-            rec.file_count = len(rec.file_ids)
-            rec.subfolder_count = len(rec.child_ids)
+            rec.subfolder_count = count_map.get(rec.id, 0)
 
     def action_open_subfolders(self):
         self.ensure_one()
@@ -60,119 +72,87 @@ class AlfrescoFolder(models.Model):
         }
 
     @api.model
-    def sync_from_alfresco(self):
-        """
-        Sincroniza todas las carpetas desde Alfresco, recreando la jerarquia.
-        """
+    def sync_from_alfresco(self):       
         config = self.env['ir.config_parameter'].sudo()
         repo_id = config.get_param('asi_alfresco_integration.alfresco_repo_id')
         if not repo_id:
             _logger.warning("No se encuentra configurado el 'alfresco_repo_id'.")
             return
-
+    
         mapping_model = self.env['alfresco.report.mapping']
         try:
+            start_time = time.time()
             alf_folders = mapping_model._recursive_folders(repo_id, repo_id)
         except Exception as e:
             _logger.error(f"Error al obtener carpetas desde Alfresco: {e}")
             return
-
-        # Borrar carpetas existentes de forma segura
-        self.search([])._cascade_delete()
-
-        # Cache para evitar búsquedas repetidas
-        path_cache = {}
-
-        # Ordenar por profundidad (más padres antes que hijos)
-        for node_id, path in sorted(alf_folders, key=lambda x: x[1].count('/')):
+    
+        # Preparar estructuras
+        alfresco_nodes = {node_id: path for node_id, path in alf_folders}
+        odoo_folders = {rec.node_id: rec for rec in self.search([]) if rec.node_id}
+    
+        path_cache = {}  # path completo ? folder creado
+        name_parent_cache = {}  # (nombre, parent_id) ? folder
+    
+        # Proceso de creación/actualizacion
+        for node_id, path in sorted(alfresco_nodes.items(), key=lambda x: x[1].count('/')):
             segments = path.strip('/').split('/')
             parent = None
             current_path = ''
+    
             for i, segment in enumerate(segments):
                 current_path = f"{current_path}/{segment}"
+                is_last = i == len(segments) - 1
+    
                 if current_path in path_cache:
                     parent = path_cache[current_path]
                     continue
-
-                folder = self.sudo().search([('complete_path', '=', current_path)], limit=1)
-                if not folder:
-                    folder = self.sudo().create({
-                        'name': segment,
-                        'node_id': node_id if i == len(segments) - 1 else False,
-                        'parent_id': parent.id if parent else False
-                    })
-                    _logger.info(f"Carpeta creada: {folder.complete_path}")
+    
+                key = (segment, parent.id if parent else None)
+                folder = name_parent_cache.get(key)
+    
+                if is_last:
+                    # Si ya existe por node_id, verificamos si cambio de nombre o ubicacion
+                    existing = odoo_folders.get(node_id)
+                    if existing:
+                        expected_path = f"{parent.complete_path}/{segment}" if parent else f"/{segment}"
+                        if existing.complete_path != expected_path:
+                            _logger.info(f"Renombrando/moviendo: {existing.complete_path} ? {expected_path}")
+                            existing.sudo().write({
+                                'name': segment,
+                                'parent_id': parent.id if parent else False,
+                            })
+                        folder = existing
+                    elif not folder:
+                        folder = self.sudo().create({
+                            'name': segment,
+                            'node_id': node_id,
+                            'parent_id': parent.id if parent else False,
+                        })
+                        _logger.info(f"Carpeta creada: {folder.complete_path}")
+                else:
+                    if not folder:
+                        folder = self.sudo().search([
+                            ('name', '=', segment),
+                            ('parent_id', '=', parent.id if parent else False)
+                        ], limit=1)
+                        if not folder:
+                            folder = self.sudo().create({
+                                'name': segment,
+                                'parent_id': parent.id if parent else False,
+                            })
+                            _logger.info(f"Carpeta intermedia creada: {folder.complete_path}")
+    
                 path_cache[current_path] = folder
+                name_parent_cache[key] = folder
                 parent = folder
+    
+        # Eliminar carpetas obsoletas (que no están en Alfresco)
+        synced_node_ids = set(alfresco_nodes.keys())
+        for node_id, record in odoo_folders.items():
+            if node_id not in synced_node_ids:
+                _logger.info(f"Eliminando carpeta obsoleta: {record.complete_path}")
+                record.sudo().unlink()
+    
+        _logger.info(f"Sincronizacion completa en {time.time() - start_time:.2f}s")
 
-    def _cascade_delete(self):
-        """
-        Borra carpetas en orden descendente para evitar errores de claves foraneas.
-        """
-        for folder in self.sudo().sorted(key=lambda r: len(r.complete_path or ''), reverse=True):
-            _logger.info(f"Eliminando carpeta: {folder.complete_path}")
-            folder.unlink()
-
-    @api.model
-    def sync_files_from_alfresco(self):
-        """
-        Sincroniza archivos desde Alfresco para cada carpeta registrada en Odoo.
-        Evita duplicados y maneja errores de red.
-        """
-        config = self.env['ir.config_parameter'].sudo()
-        base_url = config.get_param('asi_alfresco_integration.alfresco_server_url')
-        user = config.get_param('asi_alfresco_integration.alfresco_username')
-        pwd = config.get_param('asi_alfresco_integration.alfresco_password')
-
-        if not all([base_url, user, pwd]):
-            _logger.warning("Faltan parametros de configuracion para la integracion con Alfresco.")
-            return
-
-        auth = (user, pwd)
-        headers = {"Accept": "application/json"}
-        AlfrescoFile = self.env['alfresco.file'].sudo()
-
-        # Obtener node_ids ya sincronizados
-        existing_node_ids = set(AlfrescoFile.search([]).mapped('node_id'))
-
-        for folder in self.sudo().search([]):
-            if not folder.node_id:
-                _logger.warning(f"Carpeta sin node_id: {folder.name}")
-                continue
-
-            url = f"{base_url}/alfresco/api/-default-/public/alfresco/versions/1/nodes/{folder.node_id}/children"
-
-            try:
-                response = requests.get(url, auth=auth, headers=headers, timeout=10)
-                response.raise_for_status()
-                entries = response.json().get("list", {}).get("entries", [])
-            except RequestException as e:
-                _logger.warning(f"Error de conexion al obtener archivos de '{folder.name}': {e}")
-                continue
-            except ValueError as e:
-                _logger.warning(f"Error al parsear JSON para carpeta '{folder.name}': {e}")
-                continue
-
-            new_files_count = 0
-            for entry in entries:
-                node = entry.get("entry", {})
-                if not node.get("isFile"):
-                    continue
-
-                node_id = node.get("id")
-                if not node_id or node_id in existing_node_ids:
-                    continue
-
-                file_vals = {
-                    "name": node.get("name", "Sin Nombre"),
-                    "node_id": node_id,
-                    "mimetype": node.get("content", {}).get("mimeType"),
-                    "url": f"{base_url}/preview/s/{node_id}",
-                    "folder_id": folder.id
-                }
-
-                AlfrescoFile.create(file_vals)
-                existing_node_ids.add(node_id)
-                new_files_count += 1
-
-            _logger.info(f"Carpeta '{folder.name}' sincronizada con {new_files_count} archivo(s) nuevo(s).")
