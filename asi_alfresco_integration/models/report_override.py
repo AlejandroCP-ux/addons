@@ -1,120 +1,109 @@
-import logging
+# models/report_integration.py
 import requests
-import re
-import json
-from odoo import models, fields, api
+from odoo import models, api, fields
+from requests.auth import HTTPBasicAuth
 from datetime import datetime
-from io import BytesIO
-from pypdf import PdfReader
-from odoo.tools.safe_eval import safe_eval
 
-_logger = logging.getLogger(__name__)
-
-
-class Report(models.Model):
+class IrActionsReport(models.Model):
     _inherit = 'ir.actions.report'
-    
-    folder_id = fields.Many2one(
-            'alfresco.folder',
-            string='Carpeta Alfresco',
-            help="Carpeta destino en Alfresco para este reporte"
-        )
+
+    @api.model
     def _render_qweb_pdf(self, report_ref, res_ids=None, data=None, **kwargs):
-        """
-        Para cada ID en res_ids:
-         1) Genera un PDF individual (llamando a super con [id])
-         2) Evalua el nombre del archivo usando print_report_name
-         3) Sube o actualiza en Alfresco el PDF individual
-        """
-        # 1) Obtiene el PDF combinado tal y como Odoo lo haria por defecto
-        pdf_content_combined, report_type = super()._render_qweb_pdf(
-            report_ref, res_ids=res_ids, data=data, **kwargs
-        )
-    
-        _logger.debug("RES_IDS recibidos: %s  | REPORT_REF: %s", res_ids, report_ref)
-    
-        # 2) Obtiene el reporte y su carpeta configurada
-        report = self._get_report(report_ref)
-        folder = report.folder_id
-    
-        # 3) Carga configuracion de Alfresco desde parametros
+        # 1) Llamo al super para obtener el PDF binario
+        pdf_content, report_type = super()._render_qweb_pdf(report_ref, res_ids=res_ids, data=data, **kwargs)
+
+        # 2) Identifico de qué modelo y registro viene
+        #    report_ref puede ser: 'module.report_template_name'
+        #    res_ids es una lista de ids. Si solo genera uno, tomo el primero.
+        if res_ids:
+            res_model = self.env['ir.actions.report'].browse(
+                self.env.ref(report_ref).id
+            ).report_file  # a veces es mejor: self.env.ref(report_ref).model
+            # Sin embargo, para mayor robustez, usamos 'report_ref' para encontrar el modelo:
+            record_model = self.env[self.env.ref(report_ref).model]  
+            record_id = res_ids[0]  # suponiendo que genera un solo documento a la vez
+        else:
+            # Si no hay res_ids (ej: reportes globales), puedes saltarte la integración
+            return pdf_content, report_type
+
+        # 3) Preparo las credenciales y URL base de Alfresco desde parámetros
         config = self.env['ir.config_parameter'].sudo()
-        url = config.get_param('asi_alfresco_integration.alfresco_server_url')
-        user = config.get_param('asi_alfresco_integration.alfresco_username')
-        pwd = config.get_param('asi_alfresco_integration.alfresco_password')
-    
-        # Validaciones minimas
-        if not url:
-            _logger.warning("URL de servidor Alfresco no configurada. No se procesan subidas.")
-            return pdf_content_combined, report_type
-    
-        if not folder:
-            _logger.warning("El reporte '%s' no tiene carpeta Alfresco asignada.", report_ref)
-            return pdf_content_combined, report_type
-    
-        if not folder.node_id:
-            _logger.warning("La carpeta '%s' no tiene definido node_id. No se suben PDFs.", folder.name)
-            return pdf_content_combined, report_type
-    
-        # 4) Itera sobre cada registro individualmente
-        for rid in res_ids or []:
-            # 4.1) Obtiene el registro actual
-            Model = self.env[report.model]
-            record = Model.browse(rid)
-            if not record.exists():
-                _logger.warning("El registro con ID %s no existe en %s. Se omite.", rid, report.model)
-                continue
-    
-            # 4.2) Genera solo el PDF para este registro
-            try:
-                pdf_content_single, _ = super()._render_qweb_pdf(
-                    report_ref, res_ids=[rid], data=data, **kwargs
-                )
-            except Exception as e:
-                _logger.error("Error generando PDF para %s ID=%s: %s", report.model, rid, e)
-                continue
-    
-            # 4.3) Evalua el nombre de archivo usando print_report_name
-            filename = self._evaluate_report_filename(report, record)
-            if not filename:
-                filename = f"{report_ref}_{rid}.pdf"
-            _logger.debug("  -> Filename para ID %s: %s", rid, filename)
-    
-            # 4.4) Busca si ya existe en Alfresco
-            try:
-                node_id = self._find_existing_file(
-                    url, user, pwd, filename, folder.node_id
-                )
-            except Exception as e_search:
-                _logger.error("Error buscando '%s' en Alfresco: %s", filename, e_search)
-                node_id = None
-    
-            # 4.5) Si existe: descarga, compara texto y actualiza si cambia. Si no existe: crea nuevo.
-            if node_id:
-                try:
-                    existing_content = self._download_existing_content(url, user, pwd, node_id)
-                    existing_text = self._extract_text_from_pdf(existing_content)
-                    new_text = self._extract_text_from_pdf(pdf_content_single)
-    
-                    if existing_text != new_text:
-                        self._update_existing_file(url, user, pwd, node_id, pdf_content_single, filename)
-                        _logger.info("PDF actualizado en Alfresco: %s (node_id=%s)", filename, node_id)
-                    else:
-                        _logger.info("El contenido no cambio para '%s'. No se sube nueva version.", filename)
-                except Exception as e_update:
-                    _logger.error("Error actualizando '%s' (node_id=%s): %s", filename, node_id, e_update)
+        base_url = config.get_param('asi_alfresco_integration.alfresco_server_url')
+        user     = config.get_param('asi_alfresco_integration.alfresco_username')
+        pwd      = config.get_param('asi_alfresco_integration.alfresco_password')
+        repo_id  = config.get_param('asi_alfresco_integration.alfresco_repo_id')
+        if not base_url or not user or not pwd or not repo_id:
+            return pdf_content, report_type
+
+        # 4) Construyo la ruta a la carpeta destino en Alfresco
+        #    Aquí puedes basarte en el modelo origen para elegir carpeta. Por ejemplo:
+        #    folder = self.env['alfresco.folder'].search([('name', '=', record_model._name)], limit=1)
+        #    o puedes almacenar un campo 'folder_id' en ir.actions.report como ya tienes.
+        #    Supongamos que en ir.actions.report existe campo Many2one('alfresco.folder', 'folder_id')
+        report_action = self.env.ref(report_ref)
+        alf_folder = report_action.folder_id  # modelado previamente en tu vista
+        if not alf_folder:
+            return pdf_content, report_type
+
+        node_parent = alf_folder.node_id  # este es el ID de la carpeta en Alfresco
+        if not node_parent:
+            return pdf_content, report_type
+
+        # 5) Subo el PDF a Alfresco con el endpoint CMIS o REST v1
+        #    Ejemplo usando REST v1 “create version”:
+        upload_url = (
+            f"{base_url}/alfresco/api/-default-/public/alfresco/versions/1/nodes/"
+            f"{node_parent}/children"
+        )
+        headers = {'Accept': 'application/json'}
+        files = {
+            'filedata': (
+                f"{record_model._name}_{record_id}.pdf",
+                pdf_content,
+                'application/pdf'
+            )
+        }
+        auth = HTTPBasicAuth(user, pwd)
+
+        try:
+            response = requests.post(upload_url, auth=auth, headers=headers, files=files, timeout=15)
+            response.raise_for_status()
+        except Exception as e:
+            _logger.error(f"Error subiendo reporte a Alfresco: {e}")
+            return pdf_content, report_type
+
+        entry = response.json().get('entry', {})
+        new_node_id = entry.get('id')
+        version_series = entry.get('versionSeriesId')
+
+        if new_node_id and version_series:
+            # 6) Construyo la URL de descarga de la última versión
+            download_url = (
+                f"{base_url}/alfresco/api/-default-/public/alfresco/versions/1/"
+                f"nodes/{new_node_id}/content"
+            )
+            # 7) Busco o creo el mapping
+            mapping = self.env['alfresco.report.mapping'].sudo().search([
+                ('res_model', '=', record_model._name),
+                ('res_id',    '=', record_id),
+            ], limit=1)
+            vals = {
+                'version_series_id': version_series,
+                'node_id':           new_node_id,
+                'url':               download_url,
+                'last_update':       fields.Datetime.now(),
+            }
+            if not mapping:
+                vals.update({
+                    'res_model': record_model._name,
+                    'res_id':    record_id,
+                })
+                self.env['alfresco.report.mapping'].sudo().create(vals)
             else:
-                try:
-                    self._upload_new_file(
-                        url, user, pwd, folder.node_id,
-                        filename, pdf_content_single, []
-                    )
-                    _logger.info("Nuevo PDF subido a Alfresco: %s", filename)
-                except Exception as e_upload:
-                    _logger.error("Error subiendo nuevo PDF '%s' a Alfresco: %s", filename, e_upload)
-    
-        # 5) Devuelve siempre el PDF combinado original
-        return pdf_content_combined, report_type
+                mapping.sudo().write(vals)
+
+        return pdf_content, report_type
+
         
     
     def _evaluate_report_filename(self, report, record):

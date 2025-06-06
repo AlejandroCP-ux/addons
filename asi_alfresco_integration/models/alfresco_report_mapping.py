@@ -5,14 +5,32 @@ from odoo import models, fields, api, _
 _logger = logging.getLogger(__name__)
 
 
+
 class AlfrescoReportMapping(models.Model):
     _name = 'alfresco.report.mapping'
-    _description = 'Mapeo de reportes a carpetas Alfresco'
+    _description = 'Relaciona un reporte de Odoo con su PDF en Alfresco'
 
-    report_id = fields.Many2one('ir.actions.report', string='Reporte')
-    folder_id = fields.Many2one('alfresco.folder', string='Carpeta Alfresco')
+    # El “modelo origen” y su registro
+    res_model = fields.Char(string="Modelo Odoo", required=True, copy=False)
+    res_id    = fields.Integer(string="ID del registro Odoo", required=True, copy=False)
+
+    # Identificadores en Alfresco para la última versión subida
+    version_series_id = fields.Char(string="Version Series ID", index=True, readonly=True)
+    node_id           = fields.Char(string="Node ID (Alfresco)", index=True, readonly=True)
+
+    # URL que apunta directamente al contenido binario de la última versión
+    url               = fields.Char(string="URL de descarga", readonly=True)
+
+    # Fecha/hora en que se subió o actualizó esa última versión
+    last_update       = fields.Datetime(string="Última actualización", readonly=True)
+
+    _sql_constraints = [
+        ('unique_mapping', 'UNIQUE(res_model, res_id)', 'Ya existe un mapeo para este registro.'),
+    ]
+
 
     @api.model
+
     def _alfresco_get_children(self, repo_id, node_id, skip=0, max_items=100):
         RCS = self.env['ir.config_parameter'].sudo()
         url_base = RCS.get_param('asi_alfresco_integration.alfresco_server_url')
