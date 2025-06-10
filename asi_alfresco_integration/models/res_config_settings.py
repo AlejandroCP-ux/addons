@@ -8,6 +8,10 @@ _logger = logging.getLogger(__name__)
 class ResConfigSettings(models.TransientModel):
     _inherit = "res.config.settings"
 
+    module_asi_alfresco_integration = fields.Boolean(
+        string="Activar integración con Alfresco"
+    )
+
     alfresco_server_url = fields.Char(string="URL", config_parameter="asi_alfresco_integration.alfresco_server_url")
     alfresco_username = fields.Char(string="Usuario", config_parameter="asi_alfresco_integration.alfresco_username")
     alfresco_password = fields.Char(string="Contraseña",  config_parameter="asi_alfresco_integration.alfresco_password")

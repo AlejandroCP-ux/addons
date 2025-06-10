@@ -1,49 +1,71 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-    <record id="alfresco_res_config_settings_view" model="ir.ui.view">
-        <field name="name">res.config.settings.view.form.alfresco.integration.inherit</field>
-        <field name="model">res.config.settings</field>
-        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
-        <field name="arch" type="xml">
-            <xpath expr="//div[hasclass('settings')]" position="inside">
-                <div class="app_settings_block" string="Alfresco" data-key="asi_alfresco_integration">
-                    <h2>Integración con Alfresco</h2>
+<record id="alfresco_res_config_settings_view" model="ir.ui.view">
+    <field name="name">res.config.settings.view.form.alfresco.integration</field>
+    <field name="model">res.config.settings</field>
+    <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+    <field name="arch" type="xml">
 
-                    <div class="row">
-                        <!-- Columna izquierda -->
-                        <div class="col-lg-6">
-                            <div class="o_setting_box">
-                                    <label  string="Base URL: " for="alfresco_server_url"/>
-                                    <field name="alfresco_server_url"/>
-                                    <p></p>
-                                     <label  string="Repo ID: " for="alfresco_repo_id"/>
-                                    <field name="alfresco_repo_id"/>
-                               
-                            </div>
+        <xpath expr="//div[hasclass('settings')]" position="inside">
+            <div class="app_settings_block" string="Alfresco" data-key="asi_alfresco_integration">
+
+                <!-- Activador -->
+                <div class="row mt16">
+                    <div class="col-12 col-lg-6 o_setting_box">
+                        <div class="o_setting_left_pane">
+                            <field name="module_asi_alfresco_integration"/>
                         </div>
-
-                        <!-- Columna derecha -->
-                        <div class="col-lg-6">
-                            <div class="o_setting_box">
-                                <div class="o_setting_right_pane">
-                                    <label  string="User Name: " for="alfresco_username"/>
-                                    <field name="alfresco_username"/><p></p>
-                                    <label  string="Password: " for="alfresco_password"/>
-                                    <field name="alfresco_password" password="True"/><p></p>
-                                    <button name="action_test_alfresco_connection"
-                                            type="object"
-                                            string="Test connection"
-                                            class="btn btn-secondary mt16"/>                                            
-                                    <button name="action_sync_alfresco_users"
-                                            type="object"
-                                            string="Sincronizar usuarios con Alfresco"
-                                            class="btn btn-secondary mt16"/>        
-                                </div>
+                        <div class="o_setting_right_pane">
+                            <label for="module_asi_alfresco_integration"/>
+                            <div class="text-muted">
+                                Activar integración con Alfresco CMS para guardar documentos.
                             </div>
                         </div>
                     </div>
                 </div>
-            </xpath>
-        </field>
-    </record>
+
+                <!-- Campos de configuración -->
+                <div class="row" attrs="{'invisible': [('module_asi_alfresco_integration', '=', False)]}">
+ 
+                    <!-- Columna izquierda -->
+                    <div class="col-6 col-lg-6 o_setting_box">
+                        <div class="o_setting_left_pane"/>                           
+                        <div class="o_setting_right_pane">
+                         <label for="alfresco_server_url"/>
+                            <field name="alfresco_server_url"/>
+                            <label for="alfresco_repo_id"/>
+                            <field name="alfresco_repo_id"/>
+                        </div>
+                    </div>
+ 
+                    <!-- Columna derecha -->
+                    <div class="col-6 col-lg-6 o_setting_box">
+                        <div class="o_setting_left_pane"/>
+                        <div class="o_setting_right_pane">
+                            <label for="alfresco_username"/>
+                            <field name="alfresco_username"/>
+                            <label for="alfresco_password"/>
+                            <field name="alfresco_password" password="True"/>
+                            
+                            <div class="mt16">
+                                <button name="action_test_alfresco_connection"
+                                        type="object"
+                                        string="Probar conexión"
+                                        class="btn btn-primary"/>
+                                <span class="mx-1"/>
+                                <button name="action_sync_alfresco_users"
+                                        type="object"
+                                        string="Sincronizar usuarios"
+                                        class="btn btn-secondary"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </xpath>
+
+    </field>
+</record>
+ 
 </odoo>
