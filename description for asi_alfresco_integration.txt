@@ -62,11 +62,9 @@ access_alfresco_file,alfresco.file,model_alfresco_file,,1,1,1,1
 ==== Archivo: C:\Users\javier\Documents\GitHub\addons_antasi\asi_alfresco_integration\views\alfresco_report_mapping_views.xml ==== 
  
 <odoo>
-
     <record id="view_report_action_form_inherit" model="ir.ui.view">
         <field name="name">ir.actions.report.form.inherit.alfresco</field>
-        <field name="model">ir.actions.report</field>
-        <!-- Cambiar la referencia a la vista correcta de reportes en Odoo 16 -->
+        <field name="model">ir.actions.report</field> 
         <field name="inherit_id" ref="base.act_report_xml_view"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='model']" position="after">
@@ -79,7 +77,6 @@ access_alfresco_file,alfresco.file,model_alfresco_file,,1,1,1,1
             </xpath>
         </field>
     </record>
-    
 
     <!-- Menús -->
     <menuitem id="menu_alfresco_root" name="Alfresco"/>

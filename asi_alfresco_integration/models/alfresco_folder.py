@@ -38,17 +38,24 @@ class AlfrescoFolder(models.Model):
             else:
                 rec.complete_path = f"/{rec.name}"
 
-    @api.depends('child_ids')
     def _compute_counts(self):
         grouped = self.env['alfresco.folder'].read_group(
             [('parent_id', 'in', self.ids)],
             ['parent_id'],
-            ['parent_id']
+            ['parent_id'] 
         )
-        count_map = {group['parent_id'][0]: group['__count'] for group in grouped}
-        for rec in self:
-            rec.subfolder_count = count_map.get(rec.id, 0)
-
+    
+        count_map = {}
+        for group in grouped:
+            parent = group.get('parent_id')
+            count = group.get('__count', 0)  # <-- evitar error si no existe
+            if parent and count is not None:
+                count_map[parent[0]] = count
+    
+        for record in self:
+            record.subfolder_count = count_map.get(record.id, 0)
+            
+   
     def action_open_subfolders(self):
         self.ensure_one()
         return {
@@ -94,7 +101,7 @@ class AlfrescoFolder(models.Model):
         path_cache = {}  # path completo ? folder creado
         name_parent_cache = {}  # (nombre, parent_id) ? folder
     
-        # Proceso de creación/actualizacion
+        # Proceso de creacion/actualizacion
         for node_id, path in sorted(alfresco_nodes.items(), key=lambda x: x[1].count('/')):
             segments = path.strip('/').split('/')
             parent = None
@@ -147,7 +154,7 @@ class AlfrescoFolder(models.Model):
                 name_parent_cache[key] = folder
                 parent = folder
     
-        # Eliminar carpetas obsoletas (que no están en Alfresco)
+        # Eliminar carpetas obsoletas (que no estan en Alfresco)
         synced_node_ids = set(alfresco_nodes.keys())
         for node_id, record in odoo_folders.items():
             if node_id not in synced_node_ids:
