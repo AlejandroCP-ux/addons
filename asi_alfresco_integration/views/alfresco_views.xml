@@ -24,7 +24,7 @@
             <form>
                 <header>
                     <button name="action_open_subfolders" type="object" class="oe_stat_button" icon="fa-folder">
-                        <field name="subfolder_count" widget="statinfo" string="Subcarpetas"/>
+                        <field name="subfolder_count" widget="statinfo" string=" Subcarpetas"/>
                     </button>
                    
                 </header>
