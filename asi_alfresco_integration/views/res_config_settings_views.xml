@@ -26,27 +26,35 @@
 
                 <!-- Campos de configuración -->
                 <div class="row" attrs="{'invisible': [('module_asi_alfresco_integration', '=', False)]}">
- 
+
                     <!-- Columna izquierda -->
                     <div class="col-6 col-lg-6 o_setting_box">
-                        <div class="o_setting_left_pane"/>                           
+                        <div class="o_setting_left_pane"/>
                         <div class="o_setting_right_pane">
-                         <label for="alfresco_server_url"/>
-                            <field name="alfresco_server_url"/>
-                            <label for="alfresco_repo_id"/>
-                            <field name="alfresco_repo_id"/>
+                            <div class="mb-2">
+                                <label for="alfresco_server_url"/>
+                                <field name="alfresco_server_url"/>
+                            </div>
+                            <div class="mb-2">
+                                <label for="alfresco_repo_id"/>
+                                <field name="alfresco_repo_id"/>
+                            </div>
                         </div>
                     </div>
- 
+
                     <!-- Columna derecha -->
                     <div class="col-6 col-lg-6 o_setting_box">
                         <div class="o_setting_left_pane"/>
                         <div class="o_setting_right_pane">
-                            <label for="alfresco_username"/>
-                            <field name="alfresco_username"/>
-                            <label for="alfresco_password"/>
-                            <field name="alfresco_password" password="True"/>
-                            
+                            <div class="mb-2">
+                                <label for="alfresco_username"/>
+                                <field name="alfresco_username"/>
+                            </div>
+                            <div class="mb-2">
+                                <label for="alfresco_password"/>
+                                <field name="alfresco_password" password="True"/>
+                            </div>
+
                             <div class="mt16">
                                 <button name="action_test_alfresco_connection"
                                         type="object"
@@ -60,12 +68,13 @@
                             </div>
                         </div>
                     </div>
-                </div>
 
+                </div>
             </div>
         </xpath>
 
     </field>
 </record>
+
  
 </odoo>

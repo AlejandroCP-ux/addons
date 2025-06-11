@@ -10,6 +10,10 @@ class ResConfigSettings(models.TransientModel):
     def _get_default_localai_model(self):
         return self.env.ref('asi_ia.qwen2_1_5b_instruct').id
         
+        
+    module_asi_ia = fields.Boolean(
+        string="Activar integración con IA Local"
+    )    
     openapi_baseurl = fields.Char(string="Base URL", help="Provide the Base URL to local AI", config_parameter="asi_ia.openapi_base_url")
     openapi_api_key = fields.Char(string="API Key", help="Provide the API key here", config_parameter="asi_ia.openapi_api_key")
     localai_model_id = fields.Many2one('localai.model', 'Local AI Model', ondelete='cascade', default=_get_default_localai_model,  config_parameter="asi_ia.localai_model_id")
