@@ -1,0 +1,50 @@
+/* Estilos específicos para el módulo de firma digital */
+
+.o_form_view .o_firma_digital_header {
+  background-color: #f8f9fa;
+  padding: 8px 16px;
+  margin-bottom: 16px;
+  border-radius: 4px;
+}
+
+.o_form_view .o_firma_digital_footer {
+  margin-top: 16px;
+  text-align: center;
+}
+
+/* Estilos para el botón de mostrar/ocultar contraseña */
+.o_firma_digital_password_toggle {
+  cursor: pointer;
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Estilos para el campo de contraseña */
+.o_firma_digital_password_field {
+  position: relative;
+}
+
+/* Estilos para el campo de PDF */
+.o_firma_digital_pdf_field {
+  margin-bottom: 16px;
+}
+
+/* Estilos para el botón de firmar */
+.o_firma_digital_sign_button {
+  background-color: #00a09d;
+  color: white;
+}
+
+.o_firma_digital_sign_button:hover {
+  background-color: #007d7a;
+}
+
+/* Estilos para la imagen de la firma */
+.o_form_view .o_field_image.o_firma_digital_signature_image {
+  max-width: 300px;
+  max-height: 150px;
+  border: 1px dashed #ccc;
+  padding: 8px;
+}

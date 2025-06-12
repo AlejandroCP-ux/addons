@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_firma_documento_wizard_form" model="ir.ui.view">
+        <field name="name">firma.documento.wizard.form</field>
+        <field name="model">firma.documento.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Firma Digital de Documentos">
+                <field name="estado" invisible="1"/>
+                <field name="pdf_firmado" invisible="1"/>
+                
+                <div attrs="{'invisible': [('estado', '!=', 'borrador')]}">
+                    <div class="alert alert-info" role="alert">
+                        <p>Seleccione un documento PDF para firmar digitalmente.</p>
+                        <p>El documento firmado incluirá su firma digital y su imagen de firma en la esquina inferior derecha de la última página.</p>
+                    </div>
+                    
+                    <group>
+                        <field name="pdf_documento" filename="nombre_documento" widget="binary" required="1"/>
+                        <field name="nombre_documento" invisible="1"/>
+                        <field name="contrasena_firma" password="True" required="1"/>
+                    </group>
+                    
+                    <footer>
+                        <button name="action_firmar_documento" string="Firmar" type="object" class="btn-primary" 
+                                attrs="{'invisible': ['|', ('pdf_documento', '=', False), ('contrasena_firma', '=', False)]}"/>
+                    </footer>
+                </div>
+                
+                <div attrs="{'invisible': [('estado', '!=', 'firmado')]}">
+                    <div class="alert alert-success" role="alert">
+                        <p>¡El documento ha sido firmado exitosamente!</p>
+                        <p>Puede descargarlo haciendo clic en el botón "Descargar PDF Firmado".</p>
+                    </div>
+                    
+                    <footer>
+                        <button name="action_descargar_pdf" string="Descargar PDF Firmado" type="object" class="btn-primary"/>
+                        <button string="Cerrar" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </div>
+                
+                <div attrs="{'invisible': [('estado', '!=', 'error')]}">
+                    <div class="alert alert-danger" role="alert">
+                        <p>Ha ocurrido un error durante el proceso de firma:</p>
+                        <field name="mensaje_error" readonly="1"/>
+                    </div>
+                </div>
+            </form>
+        </field>
+    </record>
+    
+    <record id="action_firma_documento_wizard" model="ir.actions.act_window">
+        <field name="name">Firmar Documento</field>
+        <field name="res_model">firma.documento.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_firma_documento_wizard_form"/>
+        <field name="target">new</field>
+    </record>
+</odoo>

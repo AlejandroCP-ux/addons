@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Añadir campos a las preferencias de usuario -->
+    <record id="view_users_form_firma_digital" model="ir.ui.view">
+        <field name="name">res.users.form.firma.digital</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form"/>
+        <field name="arch" type="xml">
+            <notebook position="inside">
+                <page string="Firma Digital" name="firma_digital">
+                    <group>
+                        <field name="certificado_firma" filename="nombre_certificado" widget="binary"/>
+                        <field name="nombre_certificado" invisible="1"/>
+                        <field name="imagen_firma" widget="image" options="{'size': [300, 150]}"/>
+                    </group>
+                    <div class="alert alert-info" role="alert">
+                        <p>Suba su certificado de firma digital (.p12) y la imagen de su firma para poder firmar documentos.</p>
+                        <p>La contraseña del certificado se solicitará al momento de firmar cada documento.</p>
+                    </div>
+                </page>
+            </notebook>
+        </field>
+    </record>
+
+    <!-- Añadir campos a la preferencias del usuario actual -->
+    <record id="view_users_form_preferences_firma_digital" model="ir.ui.view">
+        <field name="name">res.users.preferences.firma.digital</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form_simple_modif"/>
+        <field name="arch" type="xml">
+            <group name="preferences" position="after">
+                <group string="Firma Digital" name="firma_digital_preferencias">
+                    <field name="certificado_firma" filename="nombre_certificado" widget="binary"/>
+                    <field name="nombre_certificado" invisible="1"/>
+                    <field name="imagen_firma" widget="image" options="{'size': [300, 150]}"/>
+                </group>
+                <div class="alert alert-info" role="alert">
+                    <p>Suba su certificado de firma digital (.p12) y la imagen de su firma para poder firmar documentos.</p>
+                    <p>La contraseña del certificado se solicitará al momento de firmar cada documento.</p>
+                </div>
+            </group>
+        </field>
+    </record>
+</odoo>
