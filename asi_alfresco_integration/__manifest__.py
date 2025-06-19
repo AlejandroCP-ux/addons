@@ -6,6 +6,9 @@
     'author': 'Javier',
     'website': 'https://www.asisurl.cu',
     "depends": ["base", "web"],
+    'external_dependencies': {
+        'python': ['requests'],
+    },
     "data": [
         "views/res_config_settings_views.xml",
         "views/alfresco_report_mapping_views.xml",

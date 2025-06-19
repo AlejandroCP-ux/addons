@@ -26,7 +26,12 @@
                     <button name="action_open_subfolders" type="object" class="oe_stat_button" icon="fa-folder">
                         <field name="subfolder_count" widget="statinfo" string=" Subcarpetas"/>
                     </button>
-                   
+                    <!-- Botón de sincronización agregado aquí -->
+                    <button name="action_sync_folder" 
+                            type="object" 
+                            string="Sincronizar carpeta" 
+                            class="oe_highlight" 
+                            icon="fa-refresh"/>
                 </header>
                 <sheet>
                     <group>
