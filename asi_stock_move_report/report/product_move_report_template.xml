@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Definición del reporte -->
+    <record id="action_report_product_move" model="ir.actions.report">
+        <field name="name">Reporte de Movimientos por Producto</field>
+        <field name="model">product.move.report.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">asi_stock_move_report.product_move_report_template</field>
+        <field name="report_file">asi_stock_move_report.product_move_report_template</field>
+        <field name="binding_model_id" ref="model_product_move_report_wizard"/>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+    </record>
+
+    <!-- Template del reporte -->
+    <template id="product_move_report_template">
+        <t t-call="web.html_container">
+            <div class="article">
+                <div class="page" style="font-size: 12px;">
+                    
+                    <!-- Logo de la compañía arriba del título -->
+                    <div class="row mb-3">
+                        <div class="col-12 text-right">
+                            <img t-if="company.logo" t-att-src="image_data_uri(company.logo)" style="max-height: 80px; max-width: 200px;" alt="Logo"/>
+                        </div>
+                    </div>
+                    
+                    <!-- Encabezado del reporte -->
+                    <div class="row mb-3">
+                        <div class="col-12 text-center">
+                            <h2 style="margin-bottom: 15px; font-size: 18px;">
+                                <strong>HISTORIAL DE MOVIMIENTOS DEL PRODUCTO "<t t-esc="product.default_code or ''"/> <t t-esc="product.name"/>"</strong>
+                            </h2>
+                            <h4 style="margin-bottom: 20px; font-size: 14px;">
+                                <t t-esc="company.name"/>
+                            </h4>
+                        </div>
+                    </div>
+
+                    <!-- Información del período -->
+                    <div class="row mb-4">
+                        <div class="col-12 text-center">
+                            <strong style="font-size: 12px;">Período:</strong>
+                            <span t-esc="date_start" t-options="{'widget': 'date'}" style="font-size: 12px;"/>
+                            <span style="font-size: 12px;"> al </span>
+                            <span t-esc="date_end" t-options="{'widget': 'date'}" style="font-size: 12px;"/>
+                        </div>
+                    </div>
+
+                    <!-- Tabla de movimientos detallados -->
+                    <table class="table table-sm" style="font-size: 12px; border-collapse: collapse; border: 2px solid #000; width: 100%;">
+                        <thead style="background-color: #f8f9fa;">
+                            <tr>
+                                <th class="text-center" style="width: 15%; border: 1px solid #000; padding: 10px; font-size: 12px;">Fecha</th>
+                                <th class="text-center" style="width: 15%; border: 1px solid #000; padding: 10px; font-size: 12px;">Cantidad a Mano</th>
+                                <th class="text-center" style="width: 40%; border: 1px solid #000; padding: 10px; font-size: 12px;">Cantidad Movida</th>
+                                <th class="text-center" style="width: 15%; border: 1px solid #000; padding: 10px; font-size: 12px;">EXISTENCIA FINAL</th>
+                                <th class="text-center" style="width: 15%; border: 1px solid #000; padding: 10px; font-size: 12px;">Referencia</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="moves_data" t-as="move">
+                                <tr>
+                                    <td class="text-center" style="border: 1px solid #000; padding: 8px; font-size: 12px;">
+                                        <span t-esc="move['date']" t-options="{'widget': 'date'}"/>
+                                    </td>
+                                    <td class="text-right" style="border: 1px solid #000; padding: 8px; font-size: 12px;">
+                                        <span t-esc="'{:,.2f}'.format(move['cantidad_antes'])"/>
+                                    </td>
+                                    <td class="text-center" style="border: 1px solid #000; padding: 8px; font-size: 12px;">
+                                        <span t-esc="'{:,.2f}'.format(move['cantidad_movida'])"/>
+                                        <strong t-if="move['movement_direction'] == 'Entrada'" style="color: green;">
+                                            (<t t-esc="move['movement_direction']"/> - <t t-esc="move['move_type_display']"/>)
+                                        </strong>
+                                        <strong t-if="move['movement_direction'] == 'Salida'" style="color: red;">
+                                            (<t t-esc="move['movement_direction']"/> - <t t-esc="move['move_type_display']"/>)
+                                        </strong>
+                                    </td>
+                                    <td class="text-right" style="font-weight: bold; border: 1px solid #000; padding: 8px; font-size: 12px;">
+                                        <span t-esc="'{:,.2f}'.format(move['existencia_final'])"/>
+                                    </td>
+                                    <td class="text-center" style="border: 1px solid #000; padding: 8px; font-size: 12px;">
+                                        <span t-esc="move['reference']"/>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+
+                    <!-- Resumen estadístico detallado -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h5 style="font-size: 14px;"><strong>Resumen del Período</strong></h5>
+                            <div class="row">
+                                <div class="col-6">
+                                    <strong style="font-size: 12px;">Total de Movimientos:</strong>
+                                    <span t-esc="total_movements" style="font-size: 12px;"/>
+                                </div>
+                            </div>
+                            
+                            <!-- Totales de Entradas -->
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <strong style="font-size: 12px; color: green;">ENTRADAS:</strong>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-3">
+                                    <span style="font-size: 12px;">• Recepciones: <strong t-esc="'{:,.2f}'.format(totals['entradas_recepcion'])"/></span>
+                                </div>
+                                <div class="col-3">
+                                    <span style="font-size: 12px;">• Ajustes: <strong t-esc="'{:,.2f}'.format(totals['entradas_ajuste'])"/></span>
+                                </div>
+                                <div class="col-3">
+                                    <span style="font-size: 12px;">• Transferencias: <strong t-esc="'{:,.2f}'.format(totals['entradas_transferencia'])"/></span>
+                                </div>
+                                <div class="col-3">
+                                    <span style="font-size: 12px;">• Devoluciones: <strong t-esc="'{:,.2f}'.format(totals['entradas_devolucion'])"/></span>
+                                </div>
+                            </div>
+                            
+                            <!-- Totales de Salidas -->
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <strong style="font-size: 12px; color: red;">SALIDAS:</strong>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-3">
+                                    <span style="font-size: 12px;">• Ventas: <strong t-esc="'{:,.2f}'.format(totals['salidas_venta'])"/></span>
+                                </div>
+                                <div class="col-3">
+                                    <span style="font-size: 12px;">• Transferencias: <strong t-esc="'{:,.2f}'.format(totals['salidas_transferencia'])"/></span>
+                                </div>
+                                <div class="col-3">
+                                    <span style="font-size: 12px;">• Ajustes: <strong t-esc="'{:,.2f}'.format(totals['salidas_ajuste'])"/></span>
+                                </div>
+                                <div class="col-3">
+                                    <span style="font-size: 12px;">• Consumo: <strong t-esc="'{:,.2f}'.format(totals['salidas_consumo'])"/></span>
+                                </div>
+                            </div>
+                            
+                            <!-- Totales generales -->
+                            <div class="row mt-3" style="border-top: 1px solid #ccc; padding-top: 10px;">
+                                <div class="col-6">
+                                    <strong style="font-size: 12px; color: green;">Total Entradas: 
+                                        <span t-esc="'{:,.2f}'.format(totals['entradas_recepcion'] + totals['entradas_ajuste'] + totals['entradas_transferencia'] + totals['entradas_devolucion'])"/>
+                                    </strong>
+                                </div>
+                                <div class="col-6">
+                                    <strong style="font-size: 12px; color: red;">Total Salidas: 
+                                        <span t-esc="'{:,.2f}'.format(totals['salidas_venta'] + totals['salidas_transferencia'] + totals['salidas_ajuste'] + totals['salidas_consumo'])"/>
+                                    </strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            
+            <div class="footer" style="border-top: 0px; margin-top: 20px;">
+                <div class="text-center" style="font-size: 12px;">
+                    Página <span class="page"/> de <span class="topage"/>
+                </div>
+            </div>
+        </t>
+    </template>
+
+</odoo>

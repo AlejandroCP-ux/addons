@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Agregar el menú de Movimientos en el submenú de Informes -->
+    <menuitem id="menu_stock_move_report"
+              name="Movimientos"
+              action="asi_stock_move_report.action_stock_move_report_wizard"
+              parent="stock.menu_warehouse_report"
+              sequence="15"
+              groups="stock.group_stock_user"/>
+
+    <!-- Agregar el menú de Movimientos por Producto en el submenú de Informes -->
+    <menuitem id="menu_product_move_report"
+              name="Movimientos por Producto"
+              action="asi_stock_move_report.action_product_move_report_wizard"
+              parent="stock.menu_warehouse_report"
+              sequence="16"
+              groups="stock.group_stock_user"/>
+
+</odoo>
