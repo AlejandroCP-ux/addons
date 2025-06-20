@@ -3,7 +3,7 @@
 
 {
     'name': 'Participación en Eventos de Calendario',
-    'version': '2.5',
+    'version': '3.0',
     'category': 'Productivity/Calendar',
     'summary': 'Permite a los asistentes marcar su participación en eventos',
     'description': """
@@ -14,7 +14,7 @@ Este módulo extiende la funcionalidad del calendario para permitir:
 - Que el organizador vea quiénes participaron en el evento
 - Que los asistentes vean si participaron o no en eventos pasados
     """,
-    'depends': ['calendar'],
+    'depends': ['calendar', 'base'],
     'data': [
         'security/ir.model.access.csv',
         'views/calendar_event_views.xml',
@@ -33,4 +33,3 @@ Este módulo extiende la funcionalidad del calendario para permitir:
     'auto_install': False,
     'license': 'LGPL-3',
 }
-

@@ -3,7 +3,11 @@
 
 from datetime import datetime, timedelta, date
 import calendar
+from dateutil.relativedelta import relativedelta
 from odoo import api, fields, models, _
+import logging
+
+_logger = logging.getLogger(__name__)
 
 class Meeting(models.Model):
     _inherit = 'calendar.event'
@@ -38,6 +42,44 @@ class Meeting(models.Model):
         compute='_compute_event_date_display',
         store=True,
         help='Fecha del evento en formato legible')
+        
+    # Añadir campo de fecha para facilitar el filtrado
+    event_date = fields.Date(
+        string='Fecha del evento',
+        compute='_compute_event_date',
+        store=True,
+        index=True,  # Indexar para mejorar rendimiento de búsquedas
+        help='Fecha del evento (solo la fecha)')
+        
+    # Campos para facilitar el filtrado por mes
+    event_month = fields.Integer(
+        string='Mes del evento',
+        compute='_compute_event_date',
+        store=True,
+        index=True,
+        help='Mes del evento (1-12)')
+        
+    event_year = fields.Integer(
+        string='Año del evento',
+        compute='_compute_event_date',
+        store=True,
+        index=True,
+        help='Año del evento')
+
+    @api.depends('start')
+    def _compute_event_date(self):
+        """Calcula la fecha, mes y año del evento"""
+        for event in self:
+            if event.start:
+                event_date = event.start.date()
+                event.event_date = event_date
+                event.event_month = event_date.month
+                event.event_year = event_date.year
+                _logger.info(f"Evento {event.id} - {event.name}: fecha={event_date}, mes={event_date.month}, año={event_date.year}")
+            else:
+                event.event_date = False
+                event.event_month = False
+                event.event_year = False
 
     @api.depends('start', 'stop')
     def _compute_is_ongoing(self):
@@ -102,4 +144,22 @@ class Meeting(models.Model):
                 'can_mark_participation': attendee.can_mark_participation,
             } for attendee in self.attendee_ids]
         }
-
+        
+    # Método para obtener el mes y año actual
+    @api.model
+    def _get_current_month_year(self):
+        today = fields.Date.today()
+        return today.month, today.year
+        
+    # Método para obtener el mes y año anterior
+    @api.model
+    def _get_last_month_year(self):
+        today = fields.Date.today()
+        last_month_date = today - relativedelta(months=1)
+        return last_month_date.month, last_month_date.year
+        
+    @api.model
+    def search(self, args, offset=0, limit=None, order=None, count=False):
+        """Extiende el método de búsqueda para aplicar filtros personalizados"""
+        # Ya no necesitamos este método, ya que estamos usando dominios directos
+        return super(Meeting, self).search(args, offset, limit, order, count)

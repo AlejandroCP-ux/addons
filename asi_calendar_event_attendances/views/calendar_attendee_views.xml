@@ -18,7 +18,8 @@
                             <field name="partner_id" invisible="1"/>
                             <field name="email" readonly="1"/>
                             <field name="event_date" readonly="1"/>
-                            <field name="state"/>
+                            <field name="event_month" invisible="1"/>
+                            <field name="event_year" invisible="1"/>
                         </group>
                         <group>
                             <field name="has_participated" readonly="1"/>
@@ -59,7 +60,8 @@
                 <field name="partner_id" invisible="1"/>
                 <field name="event_id"/>
                 <field name="event_date"/>
-                <field name="state"/>
+                <field name="event_month" invisible="1"/>
+                <field name="event_year" invisible="1"/>
                 <field name="has_participated"/>
                 <field name="can_mark_participation" invisible="1"/>
                 <button name="mark_participation" 
@@ -95,6 +97,132 @@
               parent="calendar.mail_menu_calendar"
               action="action_calendar_my_attendances"
               sequence="16"/>
+
+    <!-- Vista de árbol para gestionar asistencias (administradores) -->
+    <record id="view_calendar_attendee_admin_tree" model="ir.ui.view">
+        <field name="name">calendar.attendee.admin.tree</field>
+        <field name="model">calendar.attendee</field>
+        <field name="arch" type="xml">
+            <tree string="Gestionar Asistencias" decoration-success="has_participated" decoration-info="can_mark_participation and not has_participated">
+                <field name="partner_id"/>
+                <field name="event_id"/>
+                <field name="event_date"/>
+                <field name="event_month" invisible="1"/>
+                <field name="event_year" invisible="1"/>
+                <field name="has_participated"/>
+                <field name="can_mark_participation" invisible="1"/>
+                <button name="admin_mark_participation" 
+                        string="Marcar asistencia" 
+                        type="object" 
+                        icon="fa-check-circle" 
+                        attrs="{'invisible': [('has_participated', '=', True)]}"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vista de formulario para gestionar asistencias (administradores) -->
+    <record id="view_calendar_attendee_admin_form" model="ir.ui.view">
+        <field name="name">calendar.attendee.admin.form</field>
+        <field name="model">calendar.attendee</field>
+        <field name="arch" type="xml">
+            <form string="Gestionar Asistencias">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="event_id" readonly="1"/>
+                        </h1>
+                    </div>
+                    
+                    <group>
+                        <group>
+                            <field name="partner_id" readonly="1"/>
+                            <field name="email" readonly="1"/>
+                            <field name="event_date" readonly="1"/>
+                            <field name="event_month" invisible="1"/>
+                            <field name="event_year" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="has_participated"/>
+                            <field name="can_mark_participation" invisible="1"/>
+                        </group>
+                    </group>
+                    
+                    <div class="alert alert-success" role="alert" attrs="{'invisible': [('has_participated', '=', False)]}">
+                        <p><strong>Este asistente ha marcado su asistencia en el evento.</strong></p>
+                    </div>
+                    
+                    <div class="alert alert-info" role="alert" attrs="{'invisible': [('has_participated', '=', True)]}">
+                        <p><strong>Este asistente no ha marcado su asistencia en el evento.</strong></p>
+                    </div>
+                </sheet>
+                <footer>
+                    <button name="admin_mark_participation" 
+                            string="Marcar asistencia" 
+                            type="object" 
+                            class="btn-primary" 
+                            attrs="{'invisible': [('has_participated', '=', True)]}"/>
+                    <button string="Cancelar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Vista de búsqueda para gestionar asistencias -->
+    <record id="view_calendar_attendee_admin_search" model="ir.ui.view">
+        <field name="name">calendar.attendee.admin.search</field>
+        <field name="model">calendar.attendee</field>
+        <field name="arch" type="xml">
+            <search string="Buscar Asistencias">
+                <field name="partner_id"/>
+                <field name="event_id"/>
+                <field name="event_date"/>
+                <filter string="Asistió" name="participated" domain="[('has_participated', '=', True)]"/>
+                <filter string="No asistió" name="not_participated" domain="[('has_participated', '=', False)]"/>
+                <!-- Filtros de fecha usando campos calculados -->
+                <filter string="Este mes" name="this_month" 
+                        domain="[('event_month', '=', datetime.datetime.now().month), 
+                                 ('event_year', '=', datetime.datetime.now().year)]"/>
+                
+    <filter string="Mes pasado" name="last_month" 
+                        domain="[
+                            ('event_month', '=', datetime.datetime.now().month - 1 if datetime.datetime.now().month > 1 else 12),
+                            ('event_year', '=', datetime.datetime.now().year if datetime.datetime.now().month > 1 else datetime.datetime.now().year - 1),
+                        ]"/>
+                <group expand="0" string="Agrupar por">
+                    <filter string="Usuario" name="group_by_partner" context="{'group_by': 'partner_id'}"/>
+                    <filter string="Evento" name="group_by_event" context="{'group_by': 'event_id'}"/>
+                    <filter string="Fecha" name="group_by_date" context="{'group_by': 'event_date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Acción para gestionar asistencias (administradores) -->
+    <record id="action_calendar_admin_attendances" model="ir.actions.act_window">
+        <field name="name">Gestionar Asistencias</field>
+        <field name="res_model">calendar.attendee</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="view_calendar_attendee_admin_tree"/>
+        <field name="search_view_id" ref="view_calendar_attendee_admin_search"/>
+        <field name="domain">[]</field>
+        <field name="context">{'default_has_participated': False, 'is_admin_view': True}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No hay asistencias para gestionar
+            </p>
+            <p>
+                Aquí podrás gestionar las asistencias de todos los usuarios a los eventos.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menú para acceder a gestionar asistencias (solo administradores) -->
+    <menuitem id="menu_calendar_admin_attendances"
+              name="Gestionar Asistencias"
+              parent="calendar.mail_menu_calendar"
+              action="action_calendar_admin_attendances"
+              sequence="17"
+              groups="base.group_system"/>
 
     <!-- Añadir acción para marcar múltiples asistencias a la vez -->
     <record id="action_mark_participation_multi" model="ir.actions.server">

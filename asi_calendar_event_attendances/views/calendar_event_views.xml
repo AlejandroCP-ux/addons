@@ -31,6 +31,9 @@
                         <group>
                             <field name="is_ongoing" invisible="1"/>
                             <field name="is_in_current_month_until_today" invisible="1"/>
+                            <field name="event_date" invisible="1"/>
+                            <field name="event_month" invisible="1"/>
+                            <field name="event_year" invisible="1"/>
                             <field name="event_date_display"/>
                             <label for="participation_count" string="Asistencia"/>
                             <div>
@@ -71,6 +74,9 @@
                 <field name="participation_count" invisible="1"/>
                 <field name="participation_percentage" invisible="1"/>
                 <field name="event_date_display" invisible="1"/>
+                <field name="event_date" invisible="1"/>
+                <field name="event_month" invisible="1"/>
+                <field name="event_year" invisible="1"/>
             </xpath>
         </field>
     </record>
@@ -86,6 +92,18 @@
                 <filter string="En curso" name="ongoing" domain="[('is_ongoing', '=', True)]"/>
                 <filter string="Mes actual hasta hoy" name="current_month_until_today" domain="[('is_in_current_month_until_today', '=', True)]"/>
                 <filter string="Con asistencia" name="with_participation" domain="[('participation_count', '>', 0)]"/>
+            </xpath>
+            <xpath expr="//filter[@name='current_month_until_today']" position="after">
+                <!-- Filtros de fecha usando campos calculados -->
+                <filter string="Este mes" name="this_month" 
+                        domain="[('event_month', '=', datetime.datetime.now().month), 
+                                 ('event_year', '=', datetime.datetime.now().year)]"/>
+                <!-- Modificar el filtro "Mes pasado" para usar un dominio directo -->
+                <filter string="Mes pasado" name="last_month" 
+                        domain="[
+                            ('event_month', '=', datetime.datetime.now().month - 1 if datetime.datetime.now().month > 1 else 12),
+                            ('event_year', '=', datetime.datetime.now().year if datetime.datetime.now().month > 1 else datetime.datetime.now().year - 1),
+                        ]"/>
             </xpath>
         </field>
     </record>
