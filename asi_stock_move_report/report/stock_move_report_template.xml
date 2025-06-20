@@ -17,13 +17,6 @@
         <t t-call="web.html_container">
             <div class="article">
                 <div class="page" style="font-size: 12px;">
-
-                    <!-- Logo de la compañía arriba de la tabla -->
-                    <div class="row mb-3">
-                        <div class="col-12 text-right">
-                            <img t-if="company.logo" t-att-src="image_data_uri(company.logo)" style="max-height: 80px; max-width: 200px;" alt="Logo"/>
-                        </div>
-                    </div>
                     
                     <!-- Encabezado del reporte -->
                     <div class="row mb-3">
@@ -47,6 +40,13 @@
                         </div>
                     </div>
 
+                    <!-- Logo de la compañía arriba de la tabla -->
+                    <div class="row mb-3">
+                        <div class="col-12 text-right">
+                            <img t-if="company.logo" t-att-src="image_data_uri(company.logo)" style="max-height: 80px; max-width: 200px;" alt="Logo"/>
+                        </div>
+                    </div>
+
                     <!-- Tabla principal de movimientos consolidados con bordes -->
                     <table class="table table-sm" style="font-size: 12px; border-collapse: collapse; border: 2px solid #000; width: 100%;">
                         <thead style="background-color: #f8f9fa;">
@@ -57,8 +57,8 @@
                                 <th class="text-center" style="width: 12%; border: 1px solid #000; padding: 10px; font-size: 12px;">Cantidad a Mano</th>
                                 <th class="text-center" style="width: 9%; border: 1px solid #000; padding: 10px; font-size: 12px;">Entradas</th>
                                 <th class="text-center" style="width: 9%; border: 1px solid #000; padding: 10px; font-size: 12px;">Ventas</th>
-                                <th class="text-center" style="width: 9%; border: 1px solid #000; padding: 10px; font-size: 12px;">Consumo</th>
                                 <th class="text-center" style="width: 9%; border: 1px solid #000; padding: 10px; font-size: 12px;">Otras Salidas</th>
+                                <th class="text-center" style="width: 9%; border: 1px solid #000; padding: 10px; font-size: 12px;">Consumo</th>
                                 <th class="text-center" style="width: 12%; border: 1px solid #000; padding: 10px; font-size: 12px;">EXISTENCIA FINAL</th>
                             </tr>
                         </thead>
@@ -75,22 +75,22 @@
                                         <span t-esc="product['cantidad_movimientos']"/>
                                     </td>
                                     <td class="text-right" style="border: 1px solid #000; padding: 8px; font-size: 12px;">
-                                        <span t-esc="'{:,.2f}'.format(product['cantidad_a_mano'])"/>
+                                        <span t-esc="'{:g}'.format(product['cantidad_a_mano'])"/>
                                     </td>
                                     <td class="text-right" style="border: 1px solid #000; padding: 8px; font-size: 12px;">
-                                        <span t-esc="'{:,.2f}'.format(product['entradas'])"/>
+                                        <span t-esc="'{:g}'.format(product['entradas'])"/>
                                     </td>
                                     <td class="text-right" style="border: 1px solid #000; padding: 8px; font-size: 12px;">
-                                        <span t-esc="'{:,.2f}'.format(product['ventas'])"/>
+                                        <span t-esc="'{:g}'.format(product['ventas'])"/>
                                     </td>
                                     <td class="text-right" style="border: 1px solid #000; padding: 8px; font-size: 12px;">
-                                        <span t-esc="'{:,.2f}'.format(product['consumo'])"/>
+                                        <span t-esc="'{:g}'.format(product['otras_salidas'])"/>
                                     </td>
                                     <td class="text-right" style="border: 1px solid #000; padding: 8px; font-size: 12px;">
-                                        <span t-esc="'{:,.2f}'.format(product['otras_salidas'])"/>
+                                        <span t-esc="'{:g}'.format(product['consumo'])"/>
                                     </td>
                                     <td class="text-right" style="font-weight: bold; border: 1px solid #000; padding: 8px; font-size: 12px;">
-                                        <span t-esc="'{:,.2f}'.format(product['existencia_final'])"/>
+                                        <span t-esc="'{:g}'.format(product['existencia_final'])"/>
                                     </td>
                                 </tr>
                             </t>

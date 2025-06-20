@@ -51,11 +51,12 @@
                     <table class="table table-sm" style="font-size: 12px; border-collapse: collapse; border: 2px solid #000; width: 100%;">
                         <thead style="background-color: #f8f9fa;">
                             <tr>
-                                <th class="text-center" style="width: 15%; border: 1px solid #000; padding: 10px; font-size: 12px;">Fecha</th>
+                                <th class="text-center" style="width: 12%; border: 1px solid #000; padding: 10px; font-size: 12px;">Fecha</th>
                                 <th class="text-center" style="width: 15%; border: 1px solid #000; padding: 10px; font-size: 12px;">Cantidad a Mano</th>
-                                <th class="text-center" style="width: 40%; border: 1px solid #000; padding: 10px; font-size: 12px;">Cantidad Movida</th>
+                                <th class="text-center" style="width: 12%; border: 1px solid #000; padding: 10px; font-size: 12px;">Cantidad Movida</th>
+                                <th class="text-center" style="width: 25%; border: 1px solid #000; padding: 10px; font-size: 12px;">Tipo de Operación</th>
                                 <th class="text-center" style="width: 15%; border: 1px solid #000; padding: 10px; font-size: 12px;">EXISTENCIA FINAL</th>
-                                <th class="text-center" style="width: 15%; border: 1px solid #000; padding: 10px; font-size: 12px;">Referencia</th>
+                                <th class="text-center" style="width: 21%; border: 1px solid #000; padding: 10px; font-size: 12px;">Referencia</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -65,19 +66,21 @@
                                         <span t-esc="move['date']" t-options="{'widget': 'date'}"/>
                                     </td>
                                     <td class="text-right" style="border: 1px solid #000; padding: 8px; font-size: 12px;">
-                                        <span t-esc="'{:,.2f}'.format(move['cantidad_antes'])"/>
+                                        <span t-esc="'{:g}'.format(move['cantidad_antes'])"/>
+                                    </td>
+                                    <td class="text-right" style="border: 1px solid #000; padding: 8px; font-size: 12px;">
+                                        <span t-esc="'{:g}'.format(move['cantidad_movida'])"/>
                                     </td>
                                     <td class="text-center" style="border: 1px solid #000; padding: 8px; font-size: 12px;">
-                                        <span t-esc="'{:,.2f}'.format(move['cantidad_movida'])"/>
                                         <strong t-if="move['movement_direction'] == 'Entrada'" style="color: green;">
-                                            (<t t-esc="move['movement_direction']"/> - <t t-esc="move['move_type_display']"/>)
+                                            <t t-esc="move['movement_direction']"/> - <t t-esc="move['move_type_display']"/>
                                         </strong>
                                         <strong t-if="move['movement_direction'] == 'Salida'" style="color: red;">
-                                            (<t t-esc="move['movement_direction']"/> - <t t-esc="move['move_type_display']"/>)
+                                            <t t-esc="move['movement_direction']"/> - <t t-esc="move['move_type_display']"/>
                                         </strong>
                                     </td>
                                     <td class="text-right" style="font-weight: bold; border: 1px solid #000; padding: 8px; font-size: 12px;">
-                                        <span t-esc="'{:,.2f}'.format(move['existencia_final'])"/>
+                                        <span t-esc="'{:g}'.format(move['existencia_final'])"/>
                                     </td>
                                     <td class="text-center" style="border: 1px solid #000; padding: 8px; font-size: 12px;">
                                         <span t-esc="move['reference']"/>
@@ -106,16 +109,16 @@
                             </div>
                             <div class="row">
                                 <div class="col-3">
-                                    <span style="font-size: 12px;">• Recepciones: <strong t-esc="'{:,.2f}'.format(totals['entradas_recepcion'])"/></span>
+                                    <span style="font-size: 12px;">• Recepciones: <strong t-esc="'{:g}'.format(totals['entradas_recepcion'])"/></span>
                                 </div>
                                 <div class="col-3">
-                                    <span style="font-size: 12px;">• Ajustes: <strong t-esc="'{:,.2f}'.format(totals['entradas_ajuste'])"/></span>
+                                    <span style="font-size: 12px;">• Ajustes: <strong t-esc="'{:g}'.format(totals['entradas_ajuste'])"/></span>
                                 </div>
                                 <div class="col-3">
-                                    <span style="font-size: 12px;">• Transferencias: <strong t-esc="'{:,.2f}'.format(totals['entradas_transferencia'])"/></span>
+                                    <span style="font-size: 12px;">• Transferencias: <strong t-esc="'{:g}'.format(totals['entradas_transferencia'])"/></span>
                                 </div>
                                 <div class="col-3">
-                                    <span style="font-size: 12px;">• Devoluciones: <strong t-esc="'{:,.2f}'.format(totals['entradas_devolucion'])"/></span>
+                                    <span style="font-size: 12px;">• Devoluciones: <strong t-esc="'{:g}'.format(totals['entradas_devolucion'])"/></span>
                                 </div>
                             </div>
                             
@@ -127,16 +130,16 @@
                             </div>
                             <div class="row">
                                 <div class="col-3">
-                                    <span style="font-size: 12px;">• Ventas: <strong t-esc="'{:,.2f}'.format(totals['salidas_venta'])"/></span>
+                                    <span style="font-size: 12px;">• Ventas: <strong t-esc="'{:g}'.format(totals['salidas_venta'])"/></span>
                                 </div>
                                 <div class="col-3">
-                                    <span style="font-size: 12px;">• Transferencias: <strong t-esc="'{:,.2f}'.format(totals['salidas_transferencia'])"/></span>
+                                    <span style="font-size: 12px;">• Transferencias: <strong t-esc="'{:g}'.format(totals['salidas_transferencia'])"/></span>
                                 </div>
                                 <div class="col-3">
-                                    <span style="font-size: 12px;">• Ajustes: <strong t-esc="'{:,.2f}'.format(totals['salidas_ajuste'])"/></span>
+                                    <span style="font-size: 12px;">• Ajustes: <strong t-esc="'{:g}'.format(totals['salidas_ajuste'])"/></span>
                                 </div>
                                 <div class="col-3">
-                                    <span style="font-size: 12px;">• Consumo: <strong t-esc="'{:,.2f}'.format(totals['salidas_consumo'])"/></span>
+                                    <span style="font-size: 12px;">• Consumo: <strong t-esc="'{:g}'.format(totals['salidas_consumo'])"/></span>
                                 </div>
                             </div>
                             
@@ -144,12 +147,12 @@
                             <div class="row mt-3" style="border-top: 1px solid #ccc; padding-top: 10px;">
                                 <div class="col-6">
                                     <strong style="font-size: 12px; color: green;">Total Entradas: 
-                                        <span t-esc="'{:,.2f}'.format(totals['entradas_recepcion'] + totals['entradas_ajuste'] + totals['entradas_transferencia'] + totals['entradas_devolucion'])"/>
+                                        <span t-esc="'{:g}'.format(totals['entradas_recepcion'] + totals['entradas_ajuste'] + totals['entradas_transferencia'] + totals['entradas_devolucion'])"/>
                                     </strong>
                                 </div>
                                 <div class="col-6">
                                     <strong style="font-size: 12px; color: red;">Total Salidas: 
-                                        <span t-esc="'{:,.2f}'.format(totals['salidas_venta'] + totals['salidas_transferencia'] + totals['salidas_ajuste'] + totals['salidas_consumo'])"/>
+                                        <span t-esc="'{:g}'.format(totals['salidas_venta'] + totals['salidas_transferencia'] + totals['salidas_ajuste'] + totals['salidas_consumo'])"/>
                                     </strong>
                                 </div>
                             </div>
