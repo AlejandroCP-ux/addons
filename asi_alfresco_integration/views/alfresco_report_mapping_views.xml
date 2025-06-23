@@ -6,6 +6,10 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='model']" position="after">
                 <field name="folder_id"/>
+                <field name="related_model_name" invisible="1"/>
+                <field name="record_domain"
+                   widget="domain"
+                   context="{'default_model': related_model_name}"/>
                 <field name="metadata_field_ids"
                  widget="many2many_tags"
                  options="{'no_create': True}"

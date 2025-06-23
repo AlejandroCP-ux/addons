@@ -26,8 +26,25 @@ class Report(models.Model):
         'field_id',
         string='Campos de Metadata',
         domain="[('model', '=', model)]"
-    )     
+    )  
+
+    record_domain = fields.Char(
+        string="Dominio para filtrar registros",
+        help="Dominio para limitar los registros a imprimir automáticamente (formato: [('state','=','posted')])"
+    )
         
+
+    related_model_name = fields.Char(
+        string="Modelo Relacionado",
+        compute='_compute_related_model_name',
+        store=False
+    )
+
+    def _compute_related_model_name(self):
+        for rec in self:
+            rec.related_model_name = rec.model
+
+
     def _render_qweb_pdf(self, report_ref, res_ids=None, data=None, **kwargs):
         """
         Para cada ID en res_ids:
@@ -284,3 +301,28 @@ class Report(models.Model):
         except Exception as e:
             _logger.error("Error extrayendo texto del PDF: %s", e)
             return ''
+
+    @api.model
+    def cron_export_reports_to_alfresco(self):
+        """Imprime automáticamente todos los reportes con carpeta Alfresco asignada"""
+        reports = self.search([('folder_id', '!=', False)])
+        _logger.info("Ejecutando cron de exportación de reportes a Alfresco (%s reportes encontrados)", len(reports))
+
+        for report in reports:
+            model_name = report.model
+            model = self.env[model_name]
+            try:
+                domain = safe_eval(report.record_domain or "[]")
+            except Exception as e:
+                _logger.error("Dominio inválido para el reporte %s: %s", report.name, e)
+                domain = []
+
+            records = model.search(domain)
+            _logger.info("Procesando %s registros para el reporte %s", len(records), report.name)
+
+            for record in records:
+                try:
+                    report._render_qweb_pdf(report.id, [record.id])
+                    _logger.info("PDF generado para %s ID=%s", model_name, record.id)
+                except Exception as e:
+                    _logger.error("Error generando reporte %s para ID=%s: %s", model_name, record.id, e)
