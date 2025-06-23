@@ -37,12 +37,20 @@ class Report(models.Model):
     related_model_name = fields.Char(
         string="Modelo Relacionado",
         compute='_compute_related_model_name',
-        store=False
+        store=False,
+        # Añadimos este parámetro para forzar la notificación
+        compute_sudo=True
     )
-
+    
     def _compute_related_model_name(self):
         for rec in self:
-            rec.related_model_name = rec.model
+            # Solo actualizamos si el valor ha cambiado
+            if rec.related_model_name != rec.model:
+                rec.related_model_name = rec.model
+                
+                # Forzar la actualización de la interfaz
+                # Esta es la alternativa a _notify_computed_field_changed
+                rec.modified(['related_model_name'])
 
 
     def _render_qweb_pdf(self, report_ref, res_ids=None, data=None, **kwargs):
@@ -93,9 +101,17 @@ class Report(models.Model):
     
             # 4.2) Genera solo el PDF para este registro
             try:
+                # Obtengo el XML ID de este action.report
+                ext_id = self.env['ir.model.data'].search([
+                    ('model', '=', 'ir.actions.report'),
+                    ('res_id', '=', report.id)], limit=1).module + '.' + \
+                    self.env['ir.model.data'].search([
+                        ('model', '=', 'ir.actions.report'),
+                        ('res_id', '=', report.id)], limit=1).name
+                _logger.warning("Intentando hacer el pdf para la plantilla %s . Registo actual %s", ext_id,rid)
                 pdf_content_single, _ = super()._render_qweb_pdf(
-                    report_ref, res_ids=[rid], data=data, **kwargs
-                )
+                    ext_id, res_ids=[rid], data=data, **kwargs)
+
             except Exception as e:
                 _logger.error("Error generando PDF para %s ID=%s: %s", report.model, rid, e)
                 continue

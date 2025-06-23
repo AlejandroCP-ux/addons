@@ -17,6 +17,7 @@
         "data/cron_sync_alfresco.xml",
         "data/cron_export_reports.xml",
     ],
+    
    'images': ['static/description/icon.png'],
     "installable": True,
     "auto_install": False,
