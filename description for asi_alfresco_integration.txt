@@ -1,5 +1,25 @@
  
  
+==== Archivo: C:\Users\javier\Documents\GitHub\addons_antasi\asi_alfresco_integration\data\cron_export_reports.xml ==== 
+ 
+
+<odoo>
+  <data noupdate="1">
+    <record id="ir_cron_cron_export_reports_to_alfresco" model="ir.cron">
+      <field name="name">Exportar Reportes a Alfresco</field>
+      <field name="model_id" ref="base.model_ir_actions_report"/>
+      <field name="state">code</field>
+      <field name="code">model.cron_export_reports_to_alfresco()</field>
+      <field name="interval_number">1</field>
+      <field name="interval_type">hours</field>
+      <field name="numbercall">-1</field>
+      <field name="active">True</field>
+      <field name="user_id" ref="base.user_root"/>
+    </record>
+  </data>
+</odoo>
+ 
+ 
 ==== Archivo: C:\Users\javier\Documents\GitHub\addons_antasi\asi_alfresco_integration\data\cron_sync_alfresco.xml ==== 
  
 <?xml version="1.0" encoding="UTF-8"?>
@@ -38,6 +58,8 @@ access_alfresco_file,alfresco.file,model_alfresco_file,,1,1,1,1
         <field name="arch" type="xml">
             <xpath expr="//field[@name='model']" position="after">
                 <field name="folder_id"/>
+                <field name="related_model_name"/>
+                <field name="record_domain" />
                 <field name="metadata_field_ids"
                  widget="many2many_tags"
                  options="{'no_create': True}"
@@ -83,7 +105,12 @@ access_alfresco_file,alfresco.file,model_alfresco_file,,1,1,1,1
                     <button name="action_open_subfolders" type="object" class="oe_stat_button" icon="fa-folder">
                         <field name="subfolder_count" widget="statinfo" string=" Subcarpetas"/>
                     </button>
-                   
+                    <!-- Botón de sincronización agregado aquí -->
+                    <button name="action_sync_folder" 
+                            type="object" 
+                            string="Sincronizar carpeta" 
+                            class="oe_highlight" 
+                            icon="fa-refresh"/>
                 </header>
                 <sheet>
                     <group>

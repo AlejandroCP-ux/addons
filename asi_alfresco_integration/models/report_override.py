@@ -3,6 +3,7 @@ import requests
 import re
 import json
 from odoo import models, fields, api,_
+from odoo.exceptions import UserError
 from datetime import datetime
 from io import BytesIO
 from pypdf import PdfReader
@@ -40,7 +41,11 @@ class Report(models.Model):
         store=False,
         # Añadimos este parámetro para forzar la notificación
         compute_sudo=True
-    )
+    ) 
+    
+    last_sync_date = fields.Datetime(
+    string="Última sincronización con Alfresco",
+    readonly=True)
     
     def _compute_related_model_name(self):
         for rec in self:
@@ -318,27 +323,70 @@ class Report(models.Model):
             _logger.error("Error extrayendo texto del PDF: %s", e)
             return ''
 
+
+    def verificar_y_configurar_report_url(self):
+        """Verifica que report.url esté definido y accesible para wkhtmltopdf"""
+        IrConfig = self.env['ir.config_parameter'].sudo()
+        url = IrConfig.get_param('report.url')
+    
+        # 1. Si está vacío, intentar autoestablecerlo
+        if not url:
+            base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
+            if base_url:
+                IrConfig.set_param('report.url', base_url)
+                _logger.warning("report.url no estaba definido. Se ha establecido a: %s", base_url)
+                url = base_url
+            else:
+                _logger.error("report.url no está definido y no se pudo determinar desde web.base.url")
+                return False
+    
+        # 2. Verificamos que sea accesible (logo como recurso mínimo)
+        try:
+            test_url = url.rstrip('/') + "/web/static/src/img/logo.png"
+            response = requests.get(test_url, timeout=5)
+            if response.status_code != 200:
+                _logger.warning("report.url está definido pero no es accesible (HTTP %s): %s", response.status_code, test_url)
+                return False
+            else:
+                _logger.info("report.url está correctamente configurado y accesible: %s", url)
+                return True
+        except Exception as e:
+            _logger.error("Error al verificar report.url (%s): %s", url, e)
+            return False
+
+
+
     @api.model
     def cron_export_reports_to_alfresco(self):
-        """Imprime automáticamente todos los reportes con carpeta Alfresco asignada"""
         reports = self.search([('folder_id', '!=', False)])
         _logger.info("Ejecutando cron de exportación de reportes a Alfresco (%s reportes encontrados)", len(reports))
-
+    
         for report in reports:
-            model_name = report.model
-            model = self.env[model_name]
+            model = self.env[report.model]
             try:
-                domain = safe_eval(report.record_domain or "[]")
+                base_domain = safe_eval(report.record_domain or "[]")
             except Exception as e:
                 _logger.error("Dominio inválido para el reporte %s: %s", report.name, e)
-                domain = []
-
-            records = model.search(domain)
-            _logger.info("Procesando %s registros para el reporte %s", len(records), report.name)
-
+                base_domain = []
+    
+            # Agregamos condición por última sincronización
+            if report.last_sync_date:
+                time_domain = ['|',
+                               ('write_date', '>=', report.last_sync_date),
+                               ('create_date', '>=', report.last_sync_date)]
+                final_domain = base_domain + time_domain
+            else:
+                final_domain = base_domain
+    
+            records = model.search(final_domain)
+            _logger.info("Reporte %s: se procesarán %s registros", report.name, len(records))
+    
             for record in records:
                 try:
                     report._render_qweb_pdf(report.id, [record.id])
-                    _logger.info("PDF generado para %s ID=%s", model_name, record.id)
+                    _logger.info("PDF generado para %s ID=%s", report.model, record.id)
                 except Exception as e:
-                    _logger.error("Error generando reporte %s para ID=%s: %s", model_name, record.id, e)
+                    _logger.error("Error generando reporte %s para ID=%s: %s", report.model, record.id, e)
+    
+            # Actualizar última fecha de sincronización solo si no falló
+            report.write({'last_sync_date': fields.Datetime.now()})
