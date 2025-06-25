@@ -44,6 +44,23 @@
         </field>
     </record>
 
+<!-- Vista heredada para el árbol de reportes (añade campos Alfresco) -->
+    <record id="view_alfresco_report_tree" model="ir.ui.view">
+        <field name="name">alfresco.report.tree</field>
+        <field name="model">ir.actions.report</field>
+        <field name="inherit_id" ref="base.act_report_xml_view_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='model']" position="after">
+                <field name="alfresco_archive"/>
+                <field name="folder_id"/>
+                <field name="metadata_field_ids" widget="many2many_tags"/>
+                <field name="record_domain"/>
+                <field name="last_sync_date"/>
+            </xpath>
+        </field>
+    </record>
+
+
     <record id="action_alfresco_folders" model="ir.actions.act_window">
         <field name="name">Carpetas Alfresco</field>
         <field name="res_model">alfresco.folder</field>
@@ -55,4 +72,25 @@
               name="Carpetas"
               parent="menu_alfresco_root"
               action="action_alfresco_folders"/>
+              
+              
+       <!-- Nuevo menú Configuraciones -->
+    <menuitem id="menu_alfresco_config" name="Configuraciones" parent="menu_alfresco_root" sequence="10"/>
+
+<!-- Acción para el menú "Configuraciones > Reportes" -->
+    <record id="action_alfresco_report_config" model="ir.actions.act_window">
+        <field name="name">Configuraciones de Reportes</field>
+        <field name="res_model">ir.actions.report</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="view_alfresco_report_tree"/>
+    </record>
+ 
+    <menuitem id="menu_alfresco_report_config" 
+              name="Reportes" 
+              parent="menu_alfresco_config" 
+              action="action_alfresco_report_config"/>           
+              
+              
+              
+              
 </odoo>

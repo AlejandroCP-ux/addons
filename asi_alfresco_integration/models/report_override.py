@@ -61,12 +61,8 @@ class Report(models.Model):
         for rec in self:
             # Solo actualizamos si el valor ha cambiado
             if rec.related_model_name != rec.model:
-                rec.related_model_name = rec.model
-                
-                # Forzar la actualización de la interfaz
-                # Esta es la alternativa a _notify_computed_field_changed
-                rec.modified(['related_model_name'])
-
+                rec.related_model_name = rec.model or ''
+       
 
     def _render_qweb_pdf(self, report_ref, res_ids=None, data=None, **kwargs):
         """

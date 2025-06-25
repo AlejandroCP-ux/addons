@@ -12,7 +12,9 @@
                     <group>
                         <field name="folder_id" required="1"/>
                         <field name="related_model_name" invisible="1"/>
-                        <field name="record_domain"/>
+                        <field name="record_domain"  widget="domain"
+                                                context="{'model_name': related_model_name}"
+                                                nolabel="1" colspan="2" />                       
                         <field name="metadata_field_ids"
                                widget="many2many_tags"
                                options="{'no_create': True}"
