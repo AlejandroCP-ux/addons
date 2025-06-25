@@ -3,7 +3,7 @@ import requests
 import re
 import json
 from odoo import models, fields, api,_
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 from datetime import datetime
 from io import BytesIO
 from pypdf import PdfReader
@@ -15,6 +15,9 @@ _logger = logging.getLogger(__name__)
 class Report(models.Model):
     _inherit = 'ir.actions.report'
     
+    alfresco_archive = fields.Boolean(
+        string="Activar archivado del informe en Alfresco"
+    )
     folder_id = fields.Many2one(
             'alfresco.folder',
             string='Carpeta Alfresco',
@@ -44,9 +47,16 @@ class Report(models.Model):
     ) 
     
     last_sync_date = fields.Datetime(
-    string="Última sincronización con Alfresco",
-    readonly=True)
+    string="Última sincronización con Alfresco")
     
+
+    @api.constrains('alfresco_archive', 'folder_id')
+    def _check_alfresco_folder(self):
+        for rec in self:
+            if rec.alfresco_archive and not rec.folder_id:
+                raise ValidationError(_("Debe seleccionar una carpeta de Alfresco si la opción de archivado está activada."))
+
+
     def _compute_related_model_name(self):
         for rec in self:
             # Solo actualizamos si el valor ha cambiado
@@ -358,7 +368,7 @@ class Report(models.Model):
 
     @api.model
     def cron_export_reports_to_alfresco(self):
-        reports = self.search([('folder_id', '!=', False)])
+        reports = self.search([('alfresco_archive', '!=', False)])
         _logger.info("Ejecutando cron de exportación de reportes a Alfresco (%s reportes encontrados)", len(reports))
     
         for report in reports:
@@ -379,7 +389,7 @@ class Report(models.Model):
                 final_domain = base_domain
     
             records = model.search(final_domain)
-            _logger.info("Reporte %s: se procesarán %s registros", report.name, len(records))
+            _logger.info("******** Reporte %s: se procesarán %s registros. Dominio aplicado: %s ", report.name, len(records), final_domain)
     
             for record in records:
                 try:
