@@ -40,12 +40,10 @@ class Report(models.Model):
 
     related_model_name = fields.Char(
         string="Modelo Relacionado",
-        compute='_compute_related_model_name',
-        store=False,
-        # Añadimos este parámetro para forzar la notificación
-        compute_sudo=True
-    ) 
-    
+        related='model',       
+        readonly=True,
+        store=True,            # ¡importante!
+    )    
     last_sync_date = fields.Datetime(
     string="Última sincronización con Alfresco")
     
