@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista de formulario para el Informe de Índice de Consumo -->
+    <record id="view_fleet_consumption_index_report_form" model="ir.ui.view">
+        <field name="name">fleet.consumption.index.report.form</field>
+        <field name="model">fleet.consumption.index.report</field>
+        <field name="arch" type="xml">
+            <form string="Informe de Índice de Consumo">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="company_id"/>
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                        </group>
+                        <group>
+                            <field name="year"/>
+                            <field name="month"/>
+                        </group>
+                    </group>
+                    <group attrs="{'invisible': [('pdf_file', '=', False)]}">
+                        <field name="pdf_file" filename="pdf_filename" readonly="1"/>
+                        <field name="pdf_filename" invisible="1"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_generate_report" string="Generar Informe" type="object" class="btn-primary" attrs="{'invisible': [('pdf_file', '!=', False)]}"/>
+                    <button name="action_print_report" string="Imprimir Informe" type="object" class="btn-primary" attrs="{'invisible': [('pdf_file', '=', False)]}"/>
+                    <button string="Cerrar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Acción para el Informe de Índice de Consumo -->
+    <record id="action_fleet_consumption_index_report" model="ir.actions.act_window">
+        <field name="name">Índice de Consumo</field>
+        <field name="res_model">fleet.consumption.index.report</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Generar un informe de índice de consumo
+            </p>
+        </field>
+    </record>
+
+    <!-- Menú para el Informe de Índice de Consumo -->
+    <menuitem id="menu_fleet_consumption_index_report" 
+              name="Índice de Consumo" 
+              parent="fleet.menu_fleet_reporting" 
+              action="action_fleet_consumption_index_report" 
+              sequence="21"/>
+</odoo>

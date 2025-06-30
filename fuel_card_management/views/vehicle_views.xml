@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Extender la vista de formulario de vehículos de flota -->
+    <record id="view_fleet_vehicle_form_inherit_fuel" model="ir.ui.view">
+        <field name="name">fleet.vehicle.form.inherit.fuel</field>
+        <field name="model">fleet.vehicle</field>
+        <field name="inherit_id" ref="fleet.fleet_vehicle_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_fuel_cards" 
+                        type="object" 
+                        class="oe_stat_button" 
+                        icon="fa-credit-card">
+                    <field name="fuel_card_count" string="Tarjetas" widget="statinfo"/>
+                </button>
+                <button name="action_view_fuel_consumption" 
+                        type="object" 
+                        class="oe_stat_button" 
+                        icon="fa-tint">
+                    <field name="total_fuel_consumed" string="Consumo (L)" widget="statinfo"/>
+                </button>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="Gestión de Combustible">
+                    <group>
+                        <group string="Información del Combustible">
+                            <field name="fuel_type" options="{'no_create': True, 'no_open': True}"/>
+                            <field name="tank_capacity"/>
+                            <field name="average_consumption"/>
+                            <field name="fuel_notes" placeholder="Notas adicionales sobre el combustible..."/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Tarjetas Asignadas">
+                            <field name="fuel_card_ids" readonly="1">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="supplier_id"/>
+                                    <field name="current_balance"/>
+                                    <field name="state"/>
+                                </tree>
+                            </field>
+                            <div class="oe_right">
+                                <button name="action_assign_fuel_card" 
+                                        type="object" 
+                                        string="Asignar Tarjeta" 
+                                        class="btn btn-primary"/>
+                            </div>
+                        </page>
+                        <page string="Consumo de Combustible">
+                            <field name="fuel_consumption_ids" readonly="1">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="date"/>
+                                    <field name="card_id"/>
+                                    <field name="driver_id"/>
+                                    <field name="liters"/>
+                                    <field name="unit_price"/>
+                                    <field name="amount"/>
+                                    <field name="state"/>
+                                </tree>
+                            </field>
+                            <div class="oe_right">
+                                <button name="action_register_fuel_consumption" 
+                                        type="object" 
+                                        string="Registrar Consumo" 
+                                        class="btn btn-primary"/>
+                            </div>
+                        </page>
+                    </notebook>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Vista de árbol para vehículos -->
+    <record id="view_fleet_vehicle_tree_inherit_fuel" model="ir.ui.view">
+        <field name="name">fleet.vehicle.tree.inherit.fuel</field>
+        <field name="model">fleet.vehicle</field>
+        <field name="inherit_id" ref="fleet.fleet_vehicle_view_tree"/>
+        <field name="arch" type="xml">
+            <field name="model_id" position="after">
+                <field name="fuel_type"/>
+                <field name="tank_capacity"/>
+                <field name="average_consumption"/>
+                <field name="total_fuel_consumed"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- Vista Kanban para vehículos con información de combustible -->
+    <record id="view_fleet_vehicle_kanban_inherit_fuel" model="ir.ui.view">
+        <field name="name">fleet.vehicle.kanban.inherit.fuel</field>
+        <field name="model">fleet.vehicle</field>
+        <field name="inherit_id" ref="fleet.fleet_vehicle_view_kanban"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[hasclass('oe_kanban_details')]" position="inside">
+                <div class="row">
+                    <div class="col-12">
+                        <field name="fuel_type"/>
+                    </div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>

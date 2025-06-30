@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Heredar la vista de formulario de vehículo para añadir los nuevos campos -->
+    <record id="fleet_vehicle_view_form_inherit" model="ir.ui.view">
+        <field name="name">fleet.vehicle.form.inherit</field>
+        <field name="model">fleet.vehicle</field>
+        <field name="inherit_id" ref="fleet.fleet_vehicle_view_form"/>
+        <field name="arch" type="xml">
+            <!-- Eliminar cualquier texto o comentario que pueda estar causando el problema -->
+            <xpath expr="//div[@class='oe_title']" position="replace">
+                <div class="oe_title">
+                    <h1>
+                        <field name="name" readonly="1" invisible="1"/>
+                    </h1>
+                </div>
+            </xpath>
+            
+            <!-- Añadir los campos que faltan pero invisibles -->
+            <field name="company_id" position="before">
+                <field name="active" invisible="1"/>
+                <field name="vehicle_type" invisible="1"/>
+                <field name="service_activity" invisible="1"/>
+            </field>
+            
+            <!-- Reemplazar la sección principal del formulario -->
+            <xpath expr="//group[1]" position="replace">
+                <group>
+                    <group string="Información del Vehículo">
+                        <field name="company_id" invisible="1"/>
+                        <field name="currency_id" invisible="1"/>
+                        <field name="model_id" required="1" options="{'no_create': False, 'no_open': True}" placeholder="Seleccione o cree el modelo"/>
+                        <field name="license_plate" required="1" placeholder="Ingrese la matrícula"/>
+                        <field name="circulation_number" required="1" placeholder="Ingrese el número de circulación"/>
+                        <field name="vin_sn" placeholder="Ingrese el número de serie"/>
+                        <field name="acquisition_date" placeholder="Seleccione la fecha de adquisición"/>
+                        <field name="location" placeholder="Ingrese la ubicación"/>
+                        <label for="is_technological" string="Vehículo Tecnológico"/>
+                        <div>
+                            <field name="is_technological" nolabel="1" class="oe_inline"/>
+                        </div>
+                        <field name="tech_fuel_type" attrs="{'invisible': [('is_technological', '=', False)], 'required': [('is_technological', '=', True)]}" placeholder="Seleccione el tipo de combustible"/>
+                        <label for="has_route_sheet" string="Posee Hoja de Ruta"/>
+                        <div>
+                            <field name="has_route_sheet" nolabel="1" class="oe_inline"/>
+                        </div>
+                        <field name="custom_activity_type_id" required="1" options="{'no_create': False, 'no_open': True}" placeholder="Seleccione o cree el tipo de actividad" context="{'default_is_for_technological': is_technological}"/>
+                    </group>
+                    <group string="Información del Conductor">
+                        <field name="driver_id" required="1" options="{'no_create': False}" placeholder="Seleccione o cree el conductor"/>
+                        <field name="future_driver_id" options="{'no_create': False}" placeholder="Seleccione o cree el futuro conductor"/>
+                        <field name="plan_to_change_car" invisible="1"/>
+                        <field name="plan_to_change_bike" invisible="1"/>
+                        <field name="manager_id" options="{'no_create': False}" placeholder="Seleccione o cree el responsable"/>
+                        <field name="next_assignation_date" placeholder="Seleccione la fecha"/>
+                        <field name="write_off_date" placeholder="Seleccione la fecha"/>
+                    </group>
+                </group>
+            </xpath>
+            
+            <!-- Añadir botones de acción en el button_box -->
+            <div name="button_box" position="inside">
+                <button name="action_schedule_maintenance" type="object" class="oe_stat_button" icon="fa-wrench"
+                        attrs="{'invisible': [('maintenance_alert', '=', False)]}">
+                    <div class="o_stat_info">
+                        <span class="o_stat_text">Programar</span>
+                        <span class="o_stat_text">Mantenimiento</span>
+                    </div>
+                </button>
+                <button name="action_renew_ficav" type="object" class="oe_stat_button" icon="fa-calendar"
+                        attrs="{'invisible': [('ficav_alert', '=', False)]}">
+                    <div class="o_stat_info">
+                        <span class="o_stat_text">Renovar</span>
+                        <span class="o_stat_text">FICAV</span>
+                    </div>
+                </button>
+            </div>
+            
+            <!-- Añadir la sección de control de mantenimiento y FICAV -->
+            <xpath expr="//group[last()]" position="after">
+                <group>
+                    <group string="Control de Mantenimiento y FICAV">
+                        <field name="ficav_expiry_date"/>
+                        <field name="available_kilometers"/>
+                        <field name="last_maintenance_date"/>
+                        <field name="last_maintenance_odometer"/>
+                        <field name="next_maintenance_odometer"/>
+                        <field name="maintenance_alert" invisible="1"/>
+                        <field name="ficav_alert" invisible="1"/>
+                        <field name="maintenance_status" widget="badge" 
+                               decoration-success="maintenance_status == 'ok'" 
+                               decoration-warning="maintenance_status == 'warning'" 
+                               decoration-danger="maintenance_status in ['alert', 'overdue']"/>
+                        <field name="ficav_status" widget="badge" 
+                               decoration-success="ficav_status == 'ok'" 
+                               decoration-warning="ficav_status == 'warning'" 
+                               decoration-danger="ficav_status in ['alert', 'expired']"/>
+                    </group>
+                    <group>
+                        <!-- Espacio para otros campos si es necesario -->
+                    </group>
+                </group>
+            </xpath>
+            
+            <!-- Añadir páginas adicionales al notebook -->
+            <xpath expr="//notebook" position="inside">
+                <page string="Hojas de Ruta" attrs="{'invisible': [('has_route_sheet', '=', False)]}">
+                    <field name="route_sheet_ids">
+                        <tree>
+                            <field name="name"/>
+                            <field name="date"/>
+                            <field name="total_kilometers"/>
+                            <field name="total_trips"/>
+                            <field name="cancelled"/>
+                        </tree>
+                    </field>
+                </page>
+                <page string="Índices de Consumo">
+                    <field name="consumption_index_id">
+                        <tree>
+                            <field name="factory_consumption_index"/>
+                            <field name="current_consumption_index"/>
+                        </tree>
+                    </field>
+                </page>
+                <page string="Combustible">
+                    <field name="fuel_ids">
+                        <tree>
+                            <field name="date"/>
+                            <field name="tank_liters"/>
+                            <field name="enabled_by"/>
+                        </tree>
+                    </field>
+                </page>
+                <page string="Mantenimientos">
+                    <field name="maintenance_ids">
+                        <tree>
+                            <field name="name"/>
+                            <field name="date"/>
+                            <field name="maintenance_type"/>
+                            <field name="is_scheduled"/>
+                            <field name="state"/>
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Heredar la vista de árbol de vehículo para añadir los nuevos campos -->
+    <record id="fleet_vehicle_view_tree_inherit" model="ir.ui.view">
+        <field name="name">fleet.vehicle.tree.inherit</field>
+        <field name="model">fleet.vehicle</field>
+        <field name="inherit_id" ref="fleet.fleet_vehicle_view_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='model_id']" position="after">
+                <field name="license_plate"/>
+                <field name="circulation_number"/>
+                <field name="custom_fuel_type"/>
+                <field name="is_technological"/>
+                <field name="has_route_sheet"/>
+                <field name="custom_activity_type_id"/>
+                <field name="available_kilometers"/>
+                <field name="ficav_expiry_date"/>
+                <field name="maintenance_status" widget="badge" 
+                       decoration-success="maintenance_status == 'ok'" 
+                       decoration-warning="maintenance_status == 'warning'" 
+                       decoration-danger="maintenance_status in ['alert', 'overdue']"/>
+                <field name="ficav_status" widget="badge" 
+                       decoration-success="ficav_status == 'ok'" 
+                       decoration-warning="ficav_status == 'warning'" 
+                       decoration-danger="ficav_status in ['alert', 'expired']"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Heredar la vista de búsqueda de vehículo para añadir los nuevos campos -->
+    <record id="fleet_vehicle_view_search_inherit" model="ir.ui.view">
+        <field name="name">fleet.vehicle.search.inherit</field>
+        <field name="model">fleet.vehicle</field>
+        <field name="inherit_id" ref="fleet.fleet_vehicle_view_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='model_id']" position="after">
+                <field name="license_plate"/>
+                <field name="circulation_number"/>
+                <field name="custom_fuel_type"/>
+                <field name="custom_activity_type_id"/>
+                <field name="ficav_expiry_date"/>
+            </xpath>
+            <xpath expr="//filter[@name='alert_true']" position="after">
+                <separator/>
+                <filter string="Vehículos Tecnológicos" name="is_technological" domain="[('is_technological', '=', True)]"/>
+                <filter string="Vehículos Normales" name="is_normal" domain="[('is_technological', '=', False)]"/>
+                <filter string="Con Hoja de Ruta" name="has_route_sheet" domain="[('has_route_sheet', '=', True)]"/>
+                <filter string="Sin Hoja de Ruta" name="no_route_sheet" domain="[('has_route_sheet', '=', False)]"/>
+                <separator/>
+                <filter string="Actividad de Transporte" name="transport_activity" domain="[('custom_activity_type_id.is_for_technological', '=', False)]"/>
+                <filter string="Actividad Tecnológica" name="tech_activity" domain="[('custom_activity_type_id.is_for_technological', '=', True)]"/>
+                <separator/>
+                <filter string="Alerta de Mantenimiento" name="maintenance_alert" domain="[('maintenance_alert', '=', True)]"/>
+                <filter string="Alerta de FICAV" name="ficav_alert" domain="[('ficav_alert', '=', True)]"/>
+                <filter string="FICAV Vencido" name="ficav_expired" domain="[('ficav_status', '=', 'expired')]"/>
+                <filter string="FICAV Próximo a Vencer" name="ficav_warning" domain="[('ficav_status', 'in', ['warning', 'alert'])]"/>
+                <filter string="Mantenimiento Vencido" name="maintenance_overdue" domain="[('maintenance_status', '=', 'overdue')]"/>
+                <filter string="Mantenimiento Próximo" name="maintenance_warning" domain="[('maintenance_status', 'in', ['warning', 'alert'])]"/>
+            </xpath>
+            <xpath expr="//group" position="inside">
+                <filter string="Tipo de Combustible" name="group_by_fuel_type" context="{'group_by': 'custom_fuel_type'}"/>
+                <filter string="Tipo de Actividad" name="group_by_activity_type" context="{'group_by': 'custom_activity_type_id'}"/>
+                <filter string="Tipo de Vehículo" name="group_by_technological" context="{'group_by': 'is_technological'}"/>
+                <filter string="Con/Sin Hoja de Ruta" name="group_by_route_sheet" context="{'group_by': 'has_route_sheet'}"/>
+                <filter string="Estado Mantenimiento" name="group_by_maintenance_status" context="{'group_by': 'maintenance_status'}"/>
+                <filter string="Estado FICAV" name="group_by_ficav_status" context="{'group_by': 'ficav_status'}"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

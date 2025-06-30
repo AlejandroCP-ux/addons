@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Acción para cargas de tarjetas -->
+    <record id="action_fuel_card_load" model="ir.actions.act_window">
+        <field name="name">Cargas de Tarjeta</field>
+        <field name="res_model">fuel.card.load</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_fuel_card_load_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Crear una nueva carga de tarjeta
+            </p>
+            <p>
+                Las cargas de tarjeta son las operaciones que incrementan el saldo de las tarjetas de combustible.
+            </p>
+        </field>
+    </record>
+</odoo>
+

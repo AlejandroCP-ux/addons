@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista de formulario para Hojas de Ruta -->
+    <record id="view_fleet_route_sheet_form" model="ir.ui.view">
+        <field name="name">fleet.route.sheet.form</field>
+        <field name="model">fleet.route.sheet</field>
+        <field name="arch" type="xml">
+            <form string="Hoja de Ruta">
+                <header>
+                    <button name="action_confirm" string="Confirmar" type="object" class="oe_highlight" states="draft"/>
+                    <button name="action_cancel" string="Cancelar" type="object" states="draft,confirmed"/>
+                    <button name="action_draft" string="Volver a Borrador" type="object" states="cancelled"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,cancelled"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <div class="alert alert-info" role="alert" attrs="{'invisible': [('state', '!=', 'draft')]}">
+                        <p><strong>Nota:</strong> Complete todos los campos obligatorios y añada al menos un viaje antes de confirmar la hoja de ruta.</p>
+                    </div>
+                    <div class="alert alert-warning" role="alert" attrs="{'invisible': ['|', ('maintenance_alert', '=', False), ('state', '!=', 'draft')]}">
+                        <p><strong>Advertencia:</strong> Este vehículo está próximo a necesitar mantenimiento. Kilómetros disponibles: <field name="available_kilometers" readonly="1"/></p>
+                    </div>
+                    <div class="alert alert-danger" role="alert" attrs="{'invisible': ['|', ('ficav_alert', '=', False), ('state', '!=', 'draft')]}">
+                        <p><strong>Advertencia:</strong> El FICAV de este vehículo está próximo a vencer o ya ha vencido. Fecha de vencimiento: <field name="ficav_expiry_date" readonly="1"/></p>
+                    </div>
+                    <group>
+                        <group string="Información del Vehículo">
+                            <field name="vehicle_id" options="{'no_create': True, 'no_open': True}" domain="[('has_route_sheet', '=', True)]" widget="selection"/>
+                            <field name="vehicle_type"/>
+                            <field name="vehicle_brand"/>
+                            <field name="vehicle_capacity"/>
+                            <field name="vehicle_number"/>
+                            <field name="license_plate" string="Matrícula"/>
+                            <field name="maintenance_alert" invisible="1"/>
+                            <field name="ficav_alert" invisible="1"/>
+                            <field name="ficav_expiry_date" invisible="1"/>
+                        </group>
+                        <group string="Información General">
+                            <field name="date"/>
+                            <field name="enabled_by" options="{'no_create': False}" placeholder="Seleccione o cree quien habilita"/>
+                            <field name="entity"/>
+                            <field name="organism"/>
+                            <field name="driver_id"/>
+                            <field name="driver_license"/>
+                            <field name="signature" widget="image"/>
+                            <field name="signature_filename" invisible="1"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="authorized_service"/>
+                            <field name="available_kilometers"/>
+                        </group>
+                        <group>
+                            <field name="cupo"/>
+                            <field name="parqueo"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Viajes">
+                            <field name="trip_ids" attrs="{'readonly': [('state', '!=', 'draft')]}">
+                                <tree editable="bottom">
+                                    <field name="date"/>
+                                    <field name="origin"/>
+                                    <field name="destination"/>
+                                    <field name="authorized_route"/>
+                                    <field name="departure_time"/>
+                                    <field name="arrival_time"/>
+                                    <field name="travel_time"/>
+                                    <field name="departure_odometer"/>
+                                    <field name="arrival_odometer"/>
+                                    <field name="kilometers"/>
+                                    <field name="driver_number"/>
+                                    <field name="passenger_count"/>
+                                </tree>
+                            </field>
+                            <group class="oe_subtotal_footer">
+                                <field name="total_trips" class="oe_inline"/>
+                                <field name="total_kilometers" class="oe_inline"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Vista de árbol mejorada para Hojas de Ruta -->
+    <record id="view_fleet_route_sheet_tree" model="ir.ui.view">
+        <field name="name">fleet.route.sheet.tree</field>
+        <field name="model">fleet.route.sheet</field>
+        <field name="arch" type="xml">
+            <tree string="Hojas de Ruta" 
+                  decoration-info="state=='draft'" 
+                  decoration-muted="state=='cancelled'" 
+                  decoration-success="state=='confirmed'"
+                  class="o_list_view">
+                <field name="name"/>
+                <field name="vehicle_id"/>
+                <field name="license_plate"/>
+                <field name="date"/>
+                <field name="driver_id"/>
+                <field name="total_trips"/>
+                <field name="total_kilometers"/>
+                <field name="state" widget="badge" 
+                       decoration-info="state == 'draft'" 
+                       decoration-success="state == 'confirmed'" 
+                       decoration-muted="state == 'cancelled'"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vista de árbol específica para Control de Entrega de HR -->
+    <record id="view_fleet_route_sheet_control_tree" model="ir.ui.view">
+        <field name="name">fleet.route.sheet.control.tree</field>
+        <field name="model">fleet.route.sheet</field>
+        <field name="arch" type="xml">
+            <tree string="Control de Entrega de Hojas de Ruta" 
+                  decoration-success="state=='confirmed'"
+                  create="false" edit="false" delete="false"
+                  class="o_list_view">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="vehicle_id"/>
+                <field name="license_plate"/>
+                <field name="driver_id"/>
+                <field name="enabled_by"/>
+                <field name="total_trips"/>
+                <field name="total_kilometers"/>
+                <field name="state" invisible="1"/>
+                <button name="action_generate_pdf" string="Imprimir PDF" type="object" 
+                        class="btn-primary" icon="fa-print"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vista de búsqueda específica para Control de Entrega de HR -->
+    <record id="view_fleet_route_sheet_control_search" model="ir.ui.view">
+        <field name="name">fleet.route.sheet.control.search</field>
+        <field name="model">fleet.route.sheet</field>
+        <field name="arch" type="xml">
+            <search string="Buscar Control de Entrega HR">
+                <field name="name"/>
+                <field name="vehicle_id"/>
+                <field name="driver_id"/>
+                <field name="enabled_by"/>
+                <field name="date"/>
+                <filter string="Confirmadas" name="confirmed" domain="[('state', '=', 'confirmed')]"/>
+                <separator/>
+                <filter string="Hoy" name="today" domain="[('date', '=', context_today())]"/>
+                <filter string="Ayer" name="yesterday" domain="[('date', '=', (context_today() - datetime.timedelta(days=1)).strftime('%Y-%m-%d'))]"/>
+                <filter string="Últimos 7 días" name="last_week" domain="[('date', '&gt;=', (context_today() - datetime.timedelta(days=7)).strftime('%Y-%m-%d'))]"/>
+                <filter string="Últimos 30 días" name="last_month" domain="[('date', '&gt;=', (context_today() - datetime.timedelta(days=30)).strftime('%Y-%m-%d'))]"/>
+                <group expand="1" string="Agrupar Por">
+                    <filter string="Vehículo" name="group_by_vehicle" context="{'group_by': 'vehicle_id'}"/>
+                    <filter string="Conductor" name="group_by_driver" context="{'group_by': 'driver_id'}"/>
+                    <filter string="Habilitado por" name="group_by_enabled_by" context="{'group_by': 'enabled_by'}"/>
+                    <filter string="Fecha" name="group_by_date" context="{'group_by': 'date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Vista de búsqueda para Hojas de Ruta -->
+    <record id="view_fleet_route_sheet_search" model="ir.ui.view">
+        <field name="name">fleet.route.sheet.search</field>
+        <field name="model">fleet.route.sheet</field>
+        <field name="arch" type="xml">
+            <search string="Buscar Hojas de Ruta">
+                <field name="name"/>
+                <field name="vehicle_id"/>
+                <field name="driver_id"/>
+                <field name="date"/>
+                <filter string="Mis Hojas de Ruta" name="my_route_sheets" domain="[('create_uid', '=', uid)]"/>
+                <filter string="Borrador" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Confirmadas" name="confirmed" domain="[('state', '=', 'confirmed')]"/>
+                <filter string="Canceladas" name="cancelled" domain="[('state', '=', 'cancelled')]"/>
+                <separator/>
+                <filter string="Hoy" name="today" domain="[('date', '=', context_today())]"/>
+                <filter string="Ayer" name="yesterday" domain="[('date', '=', (context_today() - datetime.timedelta(days=1)).strftime('%Y-%m-%d'))]"/>
+                <filter string="Últimos 7 días" name="last_week" domain="[('date', '&gt;=', (context_today() - datetime.timedelta(days=7)).strftime('%Y-%m-%d'))]"/>
+                <filter string="Últimos 30 días" name="last_month" domain="[('date', '&gt;=', (context_today() - datetime.timedelta(days=30)).strftime('%Y-%m-%d'))]"/>
+                <group expand="0" string="Agrupar Por">
+                    <filter string="Vehículo" name="group_by_vehicle" context="{'group_by': 'vehicle_id'}"/>
+                    <filter string="Conductor" name="group_by_driver" context="{'group_by': 'driver_id'}"/>
+                    <filter string="Fecha" name="group_by_date" context="{'group_by': 'date'}"/>
+                    <filter string="Estado" name="group_by_state" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Acción para Hojas de Ruta -->
+    <record id="action_fleet_route_sheet" model="ir.actions.act_window">
+        <field name="name">Hojas de Ruta</field>
+        <field name="res_model">fleet.route.sheet</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Crea una nueva hoja de ruta
+            </p>
+        </field>
+    </record>
+
+    <!-- Acción para Llenar Hojas de Ruta -->
+    <record id="action_fleet_route_sheet_fill" model="ir.actions.act_window">
+        <field name="name">Llenar Hojas de Ruta</field>
+        <field name="res_model">fleet.route.sheet</field>
+        <field name="view_mode">form,tree</field>
+        <field name="context">{'default_state': 'draft'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Crea una nueva hoja de ruta
+            </p>
+            <p>
+                Aquí puedes llenar los detalles de la hoja de ruta para un vehículo.
+            </p>
+        </field>
+    </record>
+
+    <!-- Acción mejorada para Control de Entrega de HR -->
+    <record id="action_fleet_route_sheet_control" model="ir.actions.act_window">
+        <field name="name">Control de Entrega de HR</field>
+        <field name="res_model">fleet.route.sheet</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="view_fleet_route_sheet_control_tree"/>
+        <field name="search_view_id" ref="view_fleet_route_sheet_control_search"/>
+        <field name="domain">[('state', '=', 'confirmed')]</field>
+        <field name="context">{
+            'search_default_confirmed': 1,
+            'search_default_last_month': 1,
+            'create': False
+        }</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No hay hojas de ruta confirmadas
+            </p>
+            <p>
+                Este informe muestra todas las hojas de ruta confirmadas con opción de impresión en PDF.
+                Puede filtrar por fecha, vehículo o conductor.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menú para Hojas de Ruta -->
+    <menuitem id="menu_fleet_route_sheet_root" 
+              name="Hojas de Ruta" 
+              sequence="21" 
+              parent="fleet.menu_root"/>
+
+    <menuitem id="menu_fleet_route_sheet" 
+              name="Hojas de Ruta" 
+              parent="menu_fleet_route_sheet_root" 
+              action="action_fleet_route_sheet" 
+              sequence="1"/>
+
+    <menuitem id="menu_fleet_route_sheet_fill" 
+              name="Llenar Hojas de Ruta" 
+              parent="menu_fleet_route_sheet_root" 
+              action="action_fleet_route_sheet_fill" 
+              sequence="2"/>
+
+    <!-- Menú para Control de Entrega de HR en Informes -->
+    <menuitem id="menu_fleet_route_sheet_control" 
+              name="Control de Entrega de HR" 
+              parent="fleet.menu_fleet_reporting" 
+              action="action_fleet_route_sheet_control" 
+              sequence="10"/>
+</odoo>

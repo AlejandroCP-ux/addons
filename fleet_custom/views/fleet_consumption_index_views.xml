@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista de formulario para Índices de Consumo -->
+    <record id="view_fleet_consumption_index_form" model="ir.ui.view">
+        <field name="name">fleet.consumption.index.form</field>
+        <field name="model">fleet.consumption.index</field>
+        <field name="arch" type="xml">
+            <form string="Índice de Consumo">
+                <sheet>
+                    <group>
+                        <field name="vehicle_id"/>
+                        <field name="factory_consumption_index"/>
+                        <field name="current_consumption_index"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Vista de árbol para Índices de Consumo -->
+    <record id="view_fleet_consumption_index_tree" model="ir.ui.view">
+        <field name="name">fleet.consumption.index.tree</field>
+        <field name="model">fleet.consumption.index</field>
+        <field name="arch" type="xml">
+            <tree string="Índices de Consumo">
+                <field name="vehicle_id"/>
+                <field name="factory_consumption_index"/>
+                <field name="current_consumption_index"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vista de búsqueda para Índices de Consumo -->
+    <record id="view_fleet_consumption_index_search" model="ir.ui.view">
+        <field name="name">fleet.consumption.index.search</field>
+        <field name="model">fleet.consumption.index</field>
+        <field name="arch" type="xml">
+            <search string="Buscar Índices de Consumo">
+                <field name="vehicle_id"/>
+                <group expand="0" string="Agrupar Por">
+                    <filter string="Vehículo" name="group_by_vehicle" context="{'group_by': 'vehicle_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Acción para Índices de Consumo -->
+    <record id="action_fleet_consumption_index" model="ir.actions.act_window">
+        <field name="name">Registrar índices de consumo</field>
+        <field name="res_model">fleet.consumption.index</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Crea un nuevo índice de consumo
+            </p>
+        </field>
+    </record>
+
+    <!-- Menú para Índices de Consumo -->
+    <menuitem id="menu_fleet_consumption_index_root" 
+              name="Índices de Consumo" 
+              sequence="22" 
+              parent="fleet.menu_root"/>
+
+    <menuitem id="menu_fleet_consumption_index" 
+              name="Registrar índices de consumo" 
+              parent="menu_fleet_consumption_index_root" 
+              action="action_fleet_consumption_index" 
+              sequence="1"/>
+</odoo>

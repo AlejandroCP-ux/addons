@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista de formulario para traspasos de saldo -->
+    <record id="view_fuel_balance_transfer_form" model="ir.ui.view">
+        <field name="name">fuel.balance.transfer.form</field>
+        <field name="model">fuel.balance.transfer</field>
+        <field name="arch" type="xml">
+            <form string="Traspaso de Saldo">
+                <header>
+                    <button name="action_confirm" string="Confirmar" type="object" class="oe_highlight" attrs="{'invisible': [('state', '!=', 'draft')]}"/>
+                    <button name="action_cancel" string="Cancelar" type="object" attrs="{'invisible': [('state', '=', 'cancelled')]}"/>
+                    <button name="action_reset_to_draft" string="Volver a Borrador" type="object" attrs="{'invisible': [('state', '!=', 'cancelled')]}"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,cancelled"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="date"/>
+                            <field name="source_card_id" domain="[('state', 'in', ['available', 'assigned']), ('current_balance', '>', 0)]"/>
+                            <field name="source_initial_balance"/>
+                            <field name="source_final_balance"/>
+                        </group>
+                        <group>
+                            <field name="amount"/>
+                            <field name="target_card_id" domain="[('state', 'in', ['available', 'assigned']), ('id', '!=', source_card_id)]"/>
+                            <field name="target_initial_balance"/>
+                            <field name="target_final_balance"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Notas">
+                            <field name="notes"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="activity_ids" widget="mail_activity"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Vista de árbol para traspasos de saldo -->
+    <record id="view_fuel_balance_transfer_tree" model="ir.ui.view">
+        <field name="name">fuel.balance.transfer.tree</field>
+        <field name="model">fuel.balance.transfer</field>
+        <field name="arch" type="xml">
+            <tree string="Traspasos de Saldo" decoration-success="state == 'confirmed'" decoration-muted="state == 'cancelled'" decoration-info="state == 'draft'">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="source_card_id"/>
+                <field name="target_card_id"/>
+                <field name="amount"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vista de búsqueda para traspasos de saldo -->
+    <record id="view_fuel_balance_transfer_search" model="ir.ui.view">
+        <field name="name">fuel.balance.transfer.search</field>
+        <field name="model">fuel.balance.transfer</field>
+        <field name="arch" type="xml">
+            <search string="Buscar Traspasos de Saldo">
+                <field name="name"/>
+                <field name="source_card_id"/>
+                <field name="target_card_id"/>
+                <filter string="Borrador" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Confirmado" name="confirmed" domain="[('state', '=', 'confirmed')]"/>
+                <filter string="Cancelado" name="cancelled" domain="[('state', '=', 'cancelled')]"/>
+                <group expand="0" string="Agrupar Por">
+                    <filter string="Estado" name="state" context="{'group_by': 'state'}"/>
+                    <filter string="Tarjeta Origen" name="source_card_id" context="{'group_by': 'source_card_id'}"/>
+                    <filter string="Tarjeta Destino" name="target_card_id" context="{'group_by': 'target_card_id'}"/>
+                    <filter string="Fecha" name="date" context="{'group_by': 'date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+  
+</odoo>
+

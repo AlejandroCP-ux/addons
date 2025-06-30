@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Acción para ajustes de saldo -->
+    <record id="action_fuel_balance_adjustment" model="ir.actions.act_window">
+        <field name="name">Ajustes de Saldo</field>
+        <field name="res_model">fuel.balance.adjustment</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_fuel_balance_adjustment_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Crear un nuevo ajuste de saldo
+            </p>
+            <p>
+                Los ajustes de saldo son las operaciones que modifican el saldo de las tarjetas de combustible por motivos especiales.
+            </p>
+        </field>
+    </record>
+</odoo>
+

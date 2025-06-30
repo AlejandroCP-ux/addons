@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_fuel_magnetic_card_kanban_dashboard" model="ir.ui.view">
+        <field name="name">fuel.magnetic.card.kanban.dashboard</field>
+        <field name="model">fuel.magnetic.card</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_dashboard">
+                <field name="name"/>
+                <field name="state"/>
+                <field name="holder_id"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click o_kanban_record_has_image_fill">
+                            <div class="oe_kanban_details">
+                                <strong class="o_kanban_record_title">
+                                    <field name="name"/>
+                                </strong>
+                                <div class="o_kanban_tags_section">
+                                    <span class="badge rounded-pill text-bg-info">
+                                        <field name="state"/>
+                                    </span>
+                                </div>
+                                <ul>
+                                    <li>Titular: <field name="holder_id"/></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+   
+</odoo>

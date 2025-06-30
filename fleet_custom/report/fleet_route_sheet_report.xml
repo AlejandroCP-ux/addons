@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="report_fleet_route_sheet" model="ir.actions.report">
+            <field name="name">Hoja de Ruta</field>
+            <field name="model">fleet.route.sheet</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">fleet_custom.report_route_sheet</field>
+            <field name="report_file">fleet_custom.report_route_sheet</field>
+            <field name="binding_model_id" ref="model_fleet_route_sheet"/>
+            <field name="binding_type">report</field>
+        </record>
+
+        <template id="report_route_sheet">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-call="web.external_layout">
+                        <div class="page">
+                            <h2 class="text-center">Hoja de Ruta No. <span t-field="o.name"/></h2>
+                            
+                            <div class="row mt32 mb32">
+                                <div class="col-6">
+                                    <strong>Vehículo:</strong> <span t-field="o.vehicle_id.name"/><br/>
+                                    <strong>Tipo:</strong> <span t-field="o.vehicle_type"/><br/>
+                                    <strong>Marca:</strong> <span t-field="o.vehicle_brand"/><br/>
+                                    <strong>Capacidad:</strong> <span t-field="o.vehicle_capacity"/><br/>
+                                    <strong>Número:</strong> <span t-field="o.vehicle_number"/><br/>
+                                    <strong>Matrícula:</strong> <span t-field="o.license_plate"/><br/>
+                                </div>
+                                <div class="col-6">
+                                    <strong>Fecha:</strong> <span t-field="o.date"/><br/>
+                                    <strong>Habilitada por:</strong> <span t-field="o.enabled_by"/><br/>
+                                    <strong>Entidad:</strong> <span t-field="o.entity"/><br/>
+                                    <strong>Organismo:</strong> <span t-field="o.organism"/><br/>
+                                    <strong>Conductor:</strong> <span t-field="o.driver_id.name"/><br/>
+                                    <strong>Licencia No.:</strong> <span t-field="o.driver_license"/><br/>
+                                </div>
+                            </div>
+                            
+                            <div class="row mt32 mb32">
+                                <div class="col-6">
+                                    <strong>Servicio Autorizado:</strong> <span t-field="o.authorized_service"/><br/>
+                                    <strong>Kilómetros Disponibles:</strong> <span t-field="o.available_kilometers"/><br/>
+                                </div>
+                                <div class="col-6">
+                                    <strong>Cupo:</strong> <span t-field="o.cupo"/><br/>
+                                    <strong>Parqueo:</strong> <span t-field="o.parqueo"/><br/>
+                                </div>
+                            </div>
+                            
+                            <h3>Viajes</h3>
+                            <table class="table table-sm table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Origen</th>
+                                        <th>Destino</th>
+                                        <th>Ruta Autorizada</th>
+                                        <th>Hora Salida</th>
+                                        <th>Hora Llegada</th>
+                                        <th>Tiempo (h)</th>
+                                        <th>Kms Salida</th>
+                                        <th>Kms Llegada</th>
+                                        <th>Total Kms</th>
+                                        <th>Nro conduce</th>
+                                        <th>Pasajeros</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="o.trip_ids" t-as="trip">
+                                        <td><span t-field="trip.date"/></td>
+                                        <td><span t-field="trip.origin"/></td>
+                                        <td><span t-field="trip.destination"/></td>
+                                        <td><span t-field="trip.authorized_route"/></td>
+                                        <td><span t-field="trip.departure_time"/></td>
+                                        <td><span t-field="trip.arrival_time"/></td>
+                                        <td><span t-field="trip.travel_time"/></td>
+                                        <td><span t-field="trip.departure_odometer"/></td>
+                                        <td><span t-field="trip.arrival_odometer"/></td>
+                                        <td><span t-field="trip.kilometers"/></td>
+                                        <td><span t-field="trip.driver_number"/></td>
+                                        <td><span t-field="trip.passenger_count"/></td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="9" class="text-right"><strong>Totales:</strong></td>
+                                        <td><strong><span t-field="o.total_kilometers"/></strong></td>
+                                        <td></td>
+                                        <td><strong><span t-esc="sum(trip.passenger_count for trip in o.trip_ids)"/></strong></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                            
+                            <div class="row mt64">
+                                <div class="col-6 text-center">
+                                    <p>_______________________</p>
+                                    <p>Firma del Conductor</p>
+                                </div>
+                                <div class="col-6 text-center">
+                                    <p>_______________________</p>
+                                    <p>Firma del Responsable</p>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </t>
+            </t>
+        </template>
+    </data>
+</odoo>

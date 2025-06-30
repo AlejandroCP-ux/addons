@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista de formulario para el Informe de Nivel de Actividad por Equipos -->
+    <record id="view_fleet_activity_report_form" model="ir.ui.view">
+        <field name="name">fleet.activity.report.form</field>
+        <field name="model">fleet.activity.report</field>
+        <field name="arch" type="xml">
+            <form string="Informe de Nivel de Actividad por Equipos">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="company_id"/>
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                        </group>
+                        <group>
+                            <field name="year"/>
+                            <field name="month"/>
+                        </group>
+                    </group>
+                    <group attrs="{'invisible': [('pdf_file', '=', False)]}">
+                        <field name="pdf_file" filename="pdf_filename" readonly="1"/>
+                        <field name="pdf_filename" invisible="1"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_generate_report" string="Generar Informe" type="object" class="btn-primary" attrs="{'invisible': [('pdf_file', '!=', False)]}"/>
+                    <button name="action_print_report" string="Imprimir Informe" type="object" class="btn-primary" attrs="{'invisible': [('pdf_file', '=', False)]}"/>
+                    <button string="Cerrar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Acción para el Informe de Nivel de Actividad por Equipos -->
+    <record id="action_fleet_activity_report" model="ir.actions.act_window">
+        <field name="name">Nivel de Actividad por Equipos</field>
+        <field name="res_model">fleet.activity.report</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Generar un informe de nivel de actividad por equipos
+            </p>
+        </field>
+    </record>
+
+    <!-- Menú para el Informe de Nivel de Actividad por Equipos -->
+    <menuitem id="menu_fleet_activity_report" 
+              name="Nivel de Actividad por Equipos" 
+              parent="fleet.menu_fleet_reporting" 
+              action="action_fleet_activity_report" 
+              sequence="20"/>
+</odoo>

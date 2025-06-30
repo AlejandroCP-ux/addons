@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista de árbol mejorada para mostrar kilómetros totales -->
+    <record id="view_fleet_route_sheet_kilometers_tree" model="ir.ui.view">
+        <field name="name">fleet.route.sheet.kilometers.tree</field>
+        <field name="model">fleet.route.sheet</field>
+        <field name="arch" type="xml">
+            <tree string="Kilómetros Totales Recorridos" create="false" edit="false" delete="false">
+                <field name="vehicle_id"/>
+                <field name="license_plate"/>
+                <field name="driver_id"/>
+                <field name="date"/>
+                <field name="total_kilometers" sum="Total Kilómetros"/>
+                <field name="total_trips" sum="Total Viajes"/>
+                <field name="state" invisible="1"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vista de búsqueda mejorada para kilómetros -->
+    <record id="view_fleet_route_sheet_kilometers_search" model="ir.ui.view">
+        <field name="name">fleet.route.sheet.kilometers.search</field>
+        <field name="model">fleet.route.sheet</field>
+        <field name="arch" type="xml">
+            <search string="Buscar Kilómetros Recorridos">
+                <field name="vehicle_id"/>
+                <field name="driver_id"/>
+                <field name="license_plate"/>
+                <field name="date"/>
+                <filter string="Confirmadas" name="confirmed" domain="[('state', '=', 'confirmed')]"/>
+                <separator/>
+                <filter string="Hoy" name="today" domain="[('date', '=', context_today())]"/>
+                <filter string="Últimos 7 días" name="last_week" domain="[('date', '&gt;=', (context_today() - datetime.timedelta(days=7)).strftime('%Y-%m-%d'))]"/>
+                <filter string="Últimos 30 días" name="last_month" domain="[('date', '&gt;=', (context_today() - datetime.timedelta(days=30)).strftime('%Y-%m-%d'))]"/>
+                <group expand="1" string="Agrupar Por">
+                    <filter string="Vehículo" name="group_by_vehicle" context="{'group_by': 'vehicle_id'}"/>
+                    <filter string="Chofer" name="group_by_driver" context="{'group_by': 'driver_id'}"/>
+                    <filter string="Fecha" name="group_by_date" context="{'group_by': 'date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Vista de formulario para el asistente de Kilómetros Totales -->
+    <record id="view_fleet_kilometers_report_wizard_form" model="ir.ui.view">
+        <field name="name">fleet.kilometers.report.wizard.form</field>
+        <field name="model">fleet.kilometers.report.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Kilómetros Totales Recorridos">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>Informe de Kilómetros Totales Recorridos</h1>
+                    </div>
+                    <group>
+                        <group string="Período">
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                        </group>
+                        <group string="Filtros Opcionales">
+                            <field name="vehicle_id" options="{'no_create': True}" placeholder="Todos los vehículos"/>
+                            <field name="driver_id" options="{'no_create': True}" placeholder="Todos los choferes"/>
+                        </group>
+                    </group>
+                    <div class="alert alert-info" role="alert">
+                        <p><strong>Información:</strong> Este informe muestra los kilómetros totales recorridos basado en las hojas de ruta confirmadas.</p>
+                        <p>Si no selecciona vehículo o chofer específico, se mostrarán todos los datos agrupados.</p>
+                    </div>
+                </sheet>
+                <footer>
+                    <button name="action_generate_report" string="Generar Informe" type="object" class="btn-primary"/>
+                    <button string="Cancelar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Acción para el asistente de Kilómetros Totales -->
+    <record id="action_fleet_kilometers_report_wizard" model="ir.actions.act_window">
+        <field name="name">Kilómetros Totales Recorridos</field>
+        <field name="res_model">fleet.kilometers.report.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Generar informe de kilómetros totales recorridos
+            </p>
+        </field>
+    </record>
+
+    <!-- Menú para Kilómetros Totales Recorridos -->
+    <menuitem id="menu_fleet_kilometers_report" 
+              name="Kilómetros Totales Recorridos" 
+              parent="fleet.menu_fleet_reporting" 
+              action="action_fleet_kilometers_report_wizard" 
+              sequence="25"/>
+</odoo>

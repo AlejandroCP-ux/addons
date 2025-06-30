@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista de formulario para Prueba de Consumo -->
+    <record id="view_fleet_consumption_test_form" model="ir.ui.view">
+        <field name="name">fleet.consumption.test.form</field>
+        <field name="model">fleet.consumption.test</field>
+        <field name="arch" type="xml">
+            <form string="Prueba de Consumo">
+                <header>
+                    <button name="action_confirm" string="Confirmar" type="object" class="oe_highlight" states="draft"/>
+                    <button name="action_cancel" string="Cancelar" type="object" states="draft,confirmed"/>
+                    <button name="action_draft" string="Volver a Borrador" type="object" states="cancelled"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,cancelled"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <div class="alert alert-info" role="alert" attrs="{'invisible': [('state', '!=', 'draft')]}">
+                        <p><strong>Nota:</strong> Complete todos los campos obligatorios antes de confirmar la prueba de consumo.</p>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="date"/>
+                            <field name="vehicle_id" options="{'no_create': True}"/>
+                            <field name="license_plate"/>
+                            <field name="driver_id" options="{'no_create': True}"/>
+                        </group>
+                        <group>
+                            <field name="kilometers_traveled"/>
+                            <field name="fuel_consumed"/>
+                            <field name="local_index"/>
+                            <field name="territory_index"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="transport_consumption_index"/>
+                            <field name="tech_consumption_index" attrs="{'required': [('is_technological', '=', True)], 'invisible': [('is_technological', '=', False)]}"/>
+                            <field name="is_technological" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="location"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Observaciones">
+                            <field name="observations"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Vista de árbol para Prueba de Consumo -->
+    <record id="view_fleet_consumption_test_tree" model="ir.ui.view">
+        <field name="name">fleet.consumption.test.tree</field>
+        <field name="model">fleet.consumption.test</field>
+        <field name="arch" type="xml">
+            <tree string="Pruebas de Consumo" decoration-info="state=='draft'" decoration-muted="state=='cancelled'" decoration-success="state=='confirmed'">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="vehicle_id"/>
+                <field name="license_plate"/>
+                <field name="driver_id"/>
+                <field name="kilometers_traveled"/>
+                <field name="fuel_consumed"/>
+                <field name="local_index"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vista de búsqueda para Prueba de Consumo -->
+    <record id="view_fleet_consumption_test_search" model="ir.ui.view">
+        <field name="name">fleet.consumption.test.search</field>
+        <field name="model">fleet.consumption.test</field>
+        <field name="arch" type="xml">
+            <search string="Buscar Pruebas de Consumo">
+                <field name="name"/>
+                <field name="vehicle_id"/>
+                <field name="license_plate"/>
+                <field name="driver_id"/>
+                <field name="date"/>
+                <filter string="Borrador" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Confirmadas" name="confirmed" domain="[('state', '=', 'confirmed')]"/>
+                <filter string="Canceladas" name="cancelled" domain="[('state', '=', 'cancelled')]"/>
+                <separator/>
+                <filter string="Hoy" name="today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="Esta Semana" name="this_week" domain="[('date', '>=', (context_today() + relativedelta(weeks=-1,days=1,weekday=0)).strftime('%Y-%m-%d')), ('date', '&lt;=', (context_today() + relativedelta(weekday=6)).strftime('%Y-%m-%d'))]"/>
+                <filter string="Este Mes" name="this_month" domain="[('date', '>=', (context_today().replace(day=1)).strftime('%Y-%m-%d')), ('date', '&lt;=', (context_today() + relativedelta(months=1, day=1, days=-1)).strftime('%Y-%m-%d'))]"/>
+                <group expand="0" string="Agrupar Por">
+                    <filter string="Vehículo" name="group_by_vehicle" context="{'group_by': 'vehicle_id'}"/>
+                    <filter string="Chofer" name="group_by_driver" context="{'group_by': 'driver_id'}"/>
+                    <filter string="Fecha" name="group_by_date" context="{'group_by': 'date'}"/>
+                    <filter string="Estado" name="group_by_state" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Acción para Registro de Prueba de Consumo -->
+    <record id="action_fleet_consumption_test" model="ir.actions.act_window">
+        <field name="name">Registro de la Prueba de Consumo de Combustible</field>
+        <field name="res_model">fleet.consumption.test</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Crea un nuevo registro de prueba de consumo
+            </p>
+            <p>
+                Aquí puedes registrar las pruebas de consumo de combustible para los vehículos.
+            </p>
+        </field>
+    </record>
+
+    <!-- Acción para Informe de Prueba del Litro -->
+    <record id="action_fleet_consumption_test_report" model="ir.actions.act_window">
+        <field name="name">Prueba del Litro</field>
+        <field name="res_model">fleet.consumption.test</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_confirmed': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No hay pruebas de consumo confirmadas
+            </p>
+            <p>
+                Aquí puedes ver los resultados de las pruebas de consumo de combustible.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menú para Registro de Prueba de Consumo -->
+    <menuitem id="menu_fleet_consumption_test" 
+              name="Registro de la Prueba del Litro" 
+              parent="menu_fleet_consumption_index_root" 
+              action="action_fleet_consumption_test" 
+              sequence="5"/>
+
+    <!-- Menú para Informe de Prueba del Litro -->
+    <menuitem id="menu_fleet_consumption_test_report" 
+              name="Prueba del Litro" 
+              parent="menu_fleet_fuel_root" 
+              action="action_fleet_consumption_test_report" 
+              sequence="3"/>
+</odoo>

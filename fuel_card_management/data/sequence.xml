@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Secuencia para titulares de tarjetas -->
+    <record id="sequence_fuel_card_holder" model="ir.sequence">
+        <field name="name">Secuencia de Titulares de Tarjeta</field>
+        <field name="code">fuel.card.holder</field>
+        <field name="prefix">TCH</field>
+        <field name="padding">5</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+    <!-- Secuencia para proveedores de combustible -->
+    <record id="sequence_fuel_supplier" model="ir.sequence">
+        <field name="name">Secuencia de Proveedores de Combustible</field>
+        <field name="code">fuel.supplier</field>
+        <field name="prefix">SUP</field>
+        <field name="padding">5</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+    <!-- Secuencia para generadores de energía -->
+    <record id="sequence_fuel_power_generator" model="ir.sequence">
+        <field name="name">Secuencia de Generadores de Energía</field>
+        <field name="code">fuel.power.generator</field>
+        <field name="prefix">GEN</field>
+        <field name="padding">5</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+    <!-- Secuencia para conductores -->
+    <record id="sequence_fuel_driver" model="ir.sequence">
+        <field name="name">Secuencia de Conductores</field>
+        <field name="code">fuel.driver</field>
+        <field name="prefix">DRV</field>
+        <field name="padding">5</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+    <!-- Secuencia para tarjetas magnéticas -->
+    <record id="sequence_fuel_magnetic_card" model="ir.sequence">
+        <field name="name">Secuencia de Tarjetas Magnéticas</field>
+        <field name="code">fuel.magnetic.card</field>
+        <field name="prefix">CARD</field>
+        <field name="padding">5</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+    <!-- Secuencia para combustible no asignado -->
+    <record id="sequence_fuel_unassigned" model="ir.sequence">
+        <field name="name">Secuencia de Combustible No Asignado</field>
+        <field name="code">fuel.unassigned</field>
+        <field name="prefix">UNA</field>
+        <field name="padding">5</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+    <!-- Secuencia para facturas de combustible -->
+    <record id="sequence_fuel_invoice" model="ir.sequence">
+        <field name="name">Secuencia de Facturas de Combustible</field>
+        <field name="code">fuel.invoice</field>
+        <field name="prefix">INV</field>
+        <field name="padding">5</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+    <!-- Secuencia para cargas de tarjetas -->
+    <record id="sequence_fuel_card_load" model="ir.sequence">
+        <field name="name">Secuencia de Cargas de Tarjeta</field>
+        <field name="code">fuel.card.load</field>
+        <field name="prefix">LOAD</field>
+        <field name="padding">5</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+    <!-- Secuencia para entregas/devoluciones de tarjetas -->
+    <record id="sequence_fuel_card_delivery" model="ir.sequence">
+        <field name="name">Secuencia de Entregas/Devoluciones de Tarjeta</field>
+        <field name="code">fuel.card.delivery</field>
+        <field name="prefix">DEL</field>
+        <field name="padding">5</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+    <!-- Secuencia para tickets de combustible -->
+    <record id="sequence_fuel_ticket" model="ir.sequence">
+        <field name="name">Secuencia de Tickets de Combustible</field>
+        <field name="code">fuel.ticket</field>
+        <field name="prefix">TIC</field>
+        <field name="padding">5</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+    <!-- Secuencia para ajustes de saldo -->
+    <record id="sequence_fuel_balance_adjustment" model="ir.sequence">
+        <field name="name">Secuencia de Ajustes de Saldo</field>
+        <field name="code">fuel.balance.adjustment</field>
+        <field name="prefix">ADJ</field>
+        <field name="padding">5</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+    <!-- Secuencia para traspasos de saldo -->
+    <record id="sequence_fuel_balance_transfer" model="ir.sequence">
+        <field name="name">Secuencia de Traspasos de Saldo</field>
+        <field name="code">fuel.balance.transfer</field>
+        <field name="prefix">TRF</field>
+        <field name="padding">5</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+    <!-- Secuencia para planes de combustible -->
+    <record id="sequence_fuel_plan" model="ir.sequence">
+        <field name="name">Secuencia de Planes de Combustible</field>
+        <field name="code">fuel.plan</field>
+        <field name="prefix">PLAN</field>
+        <field name="padding">5</field>
+        <field name="company_id" eval="False"/>
+    </record>
+</odoo>
+

@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista de formulario para Registros de Combustible y Kilómetros -->
+    <record id="view_fleet_fuel_record_form" model="ir.ui.view">
+        <field name="name">fleet.fuel.record.form</field>
+        <field name="model">fleet.fuel.record</field>
+        <field name="arch" type="xml">
+            <form string="Registro de Combustible y Kilómetros">
+                <header>
+                    <button name="action_confirm" string="Confirmar" type="object" class="oe_highlight" states="draft"/>
+                    <button name="action_cancel" string="Cancelar" type="object" states="draft,confirmed"/>
+                    <button name="action_draft" string="Volver a Borrador" type="object" states="cancelled"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,cancelled"/>
+                </header>
+                <sheet>
+                    <div class="alert alert-info" role="alert">
+                        <strong>Vehículos Administrativos</strong>
+                    </div>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Datos Generales">
+                            <field name="vehicle_id" options="{'no_create': True, 'no_open': True}" widget="selection"/>
+                            <field name="license_plate"/>
+                            <field name="date"/>
+                            <field name="previous_odometer"/>
+                            <field name="estimated_fuel"/>
+                            <field name="next_maintenance_odometer"/>
+                            <field name="planned_consumption_index"/>
+                            <field name="enabled_by" options="{'no_create': False}" placeholder="Seleccione o cree quien habilita"/>
+                        </group>
+                        <group string="Datos de Cierre" attrs="{'readonly': [('state', '!=', 'draft')]}">
+                            <field name="closing_odometer"/>
+                            <field name="closing_fuel"/>
+                            <field name="maintenance_odometer"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Resultados Calculados">
+                            <field name="total_kilometers"/>
+                            <field name="total_fuel_consumed"/>
+                            <field name="real_consumption_index"/>
+                            <field name="consumption_percentage" widget="percentage"/>
+                        </group>
+                        <group string="Observaciones">
+                            <field name="observations" nolabel="1" placeholder="Ingrese aquí cualquier observación relevante..."/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Vista de árbol para Registros de Combustible y Kilómetros -->
+    <record id="view_fleet_fuel_record_tree" model="ir.ui.view">
+        <field name="name">fleet.fuel.record.tree</field>
+        <field name="model">fleet.fuel.record</field>
+        <field name="arch" type="xml">
+            <tree string="Registros de Combustible y Kilómetros" decoration-info="state=='draft'" decoration-muted="state=='cancelled'" decoration-success="state=='confirmed'">
+                <field name="name"/>
+                <field name="vehicle_id"/>
+                <field name="license_plate"/>
+                <field name="date"/>
+                <field name="previous_odometer"/>
+                <field name="closing_odometer"/>
+                <field name="total_kilometers"/>
+                <field name="total_fuel_consumed"/>
+                <field name="real_consumption_index"/>
+                <field name="consumption_percentage" widget="percentage"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vista de búsqueda para Registros de Combustible y Kilómetros -->
+    <record id="view_fleet_fuel_record_search" model="ir.ui.view">
+        <field name="name">fleet.fuel.record.search</field>
+        <field name="model">fleet.fuel.record</field>
+        <field name="arch" type="xml">
+            <search string="Buscar Registros de Combustible y Kilómetros">
+                <field name="name"/>
+                <field name="vehicle_id"/>
+                <field name="license_plate"/>
+                <field name="enabled_by"/>
+                <filter string="Mis Registros" name="my_records" domain="[('create_uid', '=', uid)]"/>
+                <filter string="Borrador" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Confirmados" name="confirmed" domain="[('state', '=', 'confirmed')]"/>
+                <filter string="Cancelados" name="cancelled" domain="[('state', '=', 'cancelled')]"/>
+                <separator/>
+                <filter string="Hoy" name="today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="Esta Semana" name="this_week" domain="[('date', '>=', (context_today() + relativedelta(weeks=-1,days=1,weekday=0)).strftime('%Y-%m-%d')), ('date', '&lt;=', (context_today() + relativedelta(weekday=6)).strftime('%Y-%m-%d'))]"/>
+                <filter string="Este Mes" name="this_month" domain="[('date', '>=', (context_today().replace(day=1)).strftime('%Y-%m-%d')), ('date', '&lt;=', (context_today() + relativedelta(months=1, day=1, days=-1)).strftime('%Y-%m-%d'))]"/>
+                <group expand="0" string="Agrupar Por">
+                    <filter string="Vehículo" name="group_by_vehicle" context="{'group_by': 'vehicle_id'}"/>
+                    <filter string="Habilitado por" name="group_by_enabled_by" context="{'group_by': 'enabled_by'}"/>
+                    <filter string="Fecha" name="group_by_date" context="{'group_by': 'date'}"/>
+                    <filter string="Estado" name="group_by_state" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Acción para Registros de Combustible y Kilómetros -->
+    <record id="action_fleet_fuel_record" model="ir.actions.act_window">
+        <field name="name">Registros de Combustible y Kilómetros</field>
+        <field name="res_model">fleet.fuel.record</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'create': False}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No hay registros de combustible y kilómetros
+            </p>
+            <p>
+                Este informe muestra todos los registros de combustible y kilómetros.
+                Los nuevos registros solo pueden crearse desde "Llenar Modelo de Combustible y Kilómetros" en el menú de Hojas de Ruta.
+            </p>
+        </field>
+    </record>
+
+    <!-- Acción para Llenar Modelo de Combustible y Kilómetros -->
+    <record id="action_fleet_fuel_record_fill" model="ir.actions.act_window">
+        <field name="name">Llenar Modelo de Combustible y Kilómetros</field>
+        <field name="res_model">fleet.fuel.record</field>
+        <field name="view_mode">form,tree</field>
+        <field name="context">{'default_state': 'draft'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Crea un nuevo registro de combustible y kilómetros
+            </p>
+            <p>
+                Aquí puedes llenar el modelo de combustible habilitado y kilómetros recorridos para vehículos administrativos.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menú para Llenar Modelo de Combustible y Kilómetros -->
+    <menuitem id="menu_fleet_fuel_record_fill" 
+              name="Llenar Modelo de Combustible y Kilómetros" 
+              parent="menu_fleet_route_sheet_root" 
+              action="action_fleet_fuel_record_fill" 
+              sequence="3"/>
+
+    <!-- Menú en el menú de informes -->
+    <menuitem id="menu_fleet_fuel_record_report" 
+              name="Registros de Combustible y Kilómetros" 
+              parent="fleet.menu_fleet_reporting" 
+              action="action_fleet_fuel_record" 
+              sequence="30"/>
+</odoo>

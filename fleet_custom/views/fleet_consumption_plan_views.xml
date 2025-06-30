@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista de formulario para Plan de Consumo -->
+    <record id="view_fleet_consumption_plan_form" model="ir.ui.view">
+        <field name="name">fleet.consumption.plan.form</field>
+        <field name="model">fleet.consumption.plan</field>
+        <field name="arch" type="xml">
+            <form string="Plan de Consumo">
+                <header>
+                    <button name="action_confirm" string="Confirmar" type="object" class="oe_highlight" states="draft"/>
+                    <button name="action_cancel" string="Cancelar" type="object" states="draft,confirmed"/>
+                    <button name="action_draft" string="Volver a Borrador" type="object" states="cancelled"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,cancelled"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <div class="alert alert-info" role="alert" attrs="{'invisible': [('state', '!=', 'draft')]}">
+                        <p><strong>Nota:</strong> Defina el total de combustible disponible y luego asígnelo a vehículos o actividades.</p>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="year"/>
+                            <field name="month"/>
+                        </group>
+                        <group>
+                            <field name="total_fuel"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Asignación por Vehículos">
+                            <group>
+                                <field name="total_allocated_vehicles"/>
+                                <field name="remaining_fuel_vehicles"/>
+                            </group>
+                            <field name="vehicle_allocation_ids" attrs="{'readonly': [('state', '!=', 'draft')]}">
+                                <tree editable="bottom">
+                                    <field name="vehicle_id" options="{'no_create': True}"/>
+                                    <field name="allocated_fuel"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Asignación por Actividades">
+                            <group>
+                                <field name="total_allocated_activities"/>
+                                <field name="remaining_fuel_activities"/>
+                            </group>
+                            <field name="activity_allocation_ids" attrs="{'readonly': [('state', '!=', 'draft')]}">
+                                <tree editable="bottom">
+                                    <field name="activity_type_id" options="{'no_create': True}"/>
+                                    <field name="vehicle_id" options="{'no_create': True}"/>
+                                    <field name="allocated_fuel"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Vista de árbol para Plan de Consumo -->
+    <record id="view_fleet_consumption_plan_tree" model="ir.ui.view">
+        <field name="name">fleet.consumption.plan.tree</field>
+        <field name="model">fleet.consumption.plan</field>
+        <field name="arch" type="xml">
+            <tree string="Planes de Consumo" decoration-info="state=='draft'" decoration-muted="state=='cancelled'" decoration-success="state=='confirmed'">
+                <field name="name"/>
+                <field name="year"/>
+                <field name="month"/>
+                <field name="total_fuel"/>
+                <field name="total_allocated_vehicles"/>
+                <field name="total_allocated_activities"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vista de búsqueda para Plan de Consumo -->
+    <record id="view_fleet_consumption_plan_search" model="ir.ui.view">
+        <field name="name">fleet.consumption.plan.search</field>
+        <field name="model">fleet.consumption.plan</field>
+        <field name="arch" type="xml">
+            <search string="Buscar Planes de Consumo">
+                <field name="name"/>
+                <field name="year"/>
+                <field name="month"/>
+                <filter string="Borrador" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Confirmados" name="confirmed" domain="[('state', '=', 'confirmed')]"/>
+                <filter string="Cancelados" name="cancelled" domain="[('state', '=', 'cancelled')]"/>
+                <separator/>
+                <filter string="Este Año" name="this_year" domain="[('year', '=', context_today().year)]"/>
+                <filter string="Este Mes" name="this_month" domain="[('year', '=', context_today().year), ('month', '=', context_today().month)]"/>
+                <group expand="0" string="Agrupar Por">
+                    <filter string="Año" name="group_by_year" context="{'group_by': 'year'}"/>
+                    <filter string="Mes" name="group_by_month" context="{'group_by': 'month'}"/>
+                    <filter string="Estado" name="group_by_state" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Acción para Definir Plan de Consumo -->
+    <record id="action_fleet_consumption_plan" model="ir.actions.act_window">
+        <field name="name">Definir Plan de Consumo</field>
+        <field name="res_model">fleet.consumption.plan</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Crea un nuevo plan de consumo
+            </p>
+            <p>
+                Aquí puedes definir el plan de consumo de combustible mensual para la empresa.
+            </p>
+        </field>
+    </record>
+
+    <!-- Acción para Definir Plan de Consumo por Actividad -->
+    <record id="action_fleet_consumption_plan_activity" model="ir.actions.act_window">
+        <field name="name">Definir Plan de Consumo por Actividad</field>
+        <field name="res_model">fleet.consumption.plan</field>
+        <field name="view_mode">form,tree</field>
+        <field name="context">{'default_state': 'draft'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Crea un nuevo plan de consumo por actividad
+            </p>
+            <p>
+                Aquí puedes definir el plan de consumo de combustible por actividad.
+            </p>
+        </field>
+    </record>
+
+    <!-- Acción para Definir Plan de Consumo por Vehículos -->
+    <record id="action_fleet_consumption_plan_vehicle" model="ir.actions.act_window">
+        <field name="name">Definir Plan de Consumo por Vehículos</field>
+        <field name="res_model">fleet.consumption.plan</field>
+        <field name="view_mode">form,tree</field>
+        <field name="context">{'default_state': 'draft'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Crea un nuevo plan de consumo por vehículos
+            </p>
+            <p>
+                Aquí puedes definir el plan de consumo de combustible por vehículos.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menú para Planes de Consumo -->
+    <menuitem id="menu_fleet_consumption_plan" 
+              name="Definir Plan de Consumo" 
+              parent="menu_fleet_consumption_index_root" 
+              action="action_fleet_consumption_plan" 
+              sequence="2"/>
+
+    <!-- Eliminar los menús redundantes -->
+    <!-- Eliminar el menú para Definir Plan de Consumo por Actividad -->
+
+
+    <!-- Eliminar el menú para Definir Plan de Consumo por Vehículos -->
+
+</odoo>

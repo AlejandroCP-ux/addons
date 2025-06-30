@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista de árbol para Nivel de Actividad por Equipos -->
+    <record id="view_fleet_activity_report_view_tree" model="ir.ui.view">
+        <field name="name">fleet.activity.report.view.tree</field>
+        <field name="model">fleet.activity.report.view</field>
+        <field name="arch" type="xml">
+            <tree string="Nivel de Actividad por Equipos" create="false" edit="false" delete="false">
+                <field name="fuel_type"/>
+                <field name="activity_type"/>
+                <field name="license_plate"/>
+                <field name="total_kilometers" sum="Total"/>
+                <field name="unit_measure"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vista de búsqueda para Nivel de Actividad por Equipos -->
+    <record id="view_fleet_activity_report_view_search" model="ir.ui.view">
+        <field name="name">fleet.activity.report.view.search</field>
+        <field name="model">fleet.activity.report.view</field>
+        <field name="arch" type="xml">
+            <search string="Buscar Nivel de Actividad">
+                <field name="fuel_type"/>
+                <field name="activity_type"/>
+                <field name="license_plate"/>
+                <group expand="1" string="Agrupar Por">
+                    <filter string="Portador (Combustible)" name="group_by_fuel_type" context="{'group_by': 'fuel_type'}"/>
+                    <filter string="Tipo de Actividad" name="group_by_activity_type" context="{'group_by': 'activity_type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Acción para Nivel de Actividad por Equipos -->
+    <record id="action_fleet_activity_report_view" model="ir.actions.act_window">
+        <field name="name">Nivel de Actividad por Equipos</field>
+        <field name="res_model">fleet.activity.report.view</field>
+        <field name="view_mode">tree</field>
+        <field name="context">{'search_default_group_by_fuel_type': 1, 'search_default_group_by_activity_type': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No hay datos de actividad disponibles
+            </p>
+            <p>
+                Los datos se generan automáticamente a partir de las hojas de ruta confirmadas.
+            </p>
+        </field>
+    </record>
+
+    <!-- Vista de árbol para Índice de Consumo -->
+    <record id="view_fleet_consumption_index_report_view_tree" model="ir.ui.view">
+        <field name="name">fleet.consumption.index.report.view.tree</field>
+        <field name="model">fleet.consumption.index.report.view</field>
+        <field name="arch" type="xml">
+            <tree string="Índice de Consumo" create="false" edit="false" delete="false">
+                <field name="license_plate"/>
+                <field name="total_kilometers"/>
+                <field name="unit_measure"/>
+                <field name="previous_fuel"/>
+                <field name="fuel_consumed"/>
+                <field name="third_party_fuel"/>
+                <field name="current_fuel"/>
+                <field name="real_consumption"/>
+                <field name="approx_consumption"/>
+                <field name="consumption_index"/>
+                <field name="planned_index"/>
+                <field name="deviation_percent"/>
+                <field name="significant_deviation"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vista de búsqueda para Índice de Consumo -->
+    <record id="view_fleet_consumption_index_report_view_search" model="ir.ui.view">
+        <field name="name">fleet.consumption.index.report.view.search</field>
+        <field name="model">fleet.consumption.index.report.view</field>
+        <field name="arch" type="xml">
+            <search string="Buscar Índice de Consumo">
+                <field name="license_plate"/>
+                <field name="vehicle_id"/>
+                <filter string="Desviación Significativa" name="significant_deviation" domain="[('significant_deviation', '=', '*')]"/>
+                <group expand="0" string="Agrupar Por">
+                    <filter string="Vehículo" name="group_by_vehicle" context="{'group_by': 'vehicle_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Acción para Índice de Consumo -->
+    <record id="action_fleet_consumption_index_report_view" model="ir.actions.act_window">
+        <field name="name">Índice de Consumo</field>
+        <field name="res_model">fleet.consumption.index.report.view</field>
+        <field name="view_mode">tree</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No hay datos de consumo disponibles
+            </p>
+            <p>
+                Los datos se generan automáticamente a partir de los registros de combustible confirmados.
+            </p>
+        </field>
+    </record>
+
+    <!-- Reemplazar los menús anteriores -->
+    <menuitem id="menu_fleet_activity_report" 
+              name="Nivel de Actividad por Equipos" 
+              parent="fleet.menu_fleet_reporting" 
+              action="action_fleet_activity_report_view" 
+              sequence="20"/>
+
+    <menuitem id="menu_fleet_consumption_index_report" 
+              name="Índice de Consumo" 
+              parent="fleet.menu_fleet_reporting" 
+              action="action_fleet_consumption_index_report_view" 
+              sequence="21"/>
+</odoo>

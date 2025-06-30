@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista de formulario para Tipos de Actividad -->
+    <record id="view_fleet_activity_type_form" model="ir.ui.view">
+        <field name="name">fleet.activity.type.form</field>
+        <field name="model">fleet.activity.type</field>
+        <field name="arch" type="xml">
+            <form string="Tipo de Actividad">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="is_for_technological"/>
+                            <field name="active"/>
+                        </group>
+                        <group>
+                            <field name="description"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Vista de árbol para Tipos de Actividad -->
+    <record id="view_fleet_activity_type_tree" model="ir.ui.view">
+        <field name="name">fleet.activity.type.tree</field>
+        <field name="model">fleet.activity.type</field>
+        <field name="arch" type="xml">
+            <tree string="Tipos de Actividad">
+                <field name="name"/>
+                <field name="is_for_technological"/>
+                <field name="description"/>
+                <field name="active"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vista de búsqueda para Tipos de Actividad -->
+    <record id="view_fleet_activity_type_search" model="ir.ui.view">
+        <field name="name">fleet.activity.type.search</field>
+        <field name="model">fleet.activity.type</field>
+        <field name="arch" type="xml">
+            <search string="Buscar Tipos de Actividad">
+                <field name="name"/>
+                <field name="description"/>
+                <filter string="Activos" name="active" domain="[('active', '=', True)]"/>
+                <filter string="Inactivos" name="inactive" domain="[('active', '=', False)]"/>
+                <separator/>
+                <filter string="Para Vehículos Normales" name="normal_vehicles" domain="[('is_for_technological', '=', False)]"/>
+                <filter string="Para Vehículos Tecnológicos" name="technological_vehicles" domain="[('is_for_technological', '=', True)]"/>
+                <group expand="0" string="Agrupar Por">
+                    <filter string="Tipo de Vehículo" name="group_by_technological" context="{'group_by': 'is_for_technological'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Acción para Tipos de Actividad -->
+    <record id="action_fleet_activity_type" model="ir.actions.act_window">
+        <field name="name">Tipos de Actividad</field>
+        <field name="res_model">fleet.activity.type</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Crea un nuevo tipo de actividad
+            </p>
+            <p>
+                Aquí puedes definir los tipos de actividad para vehículos normales y tecnológicos.
+            </p>
+        </field>
+    </record>
+
+    <!-- Modificar la posición del menú para que esté entre Flota y Hoja de Ruta -->
+    <menuitem id="menu_fleet_activity_type_root" 
+              name="Tipos de Actividad" 
+              sequence="20" 
+              parent="fleet.menu_root"/>
+
+    <menuitem id="menu_fleet_activity_type" 
+              name="Tipos de Actividad" 
+              parent="menu_fleet_activity_type_root" 
+              action="action_fleet_activity_type" 
+              sequence="1"/>
+</odoo>

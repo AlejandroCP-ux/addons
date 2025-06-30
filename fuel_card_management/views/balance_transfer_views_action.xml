@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Acción para traspasos de saldo -->
+    <record id="action_fuel_balance_transfer" model="ir.actions.act_window">
+        <field name="name">Traspasos de Saldo</field>
+        <field name="res_model">fuel.balance.transfer</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_fuel_balance_transfer_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Crear un nuevo traspaso de saldo
+            </p>
+            <p>
+                Los traspasos de saldo son las operaciones que transfieren saldo entre tarjetas de combustible.
+            </p>
+        </field>
+    </record>
+</odoo>
+

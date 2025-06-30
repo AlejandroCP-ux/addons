@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista de formulario para el wizard del informe -->
+    <record id="view_fuel_card_balance_report_wizard_form" model="ir.ui.view">
+        <field name="name">fuel.card.balance.report.wizard.form</field>
+        <field name="model">fuel.card.balance.report.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Informe de Balance Contable de Combustible">
+                <group>
+                    <group>
+                        <field name="date_from"/>
+                        <field name="date_to"/>
+                    </group>
+                    <group>
+                        <field name="include_inactive"/>
+                    </group>
+                </group>
+                <group>
+                    <field name="carrier_ids" widget="many2many_tags"/>
+                    <button name="action_select_carrier_cards" string="Seleccionar Tarjetas del Portador" type="object" class="oe_highlight" icon="fa-magic"/>
+                </group>
+                <group>
+                    <field name="card_ids" widget="many2many_tags"/>
+                </group>
+                <footer>
+                    <button name="action_preview_report" string="Ver Informe" type="object" class="btn-primary" icon="fa-eye"/>
+                    <button name="action_print_report" string="Imprimir PDF" type="object" class="btn-secondary" icon="fa-print"/>
+                    <button string="Cancelar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Acción para abrir el wizard -->
+    <record id="action_fuel_card_balance_report_wizard" model="ir.actions.act_window">
+        <field name="name">Balance Contable de Combustible por Tarjetas</field>
+        <field name="res_model">fuel.card.balance.report.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+   
+</odoo>
+

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista de formulario para Combustible -->
+    <record id="view_fleet_fuel_form" model="ir.ui.view">
+        <field name="name">fleet.fuel.form</field>
+        <field name="model">fleet.fuel</field>
+        <field name="arch" type="xml">
+            <form string="Registro de Combustible">
+                <sheet>
+                    <group>
+                        <field name="vehicle_id"/>
+                        <field name="date"/>
+                        <field name="tank_liters"/>
+                        <field name="enabled_by" options="{'no_create': False}" placeholder="Seleccione o cree quien habilita"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Vista de árbol para Combustible -->
+    <record id="view_fleet_fuel_tree" model="ir.ui.view">
+        <field name="name">fleet.fuel.tree</field>
+        <field name="model">fleet.fuel</field>
+        <field name="arch" type="xml">
+            <tree string="Registros de Combustible">
+                <field name="vehicle_id"/>
+                <field name="date"/>
+                <field name="tank_liters"/>
+                <field name="enabled_by"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vista de búsqueda para Combustible -->
+    <record id="view_fleet_fuel_search" model="ir.ui.view">
+        <field name="name">fleet.fuel.search</field>
+        <field name="model">fleet.fuel</field>
+        <field name="arch" type="xml">
+            <search string="Buscar Registros de Combustible">
+                <field name="vehicle_id"/>
+                <field name="enabled_by"/>
+                <group expand="0" string="Agrupar Por">
+                    <filter string="Vehículo" name="group_by_vehicle" context="{'group_by': 'vehicle_id'}"/>
+                    <filter string="Fecha" name="group_by_date" context="{'group_by': 'date'}"/>
+                    <filter string="Habilitado por" name="group_by_enabled_by" context="{'group_by': 'enabled_by'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Acción para Combustible -->
+    <record id="action_fleet_fuel" model="ir.actions.act_window">
+        <field name="name">Registrar combustible en tanque</field>
+        <field name="res_model">fleet.fuel</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Crea un nuevo registro de combustible
+            </p>
+        </field>
+    </record>
+
+    <!-- Menú para Combustible -->
+    <menuitem id="menu_fleet_fuel_root" 
+              name="Combustible" 
+              sequence="23" 
+              parent="fleet.menu_root"/>
+
+    <menuitem id="menu_fleet_fuel" 
+              name="Registrar combustible en tanque" 
+              parent="menu_fleet_fuel_root" 
+              action="action_fleet_fuel" 
+              sequence="1"/>
+</odoo>

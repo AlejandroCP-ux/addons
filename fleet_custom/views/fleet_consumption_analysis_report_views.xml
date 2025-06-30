@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista de formulario para el Informe de Análisis de Consumo -->
+    <record id="view_fleet_consumption_analysis_report_form" model="ir.ui.view">
+        <field name="name">fleet.consumption.analysis.report.form</field>
+        <field name="model">fleet.consumption.analysis.report</field>
+        <field name="arch" type="xml">
+            <form string="Informe de Consumo de Combustible y Análisis de Indicadores">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="company_id"/>
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                        </group>
+                        <group>
+                            <field name="vehicle_id" options="{'no_create': True}"/>
+                        </group>
+                    </group>
+                    <group attrs="{'invisible': [('pdf_file', '=', False)]}">
+                        <field name="pdf_file" filename="pdf_filename" readonly="1"/>
+                        <field name="pdf_filename" invisible="1"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_generate_report" string="Generar Informe" type="object" class="btn-primary" attrs="{'invisible': [('pdf_file', '!=', False)]}"/>
+                    <button name="action_print_report" string="Imprimir Informe" type="object" class="btn-primary" attrs="{'invisible': [('pdf_file', '=', False)]}"/>
+                    <button string="Cerrar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Acción para el Informe de Análisis de Consumo -->
+    <record id="action_fleet_consumption_analysis_report" model="ir.actions.act_window">
+        <field name="name">Consumo de Combustible y Análisis</field>
+        <field name="res_model">fleet.consumption.analysis.report</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Generar un informe de consumo de combustible y análisis de indicadores
+            </p>
+        </field>
+    </record>
+
+    <!-- Menú para el Informe de Análisis de Consumo -->
+    <menuitem id="menu_fleet_consumption_analysis_report" 
+              name="Consumo de Combustible y Análisis" 
+              parent="menu_fleet_fuel_root" 
+              action="action_fleet_consumption_analysis_report" 
+              sequence="4"/>
+</odoo>

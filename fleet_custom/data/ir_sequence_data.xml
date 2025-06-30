@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Secuencia para Hojas de Ruta -->
+        <record id="seq_fleet_route_sheet" model="ir.sequence">
+            <field name="name">Secuencia de Hojas de Ruta</field>
+            <field name="code">fleet.route.sheet</field>
+            <field name="prefix">HR/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        
+        <!-- Secuencia para Registros de Combustible y Kilómetros -->
+        <record id="seq_fleet_fuel_record" model="ir.sequence">
+            <field name="name">Secuencia de Registros de Combustible</field>
+            <field name="code">fleet.fuel.record</field>
+            <field name="prefix">RC/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_fuel_card_balance">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div class="page">
+                    <h2>Balance Contable de Combustible por Tarjetas</h2>
+                    
+                    <div class="row mt16 mb16">
+                        <div class="col-6">
+                            <strong>Período:</strong> <span t-esc="date_from" t-options='{"widget": "date"}'/> - <span t-esc="date_to" t-options='{"widget": "date"}'/>
+                        </div>
+                    </div>
+                    
+                    <table class="table table-sm table-bordered">
+                        <thead>
+                            <tr>
+                                <th rowspan="2">Tarjeta</th>
+                                <th rowspan="2">Portador</th>
+                                <th colspan="2">Saldo Inicial</th>
+                                <th colspan="2">Cargado</th>
+                                <th colspan="2">Consumo</th>
+                                <th colspan="2">Ajuste / Transferencias / Traspaso</th>
+                                <th colspan="2">Saldo Final</th>
+                            </tr>
+                            <tr>
+                                <th>U.F.</th>
+                                <th>Valor</th>
+                                <th>U.F.</th>
+                                <th>Valor</th>
+                                <th>U.F.</th>
+                                <th>Valor</th>
+                                <th>U.F.</th>
+                                <th>Valor</th>
+                                <th>U.F.</th>
+                                <th>Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Agrupar por portador -->
+                            <t t-set="current_carrier" t-value="False"/>
+                            <t t-set="current_carrier_name" t-value="False"/>
+                            <t t-foreach="report_data" t-as="line">
+                                <!-- Si cambia el portador, mostrar el total del portador anterior -->
+                                <t t-if="current_carrier_name and current_carrier_name != line['carrier_name']">
+                                    <tr class="table-secondary">
+                                        <td colspan="2"><strong>Consumo Total del Portador <t t-esc="current_carrier_name"/></strong></td>
+                                        <td><strong t-esc="carrier_totals[current_carrier_name]['initial_balance']" t-options='{"widget": "float", "precision": 2}'/></td>
+                                        <td><strong t-esc="carrier_totals[current_carrier_name]['initial_value']" t-options='{"widget": "monetary", "display_currency": res_company.currency_id}'/></td>
+                                        <td><strong t-esc="carrier_totals[current_carrier_name]['loaded_amount']" t-options='{"widget": "float", "precision": 2}'/></td>
+                                        <td><strong t-esc="carrier_totals[current_carrier_name]['loaded_value']" t-options='{"widget": "monetary", "display_currency": res_company.currency_id}'/></td>
+                                        <td><strong t-esc="carrier_totals[current_carrier_name]['consumption_amount']" t-options='{"widget": "float", "precision": 2}'/></td>
+                                        <td><strong t-esc="carrier_totals[current_carrier_name]['consumption_value']" t-options='{"widget": "monetary", "display_currency": res_company.currency_id}'/></td>
+                                        <td><strong t-esc="carrier_totals[current_carrier_name]['adjustment_amount']" t-options='{"widget": "float", "precision": 2}'/></td>
+                                        <td><strong t-esc="carrier_totals[current_carrier_name]['adjustment_value']" t-options='{"widget": "monetary", "display_currency": res_company.currency_id}'/></td>
+                                        <td><strong t-esc="carrier_totals[current_carrier_name]['final_balance']" t-options='{"widget": "float", "precision": 2}'/></td>
+                                        <td><strong t-esc="carrier_totals[current_carrier_name]['final_value']" t-options='{"widget": "monetary", "display_currency": res_company.currency_id}'/></td>
+                                    </tr>
+                                    <tr><td colspan="12" class="table-borderless"></td></tr>
+                                </t>
+                                <t t-set="current_carrier_name" t-value="line['carrier_name']"/>
+                                
+                                <!-- Datos de la tarjeta -->
+                                <tr>
+                                    <td><span t-esc="line['card_name']"/></td>
+                                    <td><span t-esc="line['carrier_name']"/></td>
+                                    <td><span t-esc="line['initial_balance']" t-options='{"widget": "float", "precision": 2}'/></td>
+                                    <td><span t-esc="line['initial_value']" t-options='{"widget": "monetary", "display_currency": res_company.currency_id}'/></td>
+                                    <td><span t-esc="line['loaded_amount']" t-options='{"widget": "float", "precision": 2}'/></td>
+                                    <td><span t-esc="line['loaded_value']" t-options='{"widget": "monetary", "display_currency": res_company.currency_id}'/></td>
+                                    <td><span t-esc="line['consumption_amount']" t-options='{"widget": "float", "precision": 2}'/></td>
+                                    <td><span t-esc="line['consumption_value']" t-options='{"widget": "monetary", "display_currency": res_company.currency_id}'/></td>
+                                    <td><span t-esc="line['adjustment_amount']" t-options='{"widget": "float", "precision": 2}'/></td>
+                                    <td><span t-esc="line['adjustment_value']" t-options='{"widget": "monetary", "display_currency": res_company.currency_id}'/></td>
+                                    <td><span t-esc="line['final_balance']" t-options='{"widget": "float", "precision": 2}'/></td>
+                                    <td><span t-esc="line['final_value']" t-options='{"widget": "monetary", "display_currency": res_company.currency_id}'/></td>
+                                </tr>
+                            </t>
+                            
+                            <!-- Mostrar el total del último portador -->
+                            <t t-if="current_carrier_name">
+                                <tr class="table-secondary">
+                                    <td colspan="2"><strong>Consumo Total del Portador <t t-esc="current_carrier_name"/></strong></td>
+                                    <td><strong t-esc="carrier_totals[current_carrier_name]['initial_balance']" t-options='{"widget": "float", "precision": 2}'/></td>
+                                    <td><strong t-esc="carrier_totals[current_carrier_name]['initial_value']" t-options='{"widget": "monetary", "display_currency": res_company.currency_id}'/></td>
+                                    <td><strong t-esc="carrier_totals[current_carrier_name]['loaded_amount']" t-options='{"widget": "float", "precision": 2}'/></td>
+                                    <td><strong t-esc="carrier_totals[current_carrier_name]['loaded_value']" t-options='{"widget": "monetary", "display_currency": res_company.currency_id}'/></td>
+                                    <td><strong t-esc="carrier_totals[current_carrier_name]['consumption_amount']" t-options='{"widget": "float", "precision": 2}'/></td>
+                                    <td><strong t-esc="carrier_totals[current_carrier_name]['consumption_value']" t-options='{"widget": "monetary", "display_currency": res_company.currency_id}'/></td>
+                                    <td><strong t-esc="carrier_totals[current_carrier_name]['adjustment_amount']" t-options='{"widget": "float", "precision": 2}'/></td>
+                                    <td><strong t-esc="carrier_totals[current_carrier_name]['adjustment_value']" t-options='{"widget": "monetary", "display_currency": res_company.currency_id}'/></td>
+                                    <td><strong t-esc="carrier_totals[current_carrier_name]['final_balance']" t-options='{"widget": "float", "precision": 2}'/></td>
+                                    <td><strong t-esc="carrier_totals[current_carrier_name]['final_value']" t-options='{"widget": "monetary", "display_currency": res_company.currency_id}'/></td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                    
+                    <div class="row">
+                        <div class="col-12">
+                            <p class="text-muted">
+                                U.F. = Unidades Físicas (Litros)<br/>
+                                Valor = Valor Monetario (Precio por Litro * Cantidad)
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

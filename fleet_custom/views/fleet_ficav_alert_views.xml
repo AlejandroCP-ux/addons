@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista de árbol para Alertas de FICAV -->
+    <record id="view_fleet_ficav_alert_tree" model="ir.ui.view">
+        <field name="name">fleet.vehicle.ficav.alert.tree</field>
+        <field name="model">fleet.vehicle</field>
+        <field name="arch" type="xml">
+            <tree string="Alertas de FICAV" create="false" edit="false" delete="false" 
+                  decoration-danger="ficav_status == 'expired'" 
+                  decoration-warning="ficav_status in ['alert', 'warning']"
+                  decoration-success="ficav_status == 'ok'">
+                <field name="name"/>
+                <field name="license_plate"/>
+                <field name="ficav_expiry_date"/>
+                <field name="ficav_status" widget="badge" 
+                       decoration-success="ficav_status == 'ok'" 
+                       decoration-warning="ficav_status == 'warning'" 
+                       decoration-danger="ficav_status in ['alert', 'expired']"/>
+                <field name="ficav_alert" invisible="1"/>
+                <field name="driver_id"/>
+                <field name="custom_activity_type_id"/>
+                <button name="action_renew_ficav" string="Renovar FICAV" type="object" 
+                        class="btn-primary" attrs="{'invisible': [('ficav_alert', '=', False)]}"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vista de búsqueda para Alertas de FICAV -->
+    <record id="view_fleet_ficav_alert_search" model="ir.ui.view">
+        <field name="name">fleet.vehicle.ficav.alert.search</field>
+        <field name="model">fleet.vehicle</field>
+        <field name="arch" type="xml">
+            <search string="Buscar Alertas de FICAV">
+                <field name="name"/>
+                <field name="license_plate"/>
+                <field name="driver_id"/>
+                <filter string="FICAV Vencido" name="ficav_expired" domain="[('ficav_status', '=', 'expired')]"/>
+                <filter string="FICAV Próximo a Vencer" name="ficav_alert" domain="[('ficav_status', 'in', ['alert', 'warning'])]"/>
+                <filter string="FICAV OK" name="ficav_ok" domain="[('ficav_status', '=', 'ok')]"/>
+                <group expand="0" string="Agrupar Por">
+                    <filter string="Estado FICAV" name="group_by_ficav_status" context="{'group_by': 'ficav_status'}"/>
+                    <filter string="Conductor" name="group_by_driver" context="{'group_by': 'driver_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Acción para Alertas de FICAV -->
+    <record id="action_fleet_ficav_alert_report" model="ir.actions.act_window">
+        <field name="name">Alertas de FICAV</field>
+        <field name="res_model">fleet.vehicle</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="view_fleet_ficav_alert_tree"/>
+        <field name="search_view_id" ref="view_fleet_ficav_alert_search"/>
+        <field name="domain">[]</field>
+        <field name="context">{
+            'search_default_ficav_expired': 1,
+            'search_default_ficav_alert': 1,
+            'search_default_group_by_ficav_status': 1
+        }</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No hay vehículos con alertas de FICAV
+            </p>
+            <p>
+                Aquí se mostrarán los vehículos cuyo FICAV está próximo a vencer o ya ha vencido.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menú para Alertas de FICAV -->
+    <menuitem id="menu_fleet_ficav_alert_report" 
+              name="Alertas de FICAV" 
+              parent="fleet.menu_fleet_reporting" 
+              action="action_fleet_ficav_alert_report" 
+              sequence="13"/>
+</odoo>

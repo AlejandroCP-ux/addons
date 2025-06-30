@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista de formulario para tarjetas magnéticas -->
+    <record id="view_fuel_magnetic_card_form" model="ir.ui.view">
+        <field name="name">fuel.magnetic.card.form</field>
+        <field name="model">fuel.magnetic.card</field>
+        <field name="arch" type="xml">
+            <form string="Tarjeta Magnética">
+                <header>
+                    <!-- Solo botones para estados administrativos -->
+                    <button name="action_activate" string="Activar" type="object" class="oe_highlight" attrs="{'invisible': [('state', '!=', 'draft')]}"/>
+                    <button name="action_block" string="Bloquear" type="object" attrs="{'invisible': [('state', 'not in', ['available', 'assigned'])]}"/>
+                    <button name="action_unblock" string="Desbloquear" type="object" attrs="{'invisible': [('state', '!=', 'blocked')]}"/>
+                    <button name="action_cancel" string="Cancelar" type="object" attrs="{'invisible': [('state', '=', 'cancelled')]}"/>
+                    
+                    <!-- Mostrar estado operativo en lugar del estado interno -->
+                    <field name="operational_state" widget="statusbar" statusbar_visible="draft,available,assigned,blocked,expired,cancelled"/>
+                </header>
+                <sheet>
+        
+                    <field name="state" invisible="1"/>
+                    
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" 
+                                   placeholder="Número de Tarjeta (16 dígitos)"
+                                   maxlength="19"
+                                   style="font-family: monospace; letter-spacing: 2px; font-size: 24px; font-weight: bold; color: #2c5282;"/>
+                        </h1>
+                        <div class="text-muted" style="font-size: 12px; margin-top: -10px;">
+                            <i class="fa fa-info-circle"/> Ingrese 16 dígitos. Se formatearán automáticamente con espacios cada 4 números.
+                        </div>
+                    </div>
+                    
+                    <group>
+                        <group>
+                            <field name="card_type"/>
+                            <field name="carrier_id"/>
+                            <field name="supplier_id"/>
+                            <field name="issue_date"/>
+                            <field name="expiry_date"/>
+                            <field name="pin" password="True" groups="fuel_card_management.group_fuel_card_manager"/>
+                        </group>
+                        <group>
+                            <!-- Solo mostrar saldo actual después de crear, de solo lectura -->
+                            <field name="current_balance" readonly="1" attrs="{'invisible': [('id', '=', False)]}"/>
+                            
+                            <!-- Información de asignación actual (solo lectura) -->
+                            <separator string="Asignación Actual" attrs="{'invisible': [('operational_state', '!=', 'assigned')]}"/>
+                            <field name="vehicle_id" readonly="1" attrs="{'invisible': [('operational_state', '!=', 'assigned')]}"/>
+                            <field name="generator_id" readonly="1" attrs="{'invisible': [('operational_state', '!=', 'assigned')]}"/>
+                            <field name="driver_id" readonly="1" attrs="{'invisible': [('operational_state', '!=', 'assigned')]}"/>
+                            <field name="holder_id" readonly="1" attrs="{'invisible': [('operational_state', '!=', 'assigned')]}"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Historial de Cargas">
+                            <field name="load_ids" readonly="1">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="date"/>
+                                    <field name="initial_balance"/>
+                                    <field name="amount"/>
+                                    <field name="final_balance"/>
+                                    <field name="state"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Tickets de Combustible">
+                            <field name="ticket_ids" readonly="1">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="date"/>
+                                    <field name="vehicle_id"/>
+                                    <field name="generator_id"/>
+                                    <field name="driver_id"/>
+                                    <field name="liters"/>
+                                    <field name="amount"/>
+                                    <field name="state"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Notas">
+                            <field name="notes"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="activity_ids" widget="mail_activity"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Vista de árbol para tarjetas magnéticas -->
+    <record id="view_fuel_magnetic_card_tree" model="ir.ui.view">
+        <field name="name">fuel.magnetic.card.tree</field>
+        <field name="model">fuel.magnetic.card</field>
+        <field name="arch" type="xml">
+            <tree string="Tarjetas Magnéticas" 
+                  decoration-danger="operational_state in ('expired', 'cancelled')" 
+                  decoration-warning="operational_state == 'blocked'" 
+                  decoration-success="operational_state == 'assigned'" 
+                  decoration-info="operational_state == 'available'" 
+                  decoration-muted="operational_state == 'draft'">
+                <field name="name" string="Número de Tarjeta"/>
+                <field name="card_type"/>
+                <field name="supplier_id"/>
+                <field name="vehicle_id"/>
+                <field name="generator_id"/>
+                <field name="driver_id"/>
+                <field name="holder_id"/>
+                <field name="current_balance"/>
+                <field name="expiry_date"/>
+                <field name="operational_state" string="Estado"/>
+                <field name="state" invisible="1"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vista de búsqueda para tarjetas magnéticas -->
+    <record id="view_fuel_magnetic_card_search" model="ir.ui.view">
+        <field name="name">fuel.magnetic.card.search</field>
+        <field name="model">fuel.magnetic.card</field>
+        <field name="arch" type="xml">
+            <search string="Buscar Tarjetas Magnéticas">
+                <field name="name" string="Número de Tarjeta" filter_domain="[('name', 'ilike', self)]"/>
+                <field name="supplier_id"/>
+                <field name="vehicle_id"/>
+                <field name="generator_id"/>
+                <field name="driver_id"/>
+                <field name="holder_id"/>
+                
+                <!-- Filtros por tipo de tarjeta -->
+                <filter string="Tarjetas de Vehículo" name="vehicle_cards" domain="[('card_type', '=', 'vehicle')]"/>
+                <filter string="Tarjetas de Generador" name="generator_cards" domain="[('card_type', '=', 'generator')]"/>
+                <filter string="Otras Tarjetas" name="other_cards" domain="[('card_type', '=', 'other')]"/>
+                
+                <!-- Filtros por estado operativo -->
+                <filter string="Disponibles" name="available" domain="[('operational_state', '=', 'available')]"/>
+                <filter string="Asignadas" name="assigned" domain="[('operational_state', '=', 'assigned')]"/>
+                <filter string="Bloqueadas" name="blocked" domain="[('operational_state', '=', 'blocked')]"/>
+                <filter string="Vencidas" name="expired" domain="[('operational_state', '=', 'expired')]"/>
+                <filter string="Canceladas" name="cancelled" domain="[('operational_state', '=', 'cancelled')]"/>
+                
+                <!-- Filtros por saldo -->
+                <filter string="Con Saldo" name="with_balance" domain="[('current_balance', '>', 0)]"/>
+                <filter string="Sin Saldo" name="no_balance" domain="[('current_balance', '=', 0)]"/>
+                
+                <group expand="0" string="Agrupar Por">
+                    <filter string="Estado Operativo" name="group_operational_state" context="{'group_by': 'operational_state'}"/>
+                    <filter string="Tipo de Tarjeta" name="group_card_type" context="{'group_by': 'card_type'}"/>
+                    <filter string="Proveedor" name="group_supplier_id" context="{'group_by': 'supplier_id'}"/>
+                    <filter string="Titular" name="group_holder_id" context="{'group_by': 'holder_id'}"/>
+                    <filter string="Conductor" name="group_driver_id" context="{'group_by': 'driver_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+</odoo>

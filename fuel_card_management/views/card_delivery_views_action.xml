@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Acción para entregas/devoluciones de tarjetas -->
+    <record id="action_fuel_card_delivery" model="ir.actions.act_window">
+        <field name="name">Entregas/Devoluciones de Tarjeta</field>
+        <field name="res_model">fuel.card.delivery</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Crear una nueva entrega/devolución de tarjeta
+            </p>
+            <p>
+                Las entregas/devoluciones de tarjeta son las operaciones que registran la entrega o devolución de tarjetas de combustible.
+            </p>
+        </field>
+    </record>
+</odoo>
