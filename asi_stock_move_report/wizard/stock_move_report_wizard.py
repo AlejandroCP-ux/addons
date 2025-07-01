@@ -9,6 +9,9 @@ class StockMoveReportWizard(models.TransientModel):
     _name = 'stock.move.report.wizard'
     _description = 'Asistente para Reporte de Movimientos de Inventario'
 
+    # AGREGAR EL CAMPO NAME QUE ODOO USARÁ PARA EL ARCHIVO
+    name = fields.Char(string='Nombre del Reporte', default='Movimientos_Inventario')
+
     period_type = fields.Selection([
         ('day', 'Día'),
         ('week', 'Semana'),
@@ -56,6 +59,9 @@ class StockMoveReportWizard(models.TransientModel):
     # Campos ocultos para almacenar las fechas de inicio y fin calculadas
     date_start = fields.Datetime(string='Fecha Inicio', required=True)
     date_end = fields.Datetime(string='Fecha Fin', required=True)
+    
+    # Campo para el nombre del archivo
+    report_filename = fields.Char(string='Nombre del Archivo')
     
     @api.constrains('custom_date_from', 'custom_date_to')
     def _check_custom_dates(self):
@@ -124,6 +130,42 @@ class StockMoveReportWizard(models.TransientModel):
         
         self.date_start = start_date
         self.date_end = end_date
+        
+        # Generar nombre del archivo
+        period_str = self._format_period_for_filename(start_date, end_date)
+        self.report_filename = f'Movimientos_Inventario_{period_str}'
+        # ACTUALIZAR TAMBIÉN EL CAMPO NAME
+        self.name = self.report_filename
+    
+    def _format_period_for_filename(self, date_start, date_end):
+        """
+        Formatea el período para el nombre del archivo
+        """
+        start_date = datetime.strptime(str(date_start)[:10], '%Y-%m-%d')
+        end_date = datetime.strptime(str(date_end)[:10], '%Y-%m-%d')
+        
+        # Si es el mismo día
+        if start_date.date() == end_date.date():
+            return start_date.strftime('%d-%m-%Y')
+        
+        # Si es el mismo mes
+        if start_date.year == end_date.year and start_date.month == end_date.month:
+            # Si es todo el mes
+            if start_date.day == 1 and end_date.day >= 28:
+                return start_date.strftime('%m-%Y')
+            else:
+                return f"{start_date.strftime('%d-%m-%Y')}_al_{end_date.strftime('%d-%m-%Y')}"
+        
+        # Si es el mismo año
+        if start_date.year == end_date.year:
+            # Si es todo el año
+            if start_date.month == 1 and start_date.day == 1 and end_date.month == 12 and end_date.day == 31:
+                return str(start_date.year)
+            else:
+                return f"{start_date.strftime('%d-%m-%Y')}_al_{end_date.strftime('%d-%m-%Y')}"
+        
+        # Período personalizado
+        return f"{start_date.strftime('%d-%m-%Y')}_al_{end_date.strftime('%d-%m-%Y')}"
     
     def action_generate_report(self):
         """
@@ -147,8 +189,9 @@ class StockMoveReportWizard(models.TransientModel):
         
         # Preparar datos para el reporte
         data = {
-            'date_start': self.date_start+timedelta(days=1), 
+            'date_start': self.date_start+timedelta(days=1),
             'date_end': self.date_end,
+            'report_filename': self.report_filename,
         }
         
         # Generar el reporte PDF

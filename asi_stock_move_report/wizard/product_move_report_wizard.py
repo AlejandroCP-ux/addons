@@ -57,6 +57,9 @@ class ProductMoveReportWizard(models.TransientModel):
     date_start = fields.Datetime(string='Fecha Inicio', required=True)
     date_end = fields.Datetime(string='Fecha Fin', required=True)
     
+    # Campo para el nombre del archivo
+    report_filename = fields.Char(string='Nombre del Archivo')
+    
     @api.constrains('custom_date_from', 'custom_date_to')
     def _check_custom_dates(self):
         for record in self:
@@ -64,7 +67,7 @@ class ProductMoveReportWizard(models.TransientModel):
                 if record.custom_date_from > record.custom_date_to:
                     raise UserError('La fecha de inicio no puede ser mayor que la fecha de fin.')
     
-    @api.onchange('period_type', 'week_month', 'week_year', 'week_number', 'month', 'month_year', 'year', 'custom_date_from', 'custom_date_to')
+    @api.onchange('period_type', 'product_id', 'week_month', 'week_year', 'week_number', 'month', 'month_year', 'year', 'custom_date_from', 'custom_date_to')
     def _onchange_period_fields(self):
         """Actualiza las fechas de inicio y fin basadas en los campos seleccionados"""
         if self.period_type == 'week' and self.week_month and self.week_year and self.week_number:
@@ -119,6 +122,42 @@ class ProductMoveReportWizard(models.TransientModel):
         
         self.date_start = start_date
         self.date_end = end_date
+        
+        # Generar nombre del archivo
+        if self.product_id:
+            period_str = self._format_period_for_filename(start_date, end_date)
+            product_code = self.product_id.default_code or f'ID{self.product_id.id}'
+            self.report_filename = f'Movimientos_Producto_{product_code}_{period_str}'
+    
+    def _format_period_for_filename(self, date_start, date_end):
+        """
+        Formatea el período para el nombre del archivo
+        """
+        start_date = datetime.strptime(str(date_start)[:10], '%Y-%m-%d')
+        end_date = datetime.strptime(str(date_end)[:10], '%Y-%m-%d')
+        
+        # Si es el mismo día
+        if start_date.date() == end_date.date():
+            return start_date.strftime('%d-%m-%Y')
+        
+        # Si es el mismo mes
+        if start_date.year == end_date.year and start_date.month == end_date.month:
+            # Si es todo el mes
+            if start_date.day == 1 and end_date.day >= 28:
+                return start_date.strftime('%m-%Y')
+            else:
+                return f"{start_date.strftime('%d-%m-%Y')}_al_{end_date.strftime('%d-%m-%Y')}"
+        
+        # Si es el mismo año
+        if start_date.year == end_date.year:
+            # Si es todo el año
+            if start_date.month == 1 and start_date.day == 1 and end_date.month == 12 and end_date.day == 31:
+                return str(start_date.year)
+            else:
+                return f"{start_date.strftime('%d-%m-%Y')}_al_{end_date.strftime('%d-%m-%Y')}"
+        
+        # Período personalizado
+        return f"{start_date.strftime('%d-%m-%Y')}_al_{end_date.strftime('%d-%m-%Y')}"
     
     def action_generate_report(self):
         """
@@ -147,7 +186,17 @@ class ProductMoveReportWizard(models.TransientModel):
             'product_id': self.product_id.id,
         }
         
-        # Generar el reporte PDF
-        return self.env.ref('asi_stock_move_report.action_report_product_move').report_action(
+        # Generar el reporte PDF con nombre personalizado
+        report_action = self.env.ref('asi_stock_move_report.action_report_product_move').report_action(
             self, data=data
         )
+        
+        # Modificar el nombre del archivo en la respuesta
+        if self.report_filename:
+            report_action['report_file'] = self.report_filename + '.pdf'
+            # También intentamos modificar el contexto
+            if 'context' not in report_action:
+                report_action['context'] = {}
+            report_action['context']['report_filename'] = self.report_filename + '.pdf'
+        
+        return report_action

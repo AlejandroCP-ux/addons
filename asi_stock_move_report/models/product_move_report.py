@@ -67,6 +67,7 @@ class ProductMoveReport(models.AbstractModel):
                 'cantidad_antes': cantidad_antes,
                 'cantidad_movida': quantity,
                 'movement_direction': movement_direction,
+                'product_uom': move.product_uom.name,
                 'move_type_display': self._get_move_type_display(move_type),
                 'existencia_final': running_stock,
                 'reference': move.reference or move.name or '',

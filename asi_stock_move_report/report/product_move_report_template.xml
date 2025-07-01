@@ -10,6 +10,7 @@
         <field name="report_file">asi_stock_move_report.product_move_report_template</field>
         <field name="binding_model_id" ref="model_product_move_report_wizard"/>
         <field name="paperformat_id" ref="base.paperformat_euro"/>
+        <field name="print_report_name">'Movimientos_Producto.pdf'</field>
     </record>
 
     <!-- Template del reporte -->
@@ -27,7 +28,7 @@
                     
                     <!-- Encabezado del reporte -->
                     <div class="row mb-3">
-                        <div class="col-12 text-center">
+                        <div class="col-12">
                             <h2 style="margin-bottom: 15px; font-size: 18px;">
                                 <strong>HISTORIAL DE MOVIMIENTOS DEL PRODUCTO "<t t-esc="product.default_code or ''"/> <t t-esc="product.name"/>"</strong>
                             </h2>
@@ -39,7 +40,7 @@
 
                     <!-- Información del período -->
                     <div class="row mb-4">
-                        <div class="col-12 text-center">
+                        <div class="col-12">
                             <strong style="font-size: 12px;">Período:</strong>
                             <span t-esc="date_start" t-options="{'widget': 'date'}" style="font-size: 12px;"/>
                             <span style="font-size: 12px;"> al </span>
@@ -51,19 +52,23 @@
                     <table class="table table-sm" style="font-size: 12px; border-collapse: collapse; border: 2px solid #000; width: 100%;">
                         <thead style="background-color: #f8f9fa;">
                             <tr>
-                                <th class="text-center" style="width: 12%; border: 1px solid #000; padding: 10px; font-size: 12px;">Fecha</th>
-                                <th class="text-center" style="width: 15%; border: 1px solid #000; padding: 10px; font-size: 12px;">Cantidad a Mano</th>
+                                <th class="text-center" style="width: 10%; border: 1px solid #000; padding: 10px; font-size: 12px;">Fecha</th>
+                                <th class="text-center" style="width: 10%; border: 1px solid #000; padding: 10px; font-size: 12px;">Unidad de Medida</th>
+                                <th class="text-center" style="width: 13%; border: 1px solid #000; padding: 10px; font-size: 12px;">Cantidad a Mano</th>
                                 <th class="text-center" style="width: 12%; border: 1px solid #000; padding: 10px; font-size: 12px;">Cantidad Movida</th>
-                                <th class="text-center" style="width: 25%; border: 1px solid #000; padding: 10px; font-size: 12px;">Tipo de Operación</th>
-                                <th class="text-center" style="width: 15%; border: 1px solid #000; padding: 10px; font-size: 12px;">EXISTENCIA FINAL</th>
-                                <th class="text-center" style="width: 21%; border: 1px solid #000; padding: 10px; font-size: 12px;">Referencia</th>
-                            </tr>
+                                <th class="text-center" style="width: 23%; border: 1px solid #000; padding: 10px; font-size: 12px;">Tipo de Operación</th>
+                                <th class="text-center" style="width: 13%; border: 1px solid #000; padding: 10px; font-size: 12px;">EXISTENCIA FINAL</th>
+                                <th class="text-center" style="width: 19%; border: 1px solid #000; padding: 10px; font-size: 12px;">Referencia</th>
+                            </tr>4
                         </thead>
                         <tbody>
                             <t t-foreach="moves_data" t-as="move">
                                 <tr>
                                     <td class="text-center" style="border: 1px solid #000; padding: 8px; font-size: 12px;">
                                         <span t-esc="move['date']" t-options="{'widget': 'date'}"/>
+                                    </td>
+                                    <td class="text-center" style="border: 1px solid #000; padding: 8px; font-size: 12px;">
+                                        <span t-esc="move['product_uom']"/>
                                     </td>
                                     <td class="text-right" style="border: 1px solid #000; padding: 8px; font-size: 12px;">
                                         <span t-esc="'{:g}'.format(move['cantidad_antes'])"/>
