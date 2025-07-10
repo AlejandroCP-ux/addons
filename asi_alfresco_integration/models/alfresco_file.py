@@ -1,4 +1,9 @@
-from odoo import models, fields
+from odoo import models, fields, api
+import requests
+import logging
+import base64
+
+_logger = logging.getLogger(__name__)
 
 class AlfrescoFile(models.Model):
     _name = 'alfresco.file'
@@ -9,4 +14,139 @@ class AlfrescoFile(models.Model):
     alfresco_node_id = fields.Char(string="ID de nodo en Alfresco", readonly=True, required=True, index=True)
     mime_type = fields.Char(string="MIME Type")
     file_size = fields.Integer(string="Tamaño (bytes)")
+    file_size_human = fields.Char(string="Tamaño", compute='_compute_file_size_human')
     modified_at = fields.Datetime(string="Modificado en Alfresco")
+    content_url = fields.Char(string="URL de contenido", compute='_compute_content_url')
+    preview_url = fields.Char(string="URL de preview", compute='_compute_preview_url')
+    
+    # Campo para almacenar el contenido del PDF temporalmente para preview
+    pdf_content = fields.Binary(string="Contenido PDF", attachment=True)
+    pdf_filename = fields.Char(string="Nombre archivo PDF")
+
+    @api.depends('file_size')
+    def _compute_file_size_human(self):
+        for record in self:
+            if record.file_size:
+                if record.file_size < 1024:
+                    record.file_size_human = f"{record.file_size} B"
+                elif record.file_size < 1024 * 1024:
+                    record.file_size_human = f"{round(record.file_size / 1024, 1)} KB"
+                else:
+                    record.file_size_human = f"{round(record.file_size / (1024 * 1024), 1)} MB"
+            else:
+                record.file_size_human = "0 B"
+
+    @api.depends('alfresco_node_id')
+    def _compute_content_url(self):
+        """Genera la URL para descargar el contenido del archivo"""
+        config = self.env['ir.config_parameter'].sudo()
+        base_url = config.get_param('asi_alfresco_integration.alfresco_server_url')
+        
+        for record in self:
+            if record.alfresco_node_id and base_url:
+                record.content_url = f"{base_url}/alfresco/api/-default-/public/alfresco/versions/1/nodes/{record.alfresco_node_id}/content"
+            else:
+                record.content_url = False
+
+    @api.depends('alfresco_node_id')
+    def _compute_preview_url(self):
+        """Genera la URL para el preview del PDF"""
+        for record in self:
+            if record.alfresco_node_id:
+                record.preview_url = f'/alfresco/file/{record.id}/preview'
+            else:
+                record.preview_url = False
+
+    def action_download_file(self):
+        """Descarga el contenido del archivo desde Alfresco"""
+        self.ensure_one()
+        
+        config = self.env['ir.config_parameter'].sudo()
+        url = config.get_param('asi_alfresco_integration.alfresco_server_url')
+        user = config.get_param('asi_alfresco_integration.alfresco_username')
+        pwd = config.get_param('asi_alfresco_integration.alfresco_password')
+        
+        if not all([url, user, pwd, self.alfresco_node_id]):
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'message': 'Error: Configuración de Alfresco incompleta',
+                    'type': 'danger',
+                }
+            }
+        
+        try:
+            download_url = f"{url}/alfresco/api/-default-/public/alfresco/versions/1/nodes/{self.alfresco_node_id}/content"
+            response = requests.get(download_url, auth=(user, pwd), timeout=30)
+            response.raise_for_status()
+        
+            return {
+                'type': 'ir.actions.act_url',
+                'url': f'/alfresco/file/{self.id}/download',
+                'target': 'new',
+            }
+        
+        except Exception as e:
+            _logger.error("Error descargando archivo %s: %s", self.name, e)
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'message': f'Error descargando archivo: {str(e)}',
+                    'type': 'danger',
+                }
+            }
+
+    def action_preview_file(self):
+        """Abre el preview del archivo en una nueva ventana"""
+        self.ensure_one()
+        
+        return {
+            'type': 'ir.actions.act_url',
+            'url': f'/alfresco/file/{self.id}/preview',
+            'target': 'new',
+        }
+
+    def action_load_preview(self):
+        """Carga el contenido del PDF para preview en Odoo"""
+        self.ensure_one()
+        
+        config = self.env['ir.config_parameter'].sudo()
+        url = config.get_param('asi_alfresco_integration.alfresco_server_url')
+        user = config.get_param('asi_alfresco_integration.alfresco_username')
+        pwd = config.get_param('asi_alfresco_integration.alfresco_password')
+        
+        if not all([url, user, pwd, self.alfresco_node_id]):
+            return False
+        
+        try:
+            download_url = f"{url}/alfresco/api/-default-/public/alfresco/versions/1/nodes/{self.alfresco_node_id}/content"
+            response = requests.get(download_url, auth=(user, pwd), timeout=30)
+            response.raise_for_status()
+            
+            # Guardar el contenido en el campo binary
+            self.write({
+                'pdf_content': base64.b64encode(response.content),
+                'pdf_filename': self.name,
+            })
+            
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'message': 'PDF cargado correctamente para preview',
+                    'type': 'success',
+                }
+            }
+        
+        except Exception as e:
+            _logger.error("Error cargando preview de archivo %s: %s", self.name, e)
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'message': f'Error cargando preview: {str(e)}',
+                    'type': 'danger',
+                }
+            }

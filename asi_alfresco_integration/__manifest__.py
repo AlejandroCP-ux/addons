@@ -3,8 +3,9 @@
     "version": "1.0",
     "summary": "Upload PDF reports to Alfresco automatically",
     "category": "Tools",
-    'author': 'Javier',
-    'website': 'https://www.asisurl.cu',
+    'author': 'Javier, F3nrir',
+    'company': 'ASI S.U.R.L.',
+    'website': 'https://antasi.asisurl.cu',
     "depends": ["base", "web"],
     'external_dependencies': {
         'python': ['requests'],
@@ -17,7 +18,6 @@
         "data/cron_sync_alfresco.xml",
         "data/cron_export_reports.xml",
     ],
-    
    'images': ['static/description/icon.png'],
     "installable": True,
     "auto_install": False,

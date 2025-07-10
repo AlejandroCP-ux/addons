@@ -25,6 +25,7 @@ class AlfrescoFolder(models.Model):
     complete_path = fields.Char(string='Ruta completa', compute='_compute_complete_path', store=True)
     child_ids = fields.One2many('alfresco.folder', 'parent_id', string="Subcarpetas")
     subfolder_count = fields.Integer(compute='_compute_counts', string='Subcarpetas')
+    file_count = fields.Integer(compute='_compute_counts', string='Archivos PDF')
     last_sync = fields.Datetime(string='Última sincronización')
     external_modified = fields.Datetime(string='Modificado en Alfresco')
 
@@ -37,6 +38,7 @@ class AlfrescoFolder(models.Model):
     def _compute_counts(self):
         for rec in self:
             rec.subfolder_count = len(rec.child_ids)
+            rec.file_count = self.env['alfresco.file'].search_count([('folder_id', '=', rec.id)])
 
     def _get_http_session(self):
         session = requests.Session()
@@ -87,8 +89,6 @@ class AlfrescoFolder(models.Model):
                     raw_date = folder_data.get('modifiedAt')
                     parsed_modified = date_parser.parse(raw_date).replace(tzinfo=None) if raw_date else False
 
-                    #_logger.debug("[SYNC] Fecha convertida para %s: %s", folder_data['name'], parsed_modified)
-
                     folder_rec = folder_map.get(nid)
                     if not folder_rec:
                         folder_rec = self.create({
@@ -132,8 +132,6 @@ class AlfrescoFolder(models.Model):
                 'maxItems': max_items,
                 'where': '(isFolder=true)'
             }
-
-            #_logger.debug("[SYNC][Alfresco] Nodo: %s | URL: %s | Params: %s | Usuario: %s", node_id, url, params, auth[0])
 
             try:
                 resp = session.get(url, auth=auth, params=params, timeout=30, headers={'Accept': 'application/json'})
@@ -194,23 +192,170 @@ class AlfrescoFolder(models.Model):
         obsolete_folders.unlink()
         _logger.info("[SYNC] Eliminadas %d carpetas obsoletas", len(obsolete_folders))
 
-    def action_open_subfolders(self):
+    def action_view_content(self):
+        """Ver contenido de esta carpeta (subcarpetas y archivos)"""
         self.ensure_one()
+        
+        # Sincronizar contenido si es necesario
+        if not self.last_sync or (fields.Datetime.now() - self.last_sync).total_seconds() > 3600:
+            try:
+                self._sync_folder_content()
+            except Exception as e:
+                _logger.error("Error sincronizando contenido: %s", e)
+        
+        # Crear contexto para mostrar subcarpetas y archivos
         return {
             'type': 'ir.actions.act_window',
-            'name': 'Subcarpetas',
-            'res_model': 'alfresco.folder',
+            'name': f'Contenido de: {self.name}',
             'view_mode': 'tree,form',
+            'context': {
+                'current_folder_id': self.id,
+                'current_folder_name': self.name,
+            },
+            'target': 'current',
+            'res_model': 'alfresco.folder',
             'domain': [('parent_id', '=', self.id)],
-            'context': {'default_parent_id': self.id},
         }
 
+    def action_view_files(self):
+        """Ver archivos PDF de esta carpeta"""
+        self.ensure_one()
+        
+        # Sincronizar archivos si es necesario
+        if not self.last_sync or (fields.Datetime.now() - self.last_sync).total_seconds() > 3600:
+            try:
+                self._sync_folder_content()
+            except Exception as e:
+                _logger.error("Error sincronizando contenido: %s", e)
+        
+        return {
+            'type': 'ir.actions.act_window',
+            'name': f'Archivos PDF - {self.name}',
+            'res_model': 'alfresco.file',
+            'view_mode': 'kanban,tree,form',
+            'domain': [('folder_id', '=', self.id)],
+            'context': {
+                'default_folder_id': self.id,
+                'search_default_folder_id': self.id,
+            },
+        }
+
+    def _sync_folder_content(self):
+        """Sincroniza tanto subcarpetas como archivos de esta carpeta"""
+        config = self.env['ir.config_parameter'].sudo()
+        url = config.get_param('asi_alfresco_integration.alfresco_server_url')
+        user = config.get_param('asi_alfresco_integration.alfresco_username')
+        pwd = config.get_param('asi_alfresco_integration.alfresco_password')
+        
+        if not all([url, user, pwd]):
+            return
+        
+        try:
+            # Sincronizar subcarpetas
+            folders_data = self._fetch_folder_batch(self._get_http_session(), url, (user, pwd), self.node_id)
+            if folders_data:
+                for folder_data in folders_data:
+                    existing = self.search([('node_id', '=', folder_data['id'])], limit=1)
+                    raw_date = folder_data.get('modifiedAt')
+                    parsed_modified = date_parser.parse(raw_date).replace(tzinfo=None) if raw_date else False
+                    
+                    if not existing:
+                        self.create({
+                            'name': folder_data['name'],
+                            'node_id': folder_data['id'],
+                            'parent_id': self.id,
+                            'external_modified': parsed_modified,
+                            'last_sync': fields.Datetime.now(),
+                        })
+            
+            # Sincronizar archivos PDF
+            files_data = self._fetch_folder_files(url, (user, pwd), self.node_id)
+            file_model = self.env['alfresco.file']
+            
+            for file_data in files_data:
+                existing_file = file_model.search([
+                    ('alfresco_node_id', '=', file_data['id']),
+                    ('folder_id', '=', self.id)
+                ], limit=1)
+                
+                raw_date = file_data.get('modifiedAt')
+                parsed_modified = date_parser.parse(raw_date).replace(tzinfo=None) if raw_date else False
+                
+                file_vals = {
+                    'name': file_data['name'],
+                    'folder_id': self.id,
+                    'alfresco_node_id': file_data['id'],
+                    'mime_type': file_data.get('content', {}).get('mimeType', ''),
+                    'file_size': file_data.get('content', {}).get('sizeInBytes', 0),
+                    'modified_at': parsed_modified,
+                }
+                
+                if existing_file:
+                    existing_file.write(file_vals)
+                else:
+                    file_model.create(file_vals)
+            
+            self.last_sync = fields.Datetime.now()
+            
+        except Exception as e:
+            _logger.error("Error sincronizando contenido de carpeta %s: %s", self.name, e)
+
+    def _fetch_folder_files(self, base_url, auth, node_id):
+        """Obtiene archivos PDF de un nodo específico en Alfresco - CORREGIDO"""
+        session = self._get_http_session()
+        try:
+            encoded_node_id = urllib.parse.quote(node_id, safe='')
+            url = f"{base_url.rstrip('/')}/alfresco/api/-default-/public/alfresco/versions/1/nodes/{encoded_node_id}/children"
+            
+            # CORREGIDO: Buscar archivos PDF sin restricción de mimeType en la query
+            params = {
+                'skipCount': 0,
+                'maxItems': 1000,
+                'where': '(isFile=true)'  # Buscar todos los archivos primero
+            }
+            
+            resp = session.get(url, auth=auth, params=params, timeout=30)
+            
+            # Si falla con público, probar privado
+            if resp.status_code == 400:
+                private_url = url.replace('/public/', '/private/')
+                resp = session.get(private_url, auth=auth, params=params, timeout=30)
+            
+            resp.raise_for_status()
+            
+            data = resp.json()
+            entries = data.get('list', {}).get('entries', [])
+            
+            # Filtrar PDFs en Python ya que el filtro de Alfresco puede fallar
+            pdf_files = []
+            for entry in entries:
+                file_entry = entry['entry']
+                content = file_entry.get('content', {})
+                mime_type = content.get('mimeType', '')
+                file_name = file_entry.get('name', '').lower()
+                
+                # Verificar si es PDF por MIME type o extensión
+                if mime_type == 'application/pdf' or file_name.endswith('.pdf'):
+                    pdf_files.append(file_entry)
+                    _logger.info("PDF encontrado: %s (MIME: %s)", file_entry.get('name'), mime_type)
+            
+            _logger.info("Total PDFs encontrados en carpeta %s: %d", node_id, len(pdf_files))
+            return pdf_files
+            
+        except Exception as e:
+            _logger.error("Error obteniendo archivos del nodo %s: %s", node_id, e)
+            return []
+        finally:
+            session.close()
+
     def action_sync_folder(self):
+        """Sincronizar esta carpeta y su contenido"""
         for folder in self:
-            # Lógica para sincronizar esta carpeta y sus subcarpetas
-            # Debe incluir recursión a través de folder.child_ids
-            # folder._sync_with_alfresco(recursive=True)
-            a=1
+            try:
+                folder._sync_folder_content()
+            except Exception as e:
+                _logger.error("Error sincronizando carpeta %s: %s", folder.name, e)
+        
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
@@ -219,4 +364,4 @@ class AlfrescoFolder(models.Model):
                 'type': 'success',
                 'sticky': False,
             }
-    }
+        }
