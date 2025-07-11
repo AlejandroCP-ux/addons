@@ -99,14 +99,57 @@ class AlfrescoFile(models.Model):
             }
 
     def action_preview_file(self):
-        """Abre el preview del archivo en una nueva ventana"""
+        """Carga el PDF y abre la vista form con preview integrado"""
         self.ensure_one()
         
-        return {
-            'type': 'ir.actions.act_url',
-            'url': f'/alfresco/file/{self.id}/preview',
-            'target': 'new',
-        }
+        # Primero cargar el contenido del PDF
+        config = self.env['ir.config_parameter'].sudo()
+        url = config.get_param('asi_alfresco_integration.alfresco_server_url')
+        user = config.get_param('asi_alfresco_integration.alfresco_username')
+        pwd = config.get_param('asi_alfresco_integration.alfresco_password')
+        
+        if not all([url, user, pwd, self.alfresco_node_id]):
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'message': 'Error: Configuración de Alfresco incompleta',
+                    'type': 'danger',
+                }
+            }
+        
+        try:
+            download_url = f"{url}/alfresco/api/-default-/public/alfresco/versions/1/nodes/{self.alfresco_node_id}/content"
+            response = requests.get(download_url, auth=(user, pwd), timeout=30)
+            response.raise_for_status()
+        
+            # Guardar el contenido en el campo binary
+            self.write({
+                'pdf_content': base64.b64encode(response.content),
+                'pdf_filename': self.name,
+            })
+        
+            # Abrir la vista form con el PDF cargado
+            return {
+                'type': 'ir.actions.act_window',
+                'name': f'Preview: {self.name}',
+                'res_model': 'alfresco.file',
+                'res_id': self.id,
+                'view_mode': 'form',
+                'target': 'current',
+                'context': {'show_pdf_preview': True}
+            }
+        
+        except Exception as e:
+            _logger.error("Error cargando preview de archivo %s: %s", self.name, e)
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'message': f'Error cargando preview: {str(e)}',
+                    'type': 'danger',
+                }
+            }
 
     def action_load_preview(self):
         """Carga el contenido del PDF para preview en Odoo"""
@@ -150,3 +193,24 @@ class AlfrescoFile(models.Model):
                     'type': 'danger',
                 }
             }
+
+    def action_open_firma_wizard(self):
+        """Abre el wizard de firma para este archivo o archivos seleccionados"""
+        # Obtener archivos seleccionados del contexto o usar el actual
+        active_ids = self.env.context.get('active_ids', [])
+        if not active_ids:
+            active_ids = [self.id]
+    
+        # Crear el wizard sin validaciones complejas
+        wizard = self.env['alfresco.firma.wizard'].create({
+            'file_ids': [(6, 0, active_ids)]
+        })
+    
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Firmar PDFs de Alfresco',
+            'res_model': 'alfresco.firma.wizard',
+            'res_id': wizard.id,
+            'view_mode': 'form',
+            'target': 'new',
+        }

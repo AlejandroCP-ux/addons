@@ -9,7 +9,7 @@
                 <field name="subfolder_count" string="Subcarpetas"/>
                 <field name="file_count" string="Archivos PDF"/>
                 <field name="last_sync" string="Última Sync"/>
-                
+            
                 <!-- Botones de navegación -->
                 <button name="action_view_content" 
                         type="object" 
@@ -17,14 +17,14 @@
                         class="btn-primary"
                         icon="fa-folder-open"
                         attrs="{'invisible': [('subfolder_count', '=', 0)]}"/>
-                        
+                    
                 <button name="action_view_files" 
                         type="object" 
                         string="Ver PDFs" 
                         class="btn-info"
                         icon="fa-file-pdf-o"
                         attrs="{'invisible': [('file_count', '=', 0)]}"/>
-                        
+                    
                 <button name="action_sync_folder" 
                         type="object" 
                         string="Sincronizar" 
@@ -34,7 +34,38 @@
         </field>
     </record>
 
-    <!-- Vista kanban para archivos PDF -->
+    <!-- Vista de árbol para archivos PDF (PRINCIPAL) -->
+    <record id="view_alfresco_file_tree" model="ir.ui.view">
+        <field name="name">alfresco.file.tree</field>
+        <field name="model">alfresco.file</field>
+        <field name="arch" type="xml">
+            <tree string="Archivos PDF" create="false" edit="false" multi_edit="1">
+                <field name="name" string="📄 Nombre"/>
+                <field name="folder_id"/>
+                <field name="file_size_human"/>
+                <field name="modified_at"/>
+                <button name="action_preview_file" 
+                        type="object" 
+                        string="Preview" 
+                        class="btn-primary"
+                        icon="fa-eye"/>
+                <button name="action_download_file" 
+                        type="object" 
+                        string="Descargar" 
+                        class="btn-secondary"
+                        icon="fa-download"/>
+                <!-- BOTÓN DE FIRMA - SIN REFERENCIA EXTERNA 
+                <button name="action_open_firma_wizard" 
+                        type="object" 
+                        string="🖊️ Firmar" 
+                        class="btn-warning"
+                        icon="fa-pen"/>
+                        -->
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vista kanban para archivos PDF (SECUNDARIA) -->
     <record id="view_alfresco_file_kanban" model="ir.ui.view">
         <field name="name">alfresco.file.kanban</field>
         <field name="model">alfresco.file</field>
@@ -79,6 +110,13 @@
                                                 class="btn btn-secondary btn-sm">
                                             <i class="fa fa-download"/> Descargar
                                         </button>
+                                        <!-- BOTÓN DE FIRMA EN KANBAN 
+                                        <button name="action_open_firma_wizard" 
+                                                type="object" 
+                                                class="btn btn-warning btn-sm">
+                                            <i class="fa fa-pen"/> Firmar
+                                        </button>
+                                        -->
                                     </div>
                                 </div>
                             </div>
@@ -86,30 +124,6 @@
                     </t>
                 </templates>
             </kanban>
-        </field>
-    </record>
-
-    <!-- Vista de árbol para archivos -->
-    <record id="view_alfresco_file_tree" model="ir.ui.view">
-        <field name="name">alfresco.file.tree</field>
-        <field name="model">alfresco.file</field>
-        <field name="arch" type="xml">
-            <tree string="Archivos PDF" create="false" edit="false">
-                <field name="name" string="📄 Nombre"/>
-                <field name="folder_id"/>
-                <field name="file_size_human"/>
-                <field name="modified_at"/>
-                <button name="action_preview_file" 
-                        type="object" 
-                        string="Preview" 
-                        class="btn-primary"
-                        icon="fa-eye"/>
-                <button name="action_download_file" 
-                        type="object" 
-                        string="Descargar" 
-                        class="btn-secondary"
-                        icon="fa-download"/>
-            </tree>
         </field>
     </record>
 
@@ -173,7 +187,7 @@
                 <header>
                     <button name="action_preview_file" 
                             type="object" 
-                            string="Abrir Preview" 
+                            string="Cargar Preview" 
                             class="oe_highlight" 
                             icon="fa-eye"/>
                     <button name="action_download_file" 
@@ -181,11 +195,13 @@
                             string="Descargar" 
                             class="btn-secondary" 
                             icon="fa-download"/>
-                    <button name="action_load_preview" 
+                    <!-- BOTÓN DE FIRMA EN FORM 
+                    <button name="action_open_firma_wizard" 
                             type="object" 
-                            string="Cargar Preview" 
-                            class="btn-info" 
-                            icon="fa-refresh"/>
+                            string="🖊️ Firmar Documento" 
+                            class="btn-warning" 
+                            icon="fa-pen"/>
+                            -->
                 </header>
                 <sheet>
                     <group>
@@ -203,15 +219,23 @@
                         </group>
                     </group>
                     
-                    <!-- Preview del PDF si está cargado -->
-                    <notebook>
-                        <page string="Preview PDF" attrs="{'invisible': [('pdf_content', '=', False)]}">
+                    <!-- Preview del PDF integrado -->
+                    <div class="row" attrs="{'invisible': [('pdf_content', '=', False)]}">
+                        <div class="col-12">
+                            <h3>📄 Preview del PDF</h3>
                             <field name="pdf_content" 
-                                   widget="pdf_viewer" 
+                                   widget="pdf_preview" 
                                    filename="pdf_filename"
-                                   options="{'height': '600px'}"/>
-                        </page>
-                    </notebook>
+                                   options="{'height': '800px', 'width': '100%'}"/>
+                        </div>
+                    </div>
+                    
+                    <!-- Mensaje cuando no hay preview cargado -->
+                    <div class="alert alert-info text-center" attrs="{'invisible': [('pdf_content', '!=', False)]}">
+                        <i class="fa fa-info-circle fa-2x mb-3"/>
+                        <h4>Preview no cargado</h4>
+                        <p>Haz clic en "Cargar Preview" para ver el contenido del PDF aquí mismo.</p>
+                    </div>
                 </sheet>
             </form>
         </field>
@@ -233,13 +257,16 @@
         </field>
     </record>
 
-    <!-- Acciones -->
+    <!-- Acción mejorada del explorador con botón de sincronización -->
     <record id="action_alfresco_explorer" model="ir.actions.act_window">
         <field name="name">🗂️ Explorador de Alfresco</field>
         <field name="res_model">alfresco.folder</field>
         <field name="view_mode">tree,form</field>
         <field name="view_id" ref="view_alfresco_folder_explorer_tree"/>
         <field name="domain">[('parent_id', '=', False)]</field>
+        <field name="context">{
+            'search_default_group_by_parent': 1,
+        }</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 ¡Explora el contenido de Alfresco!
@@ -248,11 +275,13 @@
                 Aquí puedes navegar por las carpetas sincronizadas desde Alfresco.<br/>
                 • <strong>Abrir Carpeta</strong>: Navegar a las subcarpetas<br/>
                 • <strong>Ver PDFs</strong>: Ver archivos PDF de la carpeta<br/>
-                • <strong>Sincronizar</strong>: Actualizar contenido desde Alfresco
+                • <strong>Sincronizar</strong>: Actualizar contenido desde Alfresco<br/>
+                • <strong>🔄 Sincronizar Todo</strong>: Actualizar todas las carpetas
             </p>
         </field>
     </record>
 
+    <!-- CAMBIO PRINCIPAL: Tree primero, luego Kanban -->
     <record id="action_alfresco_files" model="ir.actions.act_window">
         <field name="name">📄 Todos los Archivos PDF</field>
         <field name="res_model">alfresco.file</field>
@@ -262,7 +291,10 @@
                 ¡No hay archivos PDF sincronizados!
             </p>
             <p>
-                Los archivos aparecerán aquí después de sincronizar las carpetas desde Alfresco.
+                Los archivos aparecerán aquí después de sincronizar las carpetas desde Alfresco.<br/>
+                • <strong>Preview</strong>: Ver contenido del PDF<br/>
+                • <strong>Descargar</strong>: Descargar archivo original<br/>
+                • <strong>🖊️ Firmar</strong>: Firmar digitalmente el documento
             </p>
         </field>
     </record>
@@ -272,6 +304,19 @@
         <field name="res_model">ir.actions.report</field>
         <field name="view_mode">tree,form</field>
         <field name="view_id" ref="view_alfresco_report_tree"/>
+    </record>
+
+    <!-- Acción de servidor para sincronización global -->
+    <record id="action_server_sync_all_alfresco" model="ir.actions.server">
+        <field name="name">🔄 Sincronizar Todo desde Alfresco</field>
+        <field name="model_id" ref="model_alfresco_folder"/>
+        <field name="binding_model_id" ref="model_alfresco_folder"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+# Ejecutar sincronización completa
+action = env['alfresco.folder'].action_sync_all_folders()
+        </field>
     </record>
 
     <!-- Menús -->

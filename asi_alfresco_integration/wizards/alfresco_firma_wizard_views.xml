@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_alfresco_firma_wizard_form" model="ir.ui.view">
+        <field name="name">alfresco.firma.wizard.form</field>
+        <field name="model">alfresco.firma.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Firma Digital de PDFs de Alfresco">
+                <field name="estado" invisible="1"/>
+                <field name="file_count" invisible="1"/>
+                
+                <!-- Estado: Configuración -->
+                <div attrs="{'invisible': [('estado', '!=', 'borrador')]}">
+                <!-- 
+                    <div class="alert alert-info" role="alert">
+                        <h4><i class="fa fa-pen"/> Configuración de Firma Digital</h4>
+                        <p>Configure los parámetros para firmar <strong><field name="file_count"/> archivo(s) PDF</strong> seleccionado(s) desde Alfresco.</p>
+                        <p>Los documentos firmados se subirán como nuevos archivos a Alfresco con el formato "_X_firmas" donde X es el número total de firmas digitales.</p>
+                    </div>
+                -->    
+                    <group>
+                        <group>
+                            <field name="rol_firma" placeholder="ej: Director General, Gerente, etc." required="1"/>
+                            <field name="posicion_firma" widget="radio"/>
+                        </group>
+                        <group>
+                            <field name="contrasena_firma" password="True" required="1"/>
+                        </group>
+                    </group>
+                    
+                    <!-- Lista de archivos seleccionados - A TODO EL ANCHO -->
+                    <group string="📄 Archivos Seleccionados" col="1">
+                        <field name="file_ids" nolabel="1" readonly="1" widget="many2many">
+                            <tree create="false" edit="false" delete="false">
+                                <field name="name"/>
+                                <field name="folder_id"/>
+                                <field name="file_size_human"/>
+                            </tree>
+                        </field>
+                    </group>
+                    <!--
+                    <footer>
+                        <button name="action_firmar_documentos" 
+                                string="🖊️ Firmar Documentos" 
+                                type="object" 
+                                class="btn-primary"
+                                attrs="{'invisible': ['|', '|', '|', ('rol_firma', '=', False), ('rol_firma', '=', ''), ('contrasena_firma', '=', False), ('file_count', '=', 0)]}"/>
+                        <button string="Cancelar" class="btn-secondary" special="cancel"/>
+                    </footer>
+                    -->
+                </div>
+                
+                <!-- Estado: Procesando -->
+                <div attrs="{'invisible': [('estado', '!=', 'procesando')]}">
+                    <div class="alert alert-warning" role="alert">
+                        <h4><i class="fa fa-spinner fa-spin"/> Procesando Firma Digital</h4>
+                        <p>Por favor espere mientras se procesan los documentos...</p>
+                        <field name="mensaje_resultado" readonly="1"/>
+                    </div>
+                    
+                    <div class="progress" style="margin: 20px 0;">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                             role="progressbar" 
+                             t-att-style="'width: ' + str(record.archivos_procesados.raw_value * 100 / record.file_count.raw_value) + '%'">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Estado: Completado -->
+                <div attrs="{'invisible': [('estado', '!=', 'completado')]}">
+                    <div class="alert alert-success" role="alert">
+                        <h4><i class="fa fa-check-circle"/> ¡Proceso Completado!</h4>
+                        <field name="mensaje_resultado" readonly="1" nolabel="1"/>
+                    </div>
+                    
+                    <div class="row text-center" style="margin: 20px 0;">
+                        <div class="col-6">
+                            <div class="card bg-success text-white">
+                                <div class="card-body">
+                                    <h3><field name="archivos_procesados"/></h3>
+                                    <p>Archivos Firmados</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="card bg-info text-white">
+                                <div class="card-body">
+                                    <h3><field name="file_count"/></h3>
+                                    <p>Total Procesados</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Estado: Error -->
+                <div attrs="{'invisible': [('estado', '!=', 'error')]}">
+                    <div class="alert alert-danger" role="alert">
+                        <h4><i class="fa fa-exclamation-triangle"/> Error en el Proceso</h4>
+                        <field name="mensaje_resultado" readonly="1" nolabel="1"/>
+                    </div>
+                    
+                    <div class="row text-center" style="margin: 20px 0;" attrs="{'invisible': [('archivos_procesados', '=', 0)]}">
+                        <div class="col-4">
+                            <div class="card bg-success text-white">
+                                <div class="card-body">
+                                    <h3><field name="archivos_procesados"/></h3>
+                                    <p>Exitosos</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="card bg-danger text-white">
+                                <div class="card-body">
+                                    <h3><field name="archivos_con_error"/></h3>
+                                    <p>Con Error</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="card bg-info text-white">
+                                <div class="card-body">
+                                    <h3><field name="file_count"/></h3>
+                                    <p>Total</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <footer>
+                        <button string="Cancelar" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </div>
+            </form>
+        </field>
+    </record>
+</odoo>
