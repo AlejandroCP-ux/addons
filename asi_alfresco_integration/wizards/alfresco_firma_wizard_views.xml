@@ -10,13 +10,11 @@
                 
                 <!-- Estado: Configuración -->
                 <div attrs="{'invisible': [('estado', '!=', 'borrador')]}">
-                <!-- 
                     <div class="alert alert-info" role="alert">
                         <h4><i class="fa fa-pen"/> Configuración de Firma Digital</h4>
                         <p>Configure los parámetros para firmar <strong><field name="file_count"/> archivo(s) PDF</strong> seleccionado(s) desde Alfresco.</p>
-                        <p>Los documentos firmados se subirán como nuevos archivos a Alfresco con el formato "_X_firmas" donde X es el número total de firmas digitales.</p>
+                        <!--<p>Los documentos firmados se subirán como nuevos archivos a Alfresco con el formato "_X_firmas" donde X es el número total de firmas digitales.</p>-->
                     </div>
-                -->    
                     <group>
                         <group>
                             <field name="rol_firma" placeholder="ej: Director General, Gerente, etc." required="1"/>
