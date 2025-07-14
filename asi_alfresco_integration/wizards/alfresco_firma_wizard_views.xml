@@ -10,14 +10,16 @@
                 
                 <!-- Estado: Configuración -->
                 <div attrs="{'invisible': [('estado', '!=', 'borrador')]}">
+                <!-- 
                     <div class="alert alert-info" role="alert">
                         <h4><i class="fa fa-pen"/> Configuración de Firma Digital</h4>
                         <p>Configure los parámetros para firmar <strong><field name="file_count"/> archivo(s) PDF</strong> seleccionado(s) desde Alfresco.</p>
-                        <!--<p>Los documentos firmados se subirán como nuevos archivos a Alfresco con el formato "_X_firmas" donde X es el número total de firmas digitales.</p>-->
+                        <p>Los documentos firmados se subirán como nuevos archivos a Alfresco con el formato "_X_firmas" donde X es el número total de firmas digitales.</p>
                     </div>
+                -->    
                     <group>
                         <group>
-                            <field name="rol_firma" placeholder="ej: Director General, Gerente, etc." required="1"/>
+                            <field name="rol_firma" placeholder="ej: Aprobado por:, Contabilizado por:, etc." required="1"/>
                             <field name="posicion_firma" widget="radio"/>
                         </group>
                         <group>
@@ -35,16 +37,16 @@
                             </tree>
                         </field>
                     </group>
-                    <!--
+                    
                     <footer>
                         <button name="action_firmar_documentos" 
                                 string="🖊️ Firmar Documentos" 
                                 type="object" 
                                 class="btn-primary"
                                 attrs="{'invisible': ['|', '|', '|', ('rol_firma', '=', False), ('rol_firma', '=', ''), ('contrasena_firma', '=', False), ('file_count', '=', 0)]}"/>
-                        <button string="Cancelar" class="btn-secondary" special="cancel"/>
+                    <!--<button string="Cancelar" class="btn-secondary" special="cancel"/>-->
                     </footer>
-                    -->
+                    
                 </div>
                 
                 <!-- Estado: Procesando -->

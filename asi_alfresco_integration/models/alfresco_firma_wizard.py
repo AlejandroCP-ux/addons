@@ -21,22 +21,12 @@ except ImportError:
 
 # Verificar la versión de PyPDF2 y adaptar las importaciones
 try:
-    import PyPDF2
-    PYPDF2_VERSION = PyPDF2.__version__
+    import pypdf
+    from pypdf import PdfReader, PdfWriter
+    HAS_PYPDF = True
     
-    # Para versiones más recientes (>=2.0.0)
-    if hasattr(PyPDF2, 'PdfReader'):
-        from PyPDF2 import PdfReader, PdfWriter
-        NEW_PYPDF2 = True
-    # Para versiones antiguas
-    else:
-        from PyPDF2 import PdfFileReader as PdfReader, PdfFileWriter as PdfWriter
-        NEW_PYPDF2 = False
-    
-    HAS_PYPDF2 = True
 except ImportError:
-    HAS_PYPDF2 = False
-    NEW_PYPDF2 = False
+    HAS_PYPDF = False
 
 _logger = logging.getLogger(__name__)
 
@@ -51,7 +41,7 @@ class AlfrescoFirmaWizard(models.TransientModel):
     # Campos específicos para la firma
     # ELIMINADO: required=True del modelo, la validación se hace en action_firmar_documentos
     rol_firma = fields.Char(string='Rol para la Firma', 
-                           help='Rol con el que se desea firmar (ej: Director, Gerente, etc.)')
+                           help='Rol con el que se desea firmar (ej: Aporbado por:, Entregado por:, etc.)')
     # ELIMINADO: required=True del modelo, la validación se hace en action_firmar_documentos
     contrasena_firma = fields.Char(string='Contraseña del Certificado')
     posicion_firma = fields.Selection([
@@ -134,7 +124,7 @@ class AlfrescoFirmaWizard(models.TransientModel):
                     font = ImageFont.load_default()
             
             # Texto a agregar
-            texto = f"Firmado digitalmente por: {rol}"
+            texto = f"{rol}"
             
             # Calcular dimensiones del texto
             draw_temp = ImageDraw.Draw(imagen)
@@ -174,7 +164,7 @@ class AlfrescoFirmaWizard(models.TransientModel):
 
     def _calcular_coordenadas_firma(self, page_width, page_height, imagen_width, imagen_height, posicion):
         """Calcula las coordenadas de la firma según la posición seleccionada"""
-        margen_inferior = 50
+        margen_inferior = 25
         margen_lateral = 1
         ancho = page_width /4
         
@@ -202,7 +192,7 @@ class AlfrescoFirmaWizard(models.TransientModel):
         self.ensure_one()
         
         # Validar bibliotecas necesarias
-        if not HAS_ENDESIVE or not HAS_PYPDF2:
+        if not HAS_ENDESIVE or not HAS_PYPDF:
             self.write({
                 'estado': 'error',
                 'mensaje_resultado': _('Las bibliotecas necesarias no están instaladas. Por favor, instale "endesive" y "PyPDF2".')
@@ -339,9 +329,9 @@ class AlfrescoFirmaWizard(models.TransientModel):
                 last_page = pdf_reader.pages[-1]
                 
                 # Obtener dimensiones de la página
-                if hasattr(last_page, 'mediaBox'):
-                    page_width = float(last_page.mediaBox.getWidth())
-                    page_height = float(last_page.mediaBox.getHeight())
+                if hasattr(last_page, 'mediabox') and last_page.mediabox:
+                    page_width = float(last_page.mediabox.width)
+                    page_height = float(last_page.mediabox.height)
                 else:
                     from reportlab.lib.pagesizes import letter
                     page_width, page_height = letter
@@ -469,7 +459,7 @@ class AlfrescoFirmaWizard(models.TransientModel):
                 "nodeType": "cm:content",
                 "properties": {
                     "cm:title": f"Documento firmado por {self.env.user.name}",
-                    "cm:description": f"Firmado digitalmente con rol: {self.rol_firma}"
+                    "cm:description": f"{self.rol_firma}"
                 }
             })
         }
@@ -513,8 +503,9 @@ class AlfrescoFirmaWizard(models.TransientModel):
                     pdf_reader = PdfReader(f)
                 
                     # Buscar firmas en el formulario AcroForm
-                    if '/AcroForm' in pdf_reader.trailer['/Root']:
-                        acro_form = pdf_reader.trailer['/Root']['/AcroForm']
+                    if '/AcroForm' in pdf_reader.trailer.get('/Root', {}):
+                        root = pdf_reader.trailer['/Root']
+                        acro_form = root.get('/AcroForm', {})
                     
                         if '/Fields' in acro_form:
                             fields = acro_form['/Fields']
@@ -524,13 +515,11 @@ class AlfrescoFirmaWizard(models.TransientModel):
                             for field_ref in fields:
                                 field = field_ref.get_object()
                             
-                                # Verificar si es un campo de firma
-                                if '/FT' in field and field['/FT'] == '/Sig':
-                                    # Verificar si tiene valor (está firmado)
-                                    if '/V' in field and field['/V'] is not None:
-                                        firma_count += 1
+                                if field.get('/FT') == '/Sig' and field.get('/V'):
+                                    # Campo de firma digital
+                                    firma_count += 1
                         
-                        return firma_count
+                            return firma_count
                 
                     # Si no hay AcroForm o no hay firmas
                     return 0

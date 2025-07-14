@@ -8,7 +8,7 @@
     'website': 'https://antasi.asisurl.cu',
     "depends": ["base", "web", "asi_pdf_signature"],
     'external_dependencies': {
-        'python': ['requests', 'Pillow', 'endesive', 'PyPDF2'],
+        'python': ['requests', 'Pillow', 'endesive', 'pypdf'],
     },
     "data": [
         "security/ir.model.access.csv",
