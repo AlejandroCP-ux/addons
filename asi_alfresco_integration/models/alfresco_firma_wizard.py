@@ -11,14 +11,18 @@ import binascii
 import json
 import requests # Importar requests aquí para la nueva función
 
+_logger = logging.getLogger(__name__)
 # Importaciones para firma digital
 try:
     from endesive import pdf
-    from cryptography.hazmat.primitives.serialization import pkcs12
+    from cryptography.hazmat.primitives.serialization import Encoding, PrivateFormat, NoEncryption
+    from cryptography.x509 import load_der_x509_certificate
+    import OpenSSL.crypto as crypto
     HAS_ENDESIVE = True
 except ImportError:
     HAS_ENDESIVE = False
 
+_logger.debug(f"TIENE ENDESIVE: {HAS_ENDESIVE}")
 # Verificar la versión de PyPDF2 y adaptar las importaciones
 try:
     import pypdf
@@ -28,7 +32,7 @@ try:
 except ImportError:
     HAS_PYPDF = False
 
-_logger = logging.getLogger(__name__)
+_logger.debug(f"TIENE PYPDF: {HAS_PYPDF}")
 
 class AlfrescoFirmaWizard(models.TransientModel):
     _name = 'alfresco.firma.wizard'
@@ -101,7 +105,7 @@ class AlfrescoFirmaWizard(models.TransientModel):
             if ancho_original > max_ancho:
                 factor_escala = max_ancho / ancho_original
                 nuevo_ancho_img = max_ancho
-                nuevo_alto_img = int(alto_original * factor_escala)
+                nuevo_alto_img = int(alto_original * factor_escala - (max(ancho_original,nuevo_ancho_img)-min(ancho_original,nuevo_ancho_img)))
                 # Compatibilidad con versiones antiguas y nuevas de Pillow
                 try:
                     # Para versiones nuevas de Pillow (>=8.0.0)
@@ -195,7 +199,7 @@ class AlfrescoFirmaWizard(models.TransientModel):
         if not HAS_ENDESIVE or not HAS_PYPDF:
             self.write({
                 'estado': 'error',
-                'mensaje_resultado': _('Las bibliotecas necesarias no están instaladas. Por favor, instale "endesive" y "PyPDF2".')
+                'mensaje_resultado': _('Las bibliotecas necesarias no están instaladas. Por favor, instale "endesive" y "pypdf".')
             })
             return self._recargar_wizard()
         
@@ -234,12 +238,14 @@ class AlfrescoFirmaWizard(models.TransientModel):
             )
             imagen_width, imagen_height = imagen_size
             
-            # Cargar certificado una sola vez
+            # Cargar certificado usando OpenSSL como alternativa
             certificado_data = base64.b64decode(usuario.certificado_firma)
-            private_key, certificate, additional_certificates = pkcs12.load_key_and_certificates(
-                certificado_data,
-                self.contrasena_firma.encode('utf-8')
-            )
+            p12 = crypto.load_pkcs12(certificado_data, self.contrasena_firma.encode('utf-8'))
+            
+            # Convertir a formato compatible con endesive
+            private_key = p12.get_privatekey().to_cryptography_key()
+            certificate = p12.get_certificate().to_cryptography()
+            additional_certificates = [cert.to_cryptography() for cert in p12.get_ca_certificates() or []]
             
             # Procesar cada archivo
             for archivo in self.file_ids:
