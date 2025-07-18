@@ -49,21 +49,31 @@ class ResUsers(models.Model):
         email = user.email or f"{user.login}@asisurl.cu"
         if not self._validate_email_basic(email):
             email = f"{user.login}@asisurl.cu"
-        
+    
         # Separar nombre y apellido
-        name_parts = user.name.split(' ', 1)
+        name_parts = user.name.split(' ', 1) if user.name else ["Nombre", "Apellido"]
         first_name = name_parts[0] or "Nombre"
         last_name = name_parts[1] if len(name_parts) > 1 else "Apellido"
-        _logger.info("*********   Tratando de crear %s", user.login)
+    
+        # Asegurar que jobTitle sea string
+        job_title = 'No definida'
+        if user.partner_id and user.partner_id.function:
+            job_title = str(user.partner_id.function)
+    
+        # Asegurar que company sea string
+        company_name = 'No definida'
+        if user.partner_id and user.partner_id.company_id and user.partner_id.company_id.name:
+            company_name = str(user.partner_id.company_id.name)
+    
         return {
             "id": user.login,
             "firstName": first_name,
             "lastName": last_name,
             "email": email, 
-            "jobTitle": user.partner_id.function or 'No definida',
+            "jobTitle": job_title,
             "company": {
-                "organization": user.partner_id.company_id.name
-              },
+                "organization": company_name
+            },
             "password": 'Pass1234'
         }
 

@@ -57,6 +57,70 @@ class AlfrescoFile(models.Model):
             else:
                 record.preview_url = False
 
+    def action_delete_from_alfresco(self):
+        """
+        NUEVO: Método específico para eliminar archivo de Alfresco SOLO cuando el usuario lo solicite manualmente
+        """
+        self.ensure_one()
+        
+        config = self.env['ir.config_parameter'].sudo()
+        url = config.get_param('asi_alfresco_integration.alfresco_server_url')
+        user = config.get_param('asi_alfresco_integration.alfresco_username')
+        pwd = config.get_param('asi_alfresco_integration.alfresco_password')
+        
+        if not all([url, user, pwd, self.alfresco_node_id]):
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'message': 'Error: Configuración de Alfresco incompleta',
+                    'type': 'danger',
+                }
+            }
+        
+        try:
+            # Eliminar archivo de Alfresco usando la API REST
+            delete_url = f"{url}/alfresco/api/-default-/public/alfresco/versions/1/nodes/{self.alfresco_node_id}"
+            response = requests.delete(delete_url, auth=(user, pwd), timeout=30)
+        
+            if response.status_code == 200:
+                _logger.info(f"Archivo {self.name} eliminado exitosamente de Alfresco")
+                # Ahora eliminar el registro de Odoo
+                super(AlfrescoFile, self).unlink()
+                return {
+                    'type': 'ir.actions.client',
+                    'tag': 'display_notification',
+                    'params': {
+                        'message': f'Archivo {self.name} eliminado correctamente de Alfresco y Odoo',
+                        'type': 'success',
+                    }
+                }
+            elif response.status_code == 404:
+                _logger.warning(f"Archivo {self.name} no encontrado en Alfresco (ya eliminado)")
+                # Eliminar solo de Odoo
+                super(AlfrescoFile, self).unlink()
+                return {
+                    'type': 'ir.actions.client',
+                    'tag': 'display_notification',
+                    'params': {
+                        'message': f'Archivo {self.name} no existía en Alfresco, eliminado solo de Odoo',
+                        'type': 'warning',
+                    }
+                }
+            else:
+                response.raise_for_status()
+            
+        except requests.exceptions.RequestException as e:
+            _logger.error(f"Error eliminando archivo {self.name} de Alfresco: {e}")
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'message': f'Error eliminando archivo de Alfresco: {str(e)}',
+                    'type': 'danger',
+                }
+            }
+
     def action_download_file(self):
         """Descarga el contenido del archivo desde Alfresco"""
         self.ensure_one()
@@ -200,17 +264,61 @@ class AlfrescoFile(models.Model):
         active_ids = self.env.context.get('active_ids', [])
         if not active_ids:
             active_ids = [self.id]
-    
-        # Crear el wizard sin validaciones complejas
-        wizard = self.env['alfresco.firma.wizard'].create({
-            'file_ids': [(6, 0, active_ids)]
-        })
-    
-        return {
-            'type': 'ir.actions.act_window',
-            'name': 'Firmar PDFs de Alfresco',
-            'res_model': 'alfresco.firma.wizard',
-            'res_id': wizard.id,
-            'view_mode': 'form',
-            'target': 'new',
+
+        # Verificar que los archivos existen y son válidos
+        try:
+            valid_files = self.env['alfresco.file'].browse(active_ids).exists().filtered(
+                lambda f: f.name.lower().endswith('.pdf') and f.alfresco_node_id
+            )
+        except Exception as e:
+            _logger.error("Error verificando archivos: %s", e)
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'message': 'Error: Los archivos seleccionados no son válidos o no existen.',
+                    'type': 'danger',
+                }
+            }
+
+        if not valid_files:
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'message': 'No hay archivos PDF válidos seleccionados para firmar.',
+                    'type': 'warning',
+                }
+            }
+
+        # Crear el wizard con los archivos válidos
+        wizard_vals = {
+            'posicion_firma': 'derecha',  # Valor por defecto
         }
+
+        try:
+            wizard = self.env['alfresco.firma.wizard'].create(wizard_vals)
+            # Asignar archivos después de crear el wizard
+            wizard.write({'file_ids': [(6, 0, valid_files.ids)]})
+    
+            return {
+                'type': 'ir.actions.act_window',
+                'name': 'Firmar PDFs de Alfresco',
+                'res_model': 'alfresco.firma.wizard',
+                'res_id': wizard.id,
+                'view_mode': 'form',
+                'target': 'new',
+                'context': {
+                    'default_file_ids': valid_files.ids,
+                }
+            }
+        except Exception as e:
+            _logger.error("Error creando wizard de firma: %s", e)
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'message': f'Error al abrir el wizard de firma: {str(e)}',
+                    'type': 'danger',
+                }
+            }

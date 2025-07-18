@@ -7,32 +7,28 @@ import logging
 from datetime import datetime
 from io import BytesIO
 from PIL import Image, ImageDraw, ImageFont
-import binascii
-import json
-import requests # Importar requests aquí para la nueva función
+import requests
+import traceback
+
+# Importación adicional para manejo de claves
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import rsa, ec, padding
+from cryptography.hazmat.primitives.serialization import pkcs12
+from cryptography.x509.oid import SignatureAlgorithmOID
 
 _logger = logging.getLogger(__name__)
+
 # Importaciones para firma digital
 try:
-    from endesive import pdf
-    from cryptography.hazmat.primitives.serialization import Encoding, PrivateFormat, NoEncryption
-    from cryptography.x509 import load_der_x509_certificate
-    import OpenSSL.crypto as crypto
+    from endesive import signer
+    from pypdf import PdfReader
     HAS_ENDESIVE = True
-except ImportError:
-    HAS_ENDESIVE = False
-
-_logger.debug(f"TIENE ENDESIVE: {HAS_ENDESIVE}")
-# Verificar la versión de PyPDF2 y adaptar las importaciones
-try:
-    import pypdf
-    from pypdf import PdfReader, PdfWriter
     HAS_PYPDF = True
-    
-except ImportError:
+    _logger.debug("Endesive y pypdf importados correctamente")
+except ImportError as e:
+    HAS_ENDESIVE = False
     HAS_PYPDF = False
-
-_logger.debug(f"TIENE PYPDF: {HAS_PYPDF}")
+    _logger.error("Error importando dependencias: %s", e)
 
 class AlfrescoFirmaWizard(models.TransientModel):
     _name = 'alfresco.firma.wizard'
@@ -43,10 +39,8 @@ class AlfrescoFirmaWizard(models.TransientModel):
     file_count = fields.Integer(string='Cantidad de Archivos', compute='_compute_file_count')
     
     # Campos específicos para la firma
-    # ELIMINADO: required=True del modelo, la validación se hace en action_firmar_documentos
     rol_firma = fields.Char(string='Rol para la Firma', 
                            help='Rol con el que se desea firmar (ej: Aporbado por:, Entregado por:, etc.)')
-    # ELIMINADO: required=True del modelo, la validación se hace en action_firmar_documentos
     contrasena_firma = fields.Char(string='Contraseña del Certificado')
     posicion_firma = fields.Selection([
         ('izquierda', 'Izquierda'),
@@ -75,15 +69,20 @@ class AlfrescoFirmaWizard(models.TransientModel):
 
     @api.model
     def default_get(self, fields_list):
-        """Valores por defecto para el asistente"""
         res = super(AlfrescoFirmaWizard, self).default_get(fields_list)
         
         # Obtener archivos seleccionados del contexto
         active_ids = self.env.context.get('active_ids', [])
-        if active_ids:
-            files = self.env['alfresco.file'].browse(active_ids)
-            res['file_ids'] = [(6, 0, files.ids)]
+        active_model = self.env.context.get('active_model', '')
         
+        if active_model == 'alfresco.file' and active_ids:
+            # Filtrar solo archivos PDF válidos
+            valid_files = self.env['alfresco.file'].browse(active_ids).filtered(
+                lambda f: f.name.lower().endswith('.pdf') and f.alfresco_node_id
+            )
+            if valid_files:
+                res['file_ids'] = [(6, 0, valid_files.ids)]
+    
         return res
 
     def _crear_imagen_firma_con_rol(self, imagen_firma_original, rol):
@@ -100,39 +99,25 @@ class AlfrescoFirmaWizard(models.TransientModel):
             # Dimensiones originales
             ancho_original, alto_original = imagen.size
             
-            # NUEVO: Limitar ancho máximo a 205px manteniendo proporción
+            # Limitar ancho máximo a 205px manteniendo proporción
             max_ancho = 205
             if ancho_original > max_ancho:
                 factor_escala = max_ancho / ancho_original
                 nuevo_ancho_img = max_ancho
-                nuevo_alto_img = int(alto_original * factor_escala - (max(ancho_original,nuevo_ancho_img)-min(ancho_original,nuevo_ancho_img)))
-                # Compatibilidad con versiones antiguas y nuevas de Pillow
-                try:
-                    # Para versiones nuevas de Pillow (>=8.0.0)
-                    imagen = imagen.resize((nuevo_ancho_img, nuevo_alto_img), Image.Resampling.LANCZOS)
-                except AttributeError:
-                    # Para versiones antiguas de Pillow
-                    imagen = imagen.resize((nuevo_ancho_img, nuevo_alto_img), Image.LANCZOS)
+                nuevo_alto_img = int(alto_original * factor_escala)
+                imagen = imagen.resize((nuevo_ancho_img, nuevo_alto_img), Image.LANCZOS)
                 ancho_original, alto_original = nuevo_ancho_img, nuevo_alto_img
             
             # Calcular nuevo alto (agregar espacio para el texto)
-            try:
-                # Intentar cargar una fuente del sistema
-                font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 10)
-            except:
-                try:
-                    # Fuente alternativa
-                    font = ImageFont.truetype("arial.ttf", 10)
-                except:
-                    # Fuente por defecto
-                    font = ImageFont.load_default()
+            font = self._obtener_fuente()
             
             # Texto a agregar
             texto = f"{rol}"
             
-            # Calcular dimensiones del texto
-            draw_temp = ImageDraw.Draw(imagen)
-            bbox = draw_temp.textbbox((0, 0), texto, font=font)
+            # Calcular dimensiones del texto - Método moderno
+            test_img = Image.new('RGB', (1, 1))
+            draw_test = ImageDraw.Draw(test_img)
+            bbox = draw_test.textbbox((0, 0), texto, font=font)
             ancho_texto = bbox[2] - bbox[0]
             alto_texto = bbox[3] - bbox[1]
             
@@ -146,14 +131,14 @@ class AlfrescoFirmaWizard(models.TransientModel):
             
             # Pegar el texto en la parte superior
             draw = ImageDraw.Draw(nueva_imagen)
-            x_texto = (nuevo_ancho - ancho_texto) // 2  # Centrar texto
+            x_texto = (nuevo_ancho - ancho_texto) // 2
             y_texto = margen_texto
             draw.text((x_texto, y_texto), texto, fill=(0, 0, 0, 255), font=font)
             
             # Pegar la imagen original debajo del texto
-            x_imagen = (nuevo_ancho - ancho_original) // 2  # Centrar imagen
+            x_imagen = (nuevo_ancho - ancho_original) // 2
             y_imagen = alto_texto + (margen_texto * 2)
-            nueva_imagen.paste(imagen, (x_imagen, y_imagen), imagen if imagen.mode == 'RGBA' else None)
+            nueva_imagen.paste(imagen, (x_imagen, y_imagen), imagen)
             
             # Guardar en archivo temporal
             temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.png')
@@ -163,8 +148,30 @@ class AlfrescoFirmaWizard(models.TransientModel):
             return temp_file.name, nueva_imagen.size
             
         except Exception as e:
-            _logger.error(f"Error creando imagen de firma con rol: {e}")
+            _logger.error("Error creando imagen de firma con rol: %s", str(e), exc_info=True)
             raise UserError(_('Error al procesar la imagen de firma: %s') % str(e))
+        
+    def _obtener_fuente(self, tamano=10):
+        """Obtiene la mejor fuente disponible con Pillow 11.3.0"""
+        try:
+            # Intentar fuentes comunes
+            fuentes = [
+                "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+                "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+                "/Library/Fonts/Arial.ttf",  # macOS
+                "C:\\Windows\\Fonts\\Arial.ttf"  # Windows
+            ]
+            
+            for fuente in fuentes:
+                try:
+                    return ImageFont.truetype(fuente, tamano)
+                except:
+                    continue
+            
+            # Fuente por defecto si no se encuentra ninguna
+            return ImageFont.load_default()
+        except:
+            return ImageFont.load_default()
 
     def _calcular_coordenadas_firma(self, page_width, page_height, imagen_width, imagen_height, posicion):
         """Calcula las coordenadas de la firma según la posición seleccionada"""
@@ -185,8 +192,6 @@ class AlfrescoFirmaWizard(models.TransientModel):
         else:  # derecha
             x = margen_lateral + ancho*3 +1
         
-        # Asegurar que no se salga de los márgenes
-        x = max(margen_lateral, min(x, page_width - imagen_width - margen_lateral))
         x1 = x + ancho
         
         return x, y, x1
@@ -194,6 +199,12 @@ class AlfrescoFirmaWizard(models.TransientModel):
     def action_firmar_documentos(self):
         """Acción principal para firmar todos los documentos seleccionados"""
         self.ensure_one()
+        
+        import pkg_resources
+        pillow_version = pkg_resources.get_distribution("pillow").version
+        pypdf_version = pkg_resources.get_distribution("pypdf").version
+        _logger.debug(f"Versión de Pillow: {pillow_version}")
+        _logger.debug(f"Versión de pypdf: {pypdf_version}")
         
         # Validar bibliotecas necesarias
         if not HAS_ENDESIVE or not HAS_PYPDF:
@@ -203,7 +214,7 @@ class AlfrescoFirmaWizard(models.TransientModel):
             })
             return self._recargar_wizard()
         
-        # Validar campos obligatorios (ahora que no son required=True en el modelo)
+        # Validar campos obligatorios
         if not self.contrasena_firma or not self.contrasena_firma.strip():
             raise UserError(_('Debe ingresar la contraseña del certificado.'))
         
@@ -212,10 +223,6 @@ class AlfrescoFirmaWizard(models.TransientModel):
         
         if not self.rol_firma or not self.rol_firma.strip():
             raise UserError(_('Debe especificar el rol para la firma.'))
-        
-        # Validar requisitos del usuario (si el método existe)
-        if hasattr(self.env.user, 'tiene_requisitos_firma') and not self.env.user.tiene_requisitos_firma():
-            raise UserError(_('Para firmar documentos, debe configurar su certificado digital y su imagen de firma en sus preferencias de usuario.'))
         
         # Cambiar estado a procesando
         self.write({
@@ -238,21 +245,33 @@ class AlfrescoFirmaWizard(models.TransientModel):
             )
             imagen_width, imagen_height = imagen_size
             
-            # Cargar certificado usando OpenSSL como alternativa
-            certificado_data = base64.b64decode(usuario.certificado_firma)
-            p12 = crypto.load_pkcs12(certificado_data, self.contrasena_firma.encode('utf-8'))
+            # Cargar certificado usando cryptography
+            try:
+                certificado_data = base64.b64decode(usuario.certificado_firma)
+                private_key, certificate, additional_certificates = pkcs12.load_key_and_certificates(
+                    certificado_data,
+                    self.contrasena_firma.encode('utf-8')
+                )
+                
+                # Asegurar que additional_certificates sea una lista
+                if additional_certificates is None:
+                    additional_certificates = []
+                    
+                _logger.debug("Certificado cargado correctamente")
+                
+            except Exception as e:
+                raise UserError(_('Error al cargar el certificado: %s') % str(e))
             
-            # Convertir a formato compatible con endesive
-            private_key = p12.get_privatekey().to_cryptography_key()
-            certificate = p12.get_certificate().to_cryptography()
-            additional_certificates = [cert.to_cryptography() for cert in p12.get_ca_certificates() or []]
+            # CORRECCIÓN: Usar string para el algoritmo de hash
+            hashalgo = 'sha256'  # Ahora es un string
             
             # Procesar cada archivo
             for archivo in self.file_ids:
                 try:
                     self._firmar_archivo_individual(
                         archivo, imagen_firma_path, imagen_width, imagen_height,
-                        private_key, certificate, additional_certificates
+                        private_key, certificate, additional_certificates,
+                        hashalgo  # Pasar el algoritmo como string
                     )
                     archivos_procesados += 1
                     
@@ -266,18 +285,19 @@ class AlfrescoFirmaWizard(models.TransientModel):
                     archivos_con_error += 1
                     error_msg = f"Error en {archivo.name}: {str(e)}"
                     errores_detalle.append(error_msg)
-                    _logger.error(f"Error firmando archivo {archivo.name}: {e}")
+                    _logger.error(f"Error firmando archivo {archivo.name}: {e}\n{traceback.format_exc()}")
         
-        # Limpiar archivo temporal
+            # Limpiar archivo temporal
             try:
                 os.unlink(imagen_firma_path)
             except:
                 pass
-        
-        # Preparar mensaje final
+    
+            # Preparar mensaje final
             if archivos_con_error == 0:
                 mensaje = f'✅ Proceso completado exitosamente!\n\n'
                 mensaje += f'📄 {archivos_procesados} archivos firmados correctamente\n'
+                mensaje += f'Los documentos han sido actualizados con una nueva versión firmada en Alfresco'
                 estado_final = 'completado'
             else:
                 mensaje = f'⚠️ Proceso completado con errores:\n\n'
@@ -285,27 +305,27 @@ class AlfrescoFirmaWizard(models.TransientModel):
                 mensaje += f'❌ {archivos_con_error} archivos con errores\n\n'
                 mensaje += 'Errores detallados:\n' + '\n'.join(errores_detalle)
                 estado_final = 'error'
-        
+    
             self.write({
                 'estado': estado_final,
                 'mensaje_resultado': mensaje,
                 'archivos_procesados': archivos_procesados,
                 'archivos_con_error': archivos_con_error
             })
-        
+    
         except Exception as e:
-            _logger.error(f"Error general en proceso de firma: {e}")
+            _logger.error(f"Error general en proceso de firma: {e}\n{traceback.format_exc()}")
             self.write({
                 'estado': 'error',
                 'mensaje_resultado': f'Error general: {str(e)}',
                 'archivos_con_error': len(self.file_ids)
             })
-    
+
         return self._recargar_wizard()
 
     def _firmar_archivo_individual(self, archivo, imagen_firma_path, imagen_width, imagen_height,
-                                 private_key, certificate, additional_certificates):
-        """Firma un archivo individual"""
+                                 private_key, certificate, additional_certificates, hashalgo):
+        """Firma un archivo individual con pypdf 5.8.0"""
         # Descargar el PDF desde Alfresco
         config = self.env['ir.config_parameter'].sudo()
         url = config.get_param('asi_alfresco_integration.alfresco_server_url')
@@ -328,19 +348,22 @@ class AlfrescoFirmaWizard(models.TransientModel):
             temp_pdf_path = temp_pdf.name
         
         try:
-            # Leer PDF para obtener dimensiones
+            # Leer PDF para obtener dimensiones usando pypdf 5.8.0
             with open(temp_pdf_path, 'rb') as f:
                 pdf_reader = PdfReader(f)
                 num_paginas = len(pdf_reader.pages)
                 last_page = pdf_reader.pages[-1]
                 
-                # Obtener dimensiones de la página
-                if hasattr(last_page, 'mediabox') and last_page.mediabox:
+                # Obtener dimensiones de la página - Método moderno
+                try:
+                    # pypdf 5.8.0: acceso directo y consistente a mediabox
                     page_width = float(last_page.mediabox.width)
                     page_height = float(last_page.mediabox.height)
-                else:
-                    from reportlab.lib.pagesizes import letter
-                    page_width, page_height = letter
+                except Exception as dim_error:
+                    _logger.warning("Error obteniendo dimensiones: %s. Usando tamaño carta", dim_error)
+                    # Tamaño carta estándar (ANSI A: 8.5 × 11 pulgadas)
+                    page_width = 612  # 8.5 * 72 puntos/pulgada
+                    page_height = 792  # 11 * 72 puntos/pulgada
             
             # Calcular coordenadas según posición seleccionada
             x, y, x1 = self._calcular_coordenadas_firma(
@@ -352,34 +375,47 @@ class AlfrescoFirmaWizard(models.TransientModel):
             date_str = date.strftime("D:%Y%m%d%H%M%S+00'00'")
             
             dct = {
-                "aligned": 0,
                 "sigflags": 3,
-                "sigflagsft": 132,
-                "sigpage": num_paginas - 1,
-                "sigbutton": True,
-                "sigfield": f"Signature_{archivo.id}",
-                "auto_sigfield": True,
-                "sigandcertify": True,
-                "signaturebox": (x, y, x1, y + imagen_height),
-                "signature_img": imagen_firma_path,
                 "contact": self.env.user.email or '',
                 "location": self.env.user.company_id.city or '',
-                "signingdate": date_str,
+                "signingdate": date_str.encode('utf-8'),  # Debe ser bytes
                 "reason": f"Firma Digital - {self.rol_firma}",
+                "signature": f"Firmado por: {self.env.user.name}",
+                "signaturebox": (x, y, x1, y + imagen_height),
+                "signature_img": imagen_firma_path,
             }
             
             # Leer PDF original
             with open(temp_pdf_path, 'rb') as f:
                 datau = f.read()
             
-            # Firmar digitalmente
-            datas = pdf.cms.sign(
+            # CORRECCIÓN: Detección mejorada de RSA-PSS
+            pss = False
+            if isinstance(private_key, rsa.RSAPrivateKey):
+                # Verificar si el certificado usa RSA-PSS
+                if hasattr(certificate, 'signature_algorithm_oid'):
+                    pss = (certificate.signature_algorithm_oid == SignatureAlgorithmOID.RSASSA_PSS)
+                    _logger.debug(f"Algoritmo de firma detectado: {certificate.signature_algorithm_oid}")
+                else:
+                    # Para versiones más antiguas de cryptography
+                    signature_oid = certificate.signature_algorithm_oid._dotted_string
+                    pss = (signature_oid == "1.2.840.113549.1.1.10")  # OID de RSA-PSS
+                
+                if pss:
+                    _logger.debug("Usando RSA-PSS para firma")
+                else:
+                    _logger.debug("Usando PKCS#1 v1.5 para firma RSA")
+            
+            # Firmar digitalmente con endesive
+            datas = signer.sign(
                 datau,
-                dct,
                 private_key,
                 certificate,
                 additional_certificates,
-                'sha256'
+                hashalgo,  # String esperado
+                attrs=True,
+                pss=pss,  # Especificar si es RSA-PSS
+                timestampurl=None
             )
             
             # Crear PDF firmado
@@ -392,8 +428,8 @@ class AlfrescoFirmaWizard(models.TransientModel):
             with open(temp_final_path, 'rb') as f:
                 pdf_firmado_contenido = f.read()
             
-            # Subir PDF firmado de vuelta a Alfresco
-            self._subir_pdf_firmado_alfresco(archivo, pdf_firmado_contenido)
+            # Actualizar el archivo original con la versión firmada
+            self._actualizar_version_firmada_alfresco(archivo, pdf_firmado_contenido)
             
             # Limpiar archivos temporales
             for path in [temp_pdf_path, temp_final_path]:
@@ -410,137 +446,40 @@ class AlfrescoFirmaWizard(models.TransientModel):
                 pass
             raise e
 
-    def _alfresco_file_exists_in_folder(self, url, user, pwd, folder_node_id, filename):
+    def _actualizar_version_firmada_alfresco(self, archivo_original, pdf_firmado_contenido):
         """
-        Verifica si un archivo con el nombre dado ya existe en la carpeta de Alfresco especificada.
+        Actualiza el archivo original en Alfresco con la versión firmada,
+        creando una nueva versión del mismo documento
         """
-        search_url = f"{url}/alfresco/api/-default-/public/search/versions/1/search"
-        query = {
-            "query": {
-                "language": "afts",
-                "query": f'cm:name:"{filename}" AND ANCESTOR:"workspace://SpacesStore/{folder_node_id}"'
-            },
-            "include": ["properties"],
-            "paging": {"maxItems": 1, "skipCount": 0}
-        }
-        try:
-            response = requests.post(
-                search_url,
-                headers={"Content-Type": "application/json"},
-                data=json.dumps(query),
-                auth=(user, pwd),
-                timeout=10
-            )
-            response.raise_for_status()
-            results = response.json().get('list', {}).get('entries', [])
-            return bool(results)
-        except requests.exceptions.RequestException as e:
-            _logger.error(f"Error verificando existencia de archivo en Alfresco para '{filename}' en carpeta '{folder_node_id}': {e}")
-            return False # Asumir que no existe para no bloquear el proceso
-
-    def _subir_pdf_firmado_alfresco(self, archivo_original, pdf_firmado_contenido):
-        """Sube el PDF firmado de vuelta a Alfresco con nuevo formato de nombre"""
         config = self.env['ir.config_parameter'].sudo()
         url = config.get_param('asi_alfresco_integration.alfresco_server_url')
         user = config.get_param('asi_alfresco_integration.alfresco_username')
         pwd = config.get_param('asi_alfresco_integration.alfresco_password')
         
-        # Obtener nombre original sin extensión
-        nombre_original = archivo_original.name
-        nombre_base, extension = os.path.splitext(nombre_original)
+        # Usar la misma lógica que _update_existing_file en report_override.py
+        update_url = f"{url}/alfresco/api/-default-/public/alfresco/versions/1/nodes/{archivo_original.alfresco_node_id}/content"
         
-        # Nuevo: Generar nombre con sufijo "_firmado" y número incremental si es necesario
-        base_signed_name = f"{nombre_base}_firmado{extension}"
-        nombre_firmado = base_signed_name
-        counter = 0
-
-        nombre_firmado = f"{nombre_base}_firmado{extension}"
-        
-        # Subir como nuevo archivo en la misma carpeta
-        endpoint = f"{url}/alfresco/api/-default-/public/alfresco/versions/1/nodes/{archivo_original.folder_id.node_id}/children"
-        files = {'filedata': (nombre_firmado, pdf_firmado_contenido)}
-        data = {
-            "json": json.dumps({
-                "name": nombre_firmado,
-                "nodeType": "cm:content",
-                "properties": {
-                    "cm:title": f"Documento firmado por {self.env.user.name}",
-                    "cm:description": f"{self.rol_firma}"
-                }
-            })
-        }
-        
-        response = requests.post(
-            endpoint,
-            files=files,
-            data=data,
-            params={'autoRename': 'true'},
-            auth=(user, pwd)
-        )
-        response.raise_for_status()
-        
-        # Crear registro en Odoo para el nuevo archivo
-        response_data = response.json()
-        nuevo_node_id = response_data['entry']['id']
-        
-        self.env['alfresco.file'].create({
-            'name': nombre_firmado,
-            'folder_id': archivo_original.folder_id.id,
-            'alfresco_node_id': nuevo_node_id,
-            'mime_type': 'application/pdf',
-            'file_size': len(pdf_firmado_contenido),
-            'modified_at': fields.Datetime.now(),
-        })
-
-    def _contar_firmas_digitales_pdf(self, pdf_contenido):
-        """
-        Este método ya no se usa para la lógica de nombres, pero se mantiene por si es necesario en el futuro.
-        Cuenta las firmas digitales existentes en el contenido del PDF.
-        """
         try:
-            # Crear archivo temporal para leer el PDF
-            with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as temp_pdf:
-                temp_pdf.write(pdf_contenido)
-                temp_pdf_path = temp_pdf.name
-        
-            try:
-                # Leer PDF y contar firmas digitales
-                with open(temp_pdf_path, 'rb') as f:
-                    pdf_reader = PdfReader(f)
-                
-                    # Buscar firmas en el formulario AcroForm
-                    if '/AcroForm' in pdf_reader.trailer.get('/Root', {}):
-                        root = pdf_reader.trailer['/Root']
-                        acro_form = root.get('/AcroForm', {})
-                    
-                        if '/Fields' in acro_form:
-                            fields = acro_form['/Fields']
-                            firma_count = 0
-                        
-                            # Iterar sobre los campos del formulario
-                            for field_ref in fields:
-                                field = field_ref.get_object()
-                            
-                                if field.get('/FT') == '/Sig' and field.get('/V'):
-                                    # Campo de firma digital
-                                    firma_count += 1
-                        
-                            return firma_count
-                
-                    # Si no hay AcroForm o no hay firmas
-                    return 0
-                
-            finally:
-                # Limpiar archivo temporal
-                try:
-                    os.unlink(temp_pdf_path)
-                except:
-                    pass
-                
-        except Exception as e:
-            _logger.warning(f"Error contando firmas digitales en PDF: {e}")
-            # En caso de error, retornar 0 para que sea la primera firma
-            return 0
+            response = requests.put(
+                update_url,
+                headers={"Content-Type": "application/pdf"},
+                data=pdf_firmado_contenido,
+                auth=(user, pwd),
+                timeout=30
+            )
+            response.raise_for_status()
+            
+            # Actualizar el tamaño del archivo en Odoo
+            archivo_original.write({
+                'file_size': len(pdf_firmado_contenido),
+                'modified_at': fields.Datetime.now(),
+            })
+            
+            _logger.info(f"Archivo {archivo_original.name} actualizado con versión firmada en Alfresco")
+            
+        except requests.exceptions.RequestException as e:
+            _logger.error(f"Error actualizando archivo firmado en Alfresco: {e}")
+            raise UserError(_('Error actualizando el archivo firmado en Alfresco: %s') % str(e))
 
     def _recargar_wizard(self):
         """Método auxiliar para recargar el wizard"""

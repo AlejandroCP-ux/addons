@@ -22,7 +22,7 @@ class AlfrescoFolder(models.Model):
   name = fields.Char(required=True)
   node_id = fields.Char(required=True, help="ID de nodo en Alfresco", index=True)
   parent_id = fields.Many2one('alfresco.folder', string="Carpeta padre", ondelete='cascade')
-  complete_path = fields.Char(string='Ruta completa', compute='_compute_complete_path', store=True)
+  complete_path = fields.Char(string='Ruta completa', compute='_compute_complete_path', store=True, recursive=True)
   child_ids = fields.One2many('alfresco.folder', 'parent_id', string="Subcarpetas")
   subfolder_count = fields.Integer(compute='_compute_counts', string='Subcarpetas')
   file_count = fields.Integer(compute='_compute_counts', string='Archivos PDF')
@@ -452,15 +452,10 @@ class AlfrescoFolder(models.Model):
               folder._sync_folder_content()
           except Exception as e:
               _logger.error("Error sincronizando carpeta %s: %s", folder.name, e)
-      
+  
       return {
           'type': 'ir.actions.client',
-          'tag': 'display_notification',
-          'params': {
-              'message': f'Sincronización completada para {len(self)} carpetas',
-              'type': 'success',
-              'sticky': False,
-          }
+          'tag': 'reload',
       }
 
   @api.model
@@ -471,14 +466,83 @@ class AlfrescoFolder(models.Model):
           self.sync_from_alfresco() # Call the main cron sync method
           return {
               'type': 'ir.actions.client',
-              'tag': 'display_notification',
-              'params': {
-                  'title': 'Sincronización Global',
-                  'message': 'Sincronización completa de Alfresco iniciada. Los cambios se reflejarán en breve.',
-                  'type': 'success',
-                  'sticky': False,
-              }
+              'tag': 'reload',
           }
       except Exception as e:
           _logger.error("Error al iniciar sincronización global: %s", e)
           raise UserError(_("Error al iniciar sincronización global: %s") % str(e))
+
+  def action_delete_from_alfresco(self):
+    """
+    NUEVO: Método específico para eliminar carpeta de Alfresco SOLO cuando el usuario lo solicite manualmente
+    """
+    self.ensure_one()
+    
+    config = self.env['ir.config_parameter'].sudo()
+    url = config.get_param('asi_alfresco_integration.alfresco_server_url')
+    user = config.get_param('asi_alfresco_integration.alfresco_username')
+    pwd = config.get_param('asi_alfresco_integration.alfresco_password')
+    
+    if not all([url, user, pwd, self.node_id]):
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'message': 'Error: Configuración de Alfresco incompleta',
+                'type': 'danger',
+            }
+        }
+    
+    # Verificar si tiene subcarpetas o archivos
+    if self.subfolder_count > 0 or self.file_count > 0:
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'message': 'No se puede eliminar una carpeta que contiene subcarpetas o archivos. Elimine primero su contenido.',
+                'type': 'warning',
+            }
+        }
+    
+    try:
+        # Eliminar carpeta de Alfresco usando la API REST
+        delete_url = f"{url}/alfresco/api/-default-/public/alfresco/versions/1/nodes/{self.node_id}"
+        response = requests.delete(delete_url, auth=(user, pwd), timeout=30)
+        
+        if response.status_code == 200:
+            _logger.info(f"Carpeta {self.name} eliminada exitosamente de Alfresco")
+            # Ahora eliminar el registro de Odoo
+            super(AlfrescoFolder, self).unlink()
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'message': f'Carpeta {self.name} eliminada correctamente de Alfresco y Odoo',
+                    'type': 'success',
+                }
+            }
+        elif response.status_code == 404:
+            _logger.warning(f"Carpeta {self.name} no encontrada en Alfresco (ya eliminada)")
+            # Eliminar solo de Odoo
+            super(AlfrescoFolder, self).unlink()
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'message': f'Carpeta {self.name} no existía en Alfresco, eliminada solo de Odoo',
+                    'type': 'warning',
+                }
+            }
+        else:
+            response.raise_for_status()
+            
+    except requests.exceptions.RequestException as e:
+        _logger.error(f"Error eliminando carpeta {self.name} de Alfresco: {e}")
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'message': f'Error eliminando carpeta de Alfresco: {str(e)}',
+                'type': 'danger',
+            }
+        }
