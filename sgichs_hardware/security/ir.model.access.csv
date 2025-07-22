@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_it_asset_hardware_user,it.asset.hardware.user,model_it_asset_hardware,base.group_user,1,1,1,0
+access_it_asset_hardware_manager,it.asset.hardware.manager,model_it_asset_hardware,base.group_system,1,1,1,1
+access_it_component_user,it.component.user,model_it_component,base.group_user,1,1,1,0
+access_it_component_manager,it.component.manager,model_it_component,base.group_system,1,1,1,1
+access_it_component_subtype_user,it.component.subtype.user,model_it_component_subtype,base.group_user,1,0,0,0
+access_it_component_subtype_manager,it.component.subtype.manager,model_it_component_subtype,base.group_system,1,1,1,1

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Grupos principales -->
+    <record id="group_cyber_security" model="res.groups">
+        <field name="name">Encargado de ciberseguridad</field>
+        <field name="category_id" ref="base.module_category_services"/>
+        <field name="users" eval="[(4, ref('base.user_admin'))]"/>
+    </record>
+
+    <record id="group_auditor" model="res.groups">
+        <field name="name">Auditor</field>
+        <field name="category_id" ref="base.module_category_services"/>
+    </record>
+
+    <record id="group_technician" model="res.groups">
+        <field name="name">Técnico</field>
+        <field name="category_id" ref="base.module_category_services"/>
+    </record>
+    
+    <record id="group_it_admin" model="res.groups">
+        <field name="name">Admin Usuarios TI</field>
+        <field name="category_id" ref="base.module_category_services"/>
+        <field name="implied_ids" eval="[(4, ref('group_cyber_security'))]"/>
+    </record>
+
+    <record id="group_it_user" model="res.groups">
+        <field name="name">Usuario TI</field>
+        <field name="category_id" ref="base.module_category_services"/>
+        <field name="implied_ids" eval="[(4, ref('group_technician'))]"/>
+    </record>
+</odoo>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Menú para la configuración de Usuarios de TI -->
+    <menuitem
+        id="menu_it_users_config"
+        name="Usuarios de TI"
+        parent="sgichs_core2.menu_it_config"
+        action="action_it_user"
+        sequence="30"/>
+</odoo>

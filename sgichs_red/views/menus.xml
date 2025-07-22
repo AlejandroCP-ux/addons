@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Menús para la configuración de Red -->
+    <menuitem
+        id="menu_it_network_config"
+        name="Red"
+        parent="sgichs_core2.menu_it_root"
+        sequence="16"/>
+
+    <menuitem
+        id="menu_action_it_ip_address"
+        name="Direcciones IP"
+        action="action_it_ip_address"
+        parent="menu_it_network_config"
+        sequence="10"/>
+
+    <menuitem
+        id="menu_action_it_network_service"
+        name="Servicios de Red"
+        action="action_it_network_service"
+        parent="menu_it_network_config"
+        sequence="20"/>
+</odoo>

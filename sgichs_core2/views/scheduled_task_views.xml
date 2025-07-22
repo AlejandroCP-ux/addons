@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="it_scheduled_task_view_tree" model="ir.ui.view">
+        <field name="name">it.scheduled.task.tree</field>
+        <field name="model">it.scheduled.task</field>
+        <field name="arch" type="xml">
+            <tree string="Tareas Programadas">
+                <field name="name"/>
+                <field name="action_type"/>
+                <field name="active"/>
+                <field name="next_execution"/>
+                <field name="last_execution"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="it_scheduled_task_view_form" model="ir.ui.view">
+        <field name="name">it.scheduled.task.form</field>
+        <field name="model">it.scheduled.task</field>
+        <field name="arch" type="xml">
+            <form string="Tarea Programada">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="action_type"/>
+                        <field name="active"/>
+                        <field name="cron_id"/>
+                        <field name="next_execution"/>
+                        <field name="last_execution"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_it_scheduled_task" model="ir.actions.act_window">
+        <field name="name">Tareas Programadas</field>
+        <field name="res_model">it.scheduled.task</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

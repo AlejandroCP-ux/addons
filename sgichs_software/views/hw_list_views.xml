@@ -1,0 +1,39 @@
+<odoo>
+    <!-- Vista lista para listas de control -->
+    <record id="view_hw_list_tree" model="ir.ui.view">
+        <field name="name">it.hw.list.tree</field>
+        <field name="model">it.hw.list</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="type"/>
+                <field name="active"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vista formulario para listas -->
+    <record id="view_hw_list_form" model="ir.ui.view">
+        <field name="name">it.hw.list.form</field>
+        <field name="model">it.hw.list</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="type"/>
+                        <field name="active"/>
+                        <field name="software_ids" widget="many2many_tags"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Acción para listas de control -->
+    <record id="action_hw_list" model="ir.actions.act_window">
+        <field name="name">Listas de Control</field>
+        <field name="res_model">it.hw.list</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

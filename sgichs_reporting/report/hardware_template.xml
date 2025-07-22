@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_hardware_technical_sheet">
+        <t t-call="web.html_container">
+            <t t-call="web.internal_layout">
+                <div class="page">
+                    <div class="header">
+                        <div class="row">
+                            <div class="col-6">
+                                <!-- Remover logo temporalmente -->
+                                <h3>SGICHS - Ficha Técnica</h3>
+                            </div>
+                            <div class="col-6 text-right">
+                                <h3>Ficha Técnica de Hardware</h3>
+                                <p>Fecha: <span t-esc="datetime.datetime.now().strftime('%d/%m/%Y')"/></p>
+                            </div>
+                        </div>
+                        <hr/>
+                    </div>
+                    
+                    <div class="content">
+                        <h2 t-field="doc.name"/>
+                        
+                        <table class="table table-bordered mt-4">
+                            <tr>
+                                <th>Número de Inventario</th>
+                                <td t-field="doc.inventory_number"/>
+                            </tr>
+                            <tr>
+                                <th>Subtipo</th>
+                                <td t-field="doc.subtype"/>
+                            </tr>
+                            <tr>
+                                <th>Responsable</th>
+                                <td t-field="doc.responsible_id.name"/>
+                            </tr>
+                            <tr>
+                                <th>Estado</th>
+                                <td>
+                                    <span t-attf-class="doc.status == 'active' ? 'text-success' : 
+                                                       doc.status == 'retired' ? 'text-danger' : 'text-warning'">
+                                        <t t-esc="doc.status"/>
+                                    </span>
+                                </td>
+                            </tr>
+                        </table>
+                        
+                        <h4>Componentes</h4>
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Tipo</th>
+                                    <th>Modelo</th>
+                                    <th>Número de Serie</th>
+                                    <th>Número de Inventario</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="doc.components_ids" t-as="component">
+                                    <tr>
+                                        <td t-esc="component.type"/>
+                                        <td t-esc="component.model"/>
+                                        <td t-esc="component.serial_number"/>
+                                        <td t-esc="component.inventory_number"/>
+                                        <td>
+                                            <span t-attf-class="component.status == 'operational' ? 'text-success' : 
+                                                               component.status == 'failed' ? 'text-danger' : 'text-warning'">
+                                                <t t-esc="component.status"/>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="footer mt-5">
+                        <hr/>
+                        <div class="row">
+                            <div class="col-6">
+                                <p>Sistema de Gestión Integral de TI (SGICHS)</p>
+                            </div>
+                            <div class="col-6 text-right">
+                                <p>Página <span class="page"/> de <span class="topage"/></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Heredamos la vista árbol de hardware para añadir botón de reporte -->
+    <record id="view_hardware_tree_reporting" model="ir.ui.view">
+        <field name="name">it.asset.hardware.tree.reporting</field>
+        <field name="model">it.asset.hardware</field>
+        <field name="inherit_id" ref="sgichs_hardware.it_asset_hardware_view_tree"/>
+        <field name="arch" type="xml">
+            <!-- Añadimos el botón después del campo de estado -->
+            <xpath expr="//field[@name='status']" position="after">
+                <button name="action_llamar_reporte_ficha_tecnica"
+                        string="Ficha Técnica"
+                        type="object"
+                        class="btn-primary"
+                        icon="fa-file-pdf-o"
+                        attrs="{'invisible': [('has_reporting_module', '=', False)]}"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

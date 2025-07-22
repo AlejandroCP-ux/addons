@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_it_ip_address_user,it.ip.address.user,model_it_ip_address,base.group_user,1,1,1,1
+access_it_network_service_user,it.asset.network_service.user,model_it_asset_network_service,base.group_user,1,1,1,1
+access_it_ping_history_user,it.hardware.ping.history.user,model_it_hardware_ping_history,base.group_user,1,0,1,0

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Herencia de la vista formulario de Hardware para añadir la pestaña de Red -->
+    <record id="it_asset_hardware_view_form_inherit_network" model="ir.ui.view">
+        <field name="name">it.asset.hardware.form.inherit.network</field>
+        <field name="model">it.asset.hardware</field>
+        <field name="inherit_id" ref="sgichs_hardware.it_asset_hardware_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Red y Conectividad" name="network">
+                    <group>
+                        <group string="Conectividad">
+                            <field name="connection_status" widget="badge"
+                                decoration-success="connection_status == 'online'"
+                                decoration-danger="connection_status in ('offline', 'unreachable')"
+                                decoration-muted="connection_status in ('pending', 'unknown')"/>
+                            <field name="last_ping_time"/>
+                            <button name="action_manual_ping" string="Verificar Conexión Ahora" type="object" class="btn-secondary"/>
+                        </group>
+                        <group string="Direcciones IP Asignadas">
+                            <field name="ip_ids" widget="many2many_tags" placeholder="Añadir IPs..."/>
+                        </group>
+                    </group>
+                    <field name="ping_history_ids">
+                        <tree>
+                            <field name="ping_time"/>
+                            <field name="status" widget="badge"
+                                decoration-success="status == 'online'"
+                                decoration-danger="status in ('offline', 'unreachable')"
+                                decoration-muted="status == 'unknown'"/>
+                            <field name="response_time_ms"/>
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

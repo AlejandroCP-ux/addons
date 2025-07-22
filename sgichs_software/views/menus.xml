@@ -1,0 +1,23 @@
+<odoo>
+    <!-- Menú principal bajo Gestión de TI -->
+    <menuitem 
+        id="menu_software_root" 
+        name="Software"
+        parent="sgichs_core2.menu_it_root"
+        sequence="15"/>
+    
+    <!-- Submenús -->
+    <menuitem
+        id="menu_software"
+        name="Software"
+        parent="menu_software_root"
+        action="action_software"
+        sequence="10"/>
+    
+    <menuitem
+        id="menu_hw_list"
+        name="Listas de Control"
+        parent="menu_software_root"
+        action="action_hw_list"
+        sequence="20"/>
+</odoo>

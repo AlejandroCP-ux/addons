@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Menú para Hardware, que aparecerá bajo "Activos" -->
+    <menuitem
+        id="menu_action_it_hardware"
+        name="Hardware"
+        action="action_it_asset_hardware"
+        parent="sgichs_core2.menu_it_assets"
+        sequence="15"/>
+
+    <!-- Menú para la configuración de Hardware -->
+    <menuitem
+        id="menu_it_hardware_config"
+        name="Hardware"
+        parent="sgichs_core2.menu_it_config"
+        sequence="10"/>
+
+    <menuitem
+        id="menu_action_it_component"
+        name="Componentes"
+        action="action_it_component"
+        parent="menu_it_hardware_config"
+        sequence="10"/>
+
+    <menuitem
+        id="menu_action_it_component_subtype"
+        name="Subtipos de Componente"
+        action="action_it_component_subtype"
+        parent="menu_it_hardware_config"
+        sequence="20"/>
+</odoo>

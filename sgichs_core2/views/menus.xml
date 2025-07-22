@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Menú Principal -->
+    <menuitem
+        id="menu_it_root"
+        name="Gestión de TI"
+        sequence="10"/>
+
+    <!-- Menú para Activos -->
+    <menuitem
+        id="menu_it_assets"
+        name="Activos"
+        parent="menu_it_root"
+        sequence="10"/>
+
+    <!-- <menuitem
+        id="menu_action_it_asset"
+        action="action_it_asset"
+        parent="menu_it_assets"
+        sequence="10"/> -->
+
+    <menuitem
+        id="menu_action_it_asset_backlog"
+        action="action_it_asset_backlog"
+        parent="menu_it_assets"
+        sequence="20"/>
+
+    <!-- Menú para Operaciones -->
+    <menuitem
+        id="menu_it_operations"
+        name="Operaciones"
+        parent="menu_it_root"
+        sequence="20"/>
+
+    <menuitem
+        id="menu_action_it_incident"
+        action="action_it_incident"
+        parent="menu_it_operations"
+        sequence="10"/>
+
+    <!-- Menú para Configuración -->
+    <menuitem
+        id="menu_it_config"
+        name="Configuración"
+        parent="menu_it_root"
+        sequence="100"
+        groups="base.group_system"/>
+
+    <menuitem
+        id="menu_action_it_scheduled_task"
+        action="action_it_scheduled_task"
+        parent="menu_it_config"
+        sequence="10"/>
+</odoo>

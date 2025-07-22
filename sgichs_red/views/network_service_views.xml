@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="it_network_service_view_tree" model="ir.ui.view">
+        <field name="name">it.asset.network_service.tree</field>
+        <field name="model">it.asset.network_service</field>
+        <field name="arch" type="xml">
+            <tree string="Servicios de Red">
+                <field name="name"/>
+                <field name="ip_address"/>
+                <field name="port"/>
+                <field name="protocol"/>
+                <field name="status"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_it_network_service" model="ir.actions.act_window">
+        <field name="name">Servicios de Red</field>
+        <field name="res_model">it.asset.network_service</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('type', '=', 'network_service')]</field>
+        <field name="context">{'default_type': 'network_service'}</field>
+    </record>
+</odoo>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="it_user_view_tree" model="ir.ui.view">
+        <field name="name">it.user.tree</field>
+        <field name="model">it.user</field>
+        <field name="arch" type="xml">
+            <tree string="Usuarios de TI">
+                <field name="name"/>
+                <field name="status"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="it_user_view_form" model="ir.ui.view">
+        <field name="name">it.user.form</field>
+        <field name="model">it.user</field>
+        <field name="arch" type="xml">
+            <form string="Usuario de TI">
+                <header>
+                     <field name="status" widget="statusbar" statusbar_visible="active,revoked"/>
+                </header>
+                <sheet>
+                    <group>
+                        <field name="user_id"/>
+                        <field name="name"/>
+                    </group>
+                    <notebook>
+                        <page string="Hardware Asignado">
+                            <!-- Este campo ahora funcionará correctamente -->
+                            <field name="hardware_ids"/>
+                        </page>
+                        <page string="Notas">
+                            <field name="notes"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_it_user" model="ir.actions.act_window">
+        <field name="name">Usuarios de TI</field>
+        <field name="res_model">it.user</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Acciones para los modelos de este módulo -->
+    <record id="action_it_asset_hardware" model="ir.actions.act_window">
+        <field name="name">Hardware</field>
+        <field name="res_model">it.asset.hardware</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('type', '=', 'hardware')]</field>
+        <field name="context">{'default_type': 'hardware'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Crea tu primer activo de hardware
+            </p>
+        </field>
+    </record>
+
+    <record id="action_it_component" model="ir.actions.act_window">
+        <field name="name">Componentes</field>
+        <field name="res_model">it.component</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="action_it_component_subtype" model="ir.actions.act_window">
+        <field name="name">Subtipos de Componente</field>
+        <field name="res_model">it.component.subtype</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Vista de árbol para Hardware -->
+    <record id="it_asset_hardware_view_tree" model="ir.ui.view">
+        <field name="name">it.asset.hardware.tree</field>
+        <field name="model">it.asset.hardware</field>
+        <field name="arch" type="xml">
+            <tree string="Activos de Hardware">
+                <!-- Campos computados necesarios (invisibles) -->
+                <field name="has_reporting_module" invisible="1"/>
+                
+                <field name="name"/>
+                <field name="subtype"/>
+                <field name="inventory_number"/>
+                <field name="status" widget="badge"/>
+                
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vista de formulario para Hardware - Versión mejorada -->
+    <record id="it_asset_hardware_view_form" model="ir.ui.view">
+        <field name="name">it.asset.hardware.form</field>
+        <field name="model">it.asset.hardware</field>
+        <field name="arch" type="xml">
+            <form string="Activo de Hardware">
+                <header>
+                    <!-- Campos computados necesarios (invisibles) -->
+                    <field name="has_reporting_module" invisible="1"/>
+                    <field name="has_network_module" invisible="1"/>
+                    <field name="has_software_module" invisible="1"/>
+                    
+                    <!-- Barra de estado -->
+                    <field name="status" widget="statusbar" 
+                           statusbar_visible="draft,active,retired"
+                           options="{'clickable': ['draft', 'active', 'retired']}"/>
+                    
+                    <!-- Botones condicionales -->
+                    <button 
+                        name="action_llamar_reporte_ficha_tecnica"
+                        string="Ficha Técnica PDF"
+                        type="object"
+                        class="btn-primary"
+                        icon="fa-file-pdf-o"
+                        attrs="{'invisible': [('has_reporting_module', '=', False)]}"/>
+                        
+                    <button 
+                        name="action_manual_ping"
+                        string="Verificar Conexión"
+                        type="object"
+                        class="btn-info"
+                        icon="fa-refresh"
+                        attrs="{'invisible': [('has_network_module', '=', False)]}"/>
+                </header>
+                
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                    </div>
+                    
+                    <!-- Sección de información básica -->
+                    <div class="oe_button_box" name="button_box">
+                        <!-- Botones adicionales pueden ir aquí si son necesarios -->
+                    </div>
+                    
+                    <group>
+                        <group string="Identificación" col="4">
+                            <field name="subtype" required="1"/>
+                            <field name="inventory_number"/>
+                        </group>
+                        
+                        <group string="Responsable" col="4">
+                            <field name="responsible_id" widget="many2one_avatar"/>
+                        </group>
+                        
+                        <group string="Estado" col="4">
+                            <field name="status" widget="radio" options="{'horizontal': true}"/>
+                        </group>
+                    </group>
+                    
+                    <!-- Notebook con pestañas para detalles -->
+                    <notebook>
+                        <page string="Componentes" attrs="{'invisible': [('components_ids', '=', False)]}">
+                            <field name="components_ids" mode="tree,form">
+                                <tree string="Componentes Asociados" decoration-danger="status == 'failed'" decoration-warning="status == 'maintenance'">
+                                    <field name="type"/>
+                                    <field name="subtype_id" widget="many2one_avatar" options="{'no_create': True}"/>
+                                    <field name="model"/>
+                                    <field name="serial_number"/>
+                                    <field name="inventory_number"/>
+                                    <field name="status" widget="badge"/>
+                                    
+                                    <button 
+                                        name="action_unassign_from_hardware"
+                                        string="Desasignar"
+                                        type="object"
+                                        icon="fa-unlink"
+                                        confirm="¿Está seguro de desasignar este componente?"
+                                        groups="sgichs_hardware.group_component_manager"/>
+                                </tree>
+                                
+                                <form>
+                                    <group>
+                                        <field name="type"/>
+                                        <field name="subtype_id" options="{'no_create': True}" context="{'form_view_ref': 'it_asset.view_component_subtype_form'}"/>
+                                        <field name="model"/>
+                                        <field name="serial_number"/>
+                                        <field name="inventory_number"/>
+                                        <field name="status" widget="radio" options="{'horizontal': true}"/>
+                                    </group>
+                                </form>
+                            </field>
+                        </page>
+                        
+                        <!-- Pestaña condicional para software -->
+                        <page 
+                            string="Software Instalado" 
+                            attrs="{'invisible': [('has_software_module', '=', False)]}">
+                            <field name="software_ids" widget="many2many_tags" optional="show"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>

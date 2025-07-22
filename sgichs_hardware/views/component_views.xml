@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="it_component_view_tree" model="ir.ui.view">
+        <field name="name">it.component.tree</field>
+        <field name="model">it.component</field>
+        <field name="arch" type="xml">
+            <tree string="Componentes">
+                <field name="model"/>
+                <field name="subtype_id"/>
+                <field name="type"/>
+                <field name="serial_number"/>
+                <field name="hardware_id"/>
+                <field name="status"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="it_component_view_form" model="ir.ui.view">
+        <field name="name">it.component.form</field>
+        <field name="model">it.component</field>
+        <field name="arch" type="xml">
+            <form string="Componente">
+                <sheet>
+                    <group>
+                        <field name="model"/>
+                        <field name="subtype_id"/>
+                        <field name="type"/>
+                        <field name="serial_number"/>
+                        <field name="hardware_id"/>
+                        <field name="status"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_it_component" model="ir.actions.act_window">
+        <field name="name">Componentes</field>
+        <field name="res_model">it.component</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

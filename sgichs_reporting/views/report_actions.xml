@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_report_custom_tree" model="ir.ui.view">
+        <field name="name">custom.report.tree</field>
+        <field name="model">custom.report</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="model_id"/>
+                <field name="active"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_report_custom_form" model="ir.ui.view">
+        <field name="name">custom.report.form</field>
+        <field name="model">custom.report</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="model_id"/>
+                        <field name="template_id"/>
+                        <field name="active"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_custom_report" model="ir.actions.act_window">
+        <field name="name">Reportes Personalizados</field>
+        <field name="res_model">custom.report</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Menú principal en Configuración Técnica -->
+    <menuitem 
+        id="menu_reporting_config" 
+        name="Configuración de Reportes"
+        parent="base.menu_administration"
+        sequence="100"
+        groups="base.group_system"/>
+    
+    <!-- Submenú para reportes personalizados -->
+    <menuitem 
+        id="menu_action_custom_report" 
+        name="Reportes Personalizados"
+        action="action_custom_report"
+        parent="menu_reporting_config"
+        sequence="10"/>
+</odoo>

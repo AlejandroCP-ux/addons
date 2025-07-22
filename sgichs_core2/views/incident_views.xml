@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="it_incident_view_tree" model="ir.ui.view">
+        <field name="name">it.incident.tree</field>
+        <field name="model">it.incident</field>
+        <field name="arch" type="xml">
+            <tree string="Incidentes de TI" 
+                  decoration-danger="severity == 'high'" 
+                  decoration-warning="severity == 'medium'" 
+                  decoration-info="severity == 'low'">
+                <field name="title" string="Título"/>
+                <field name="asset_ref" string="Activo"/>
+                <field name="severity" widget="badge"
+                    decoration-success="severity == 'info'"
+                    decoration-info="severity == 'low'"
+                    decoration-warning="severity == 'medium'"
+                    decoration-danger="severity == 'high'"/>
+                <field name="status" widget="badge"
+                    decoration-success="status == 'resolved' or status == 'closed'"
+                    decoration-warning="status == 'in_progress'"
+                    decoration-danger="status == 'new'"/>
+                <field name="detection_date" string="Detectado"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="it_incident_view_form" model="ir.ui.view">
+        <field name="name">it.incident.form</field>
+        <field name="model">it.incident</field>
+        <field name="arch" type="xml">
+            <form string="Incidente de TI">
+                <header>
+                    <!-- Barra de estado mejorada -->
+                    <field name="status" widget="statusbar" 
+                           statusbar_visible="new,in_progress,resolved,closed"
+                           options="{'clickable': true}"
+                           class="oe_highlight"/>
+                </header>
+                
+                <sheet>
+                    <!-- Título destacado -->
+                    <div class="oe_title" style="margin-bottom: 20px;">
+                        <h1>
+                            <field name="title" placeholder="Título del incidente..."
+                                   style="font-size: 1.5em; color: #0077B6;"/>
+                        </h1>
+                    </div>
+                    
+                    <!-- Información principal en 2 columnas -->
+                    <div style="display: flex; gap: 20px; margin-bottom: 25px;">
+                        <div style="flex: 1; border-right: 1px solid #EEE; padding-right: 20px;">
+                            <h2 style="color: #0077B6; border-bottom: 1px solid #EEE; padding-bottom: 5px; margin-bottom: 15px;">
+                                Detalles del Incidente
+                            </h2>
+                            <group>
+                                <field name="severity" widget="radio" options="{'horizontal': true}"/>
+                                <field name="detection_date"/>
+                            </group>
+                        </div>
+                        
+                        <div style="flex: 1;">
+                            <h2 style="color: #0077B6; border-bottom: 1px solid #EEE; padding-bottom: 5px; margin-bottom: 15px;">
+                                Activo Relacionado
+                            </h2>
+                            <field name="asset_ref"/>
+                        </div>
+                    </div>
+                    
+                    <!-- Descripción en pestaña con fondo diferenciado -->
+                    <notebook>
+                        <page string="Descripción" attrs="{'invisible': [('description', '=', False)]}">
+                            <div style="background-color: #F8F9FA; padding: 15px; border-radius: 5px;">
+                                <field name="description" style="min-height: 150px;"/>
+                            </div>
+                        </page>
+                    </notebook>
+                </sheet>
+                
+                <!-- Sección de seguimiento mejorada -->
+                <div class="oe_chatter" style="margin-top: 30px; border-top: 2px solid #0077B6; padding-top: 20px;">
+                    <div style="margin-bottom: 15px;">
+                        <h3 style="color: #0077B6;">Seguimiento</h3>
+                    </div>
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_it_incident" model="ir.actions.act_window">
+        <field name="name">Incidentes</field>
+        <field name="res_model">it.incident</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

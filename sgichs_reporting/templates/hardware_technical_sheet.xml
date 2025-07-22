@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="hardware_technical_sheet">
+        <t t-call="web.html_container">
+            <t t-call="web.internal_layout">
+                <div class="page">
+                    <!-- Encabezado con Logo -->
+                    <div class="header" style="border-bottom: 2px solid #0077B6; padding-bottom: 15px; margin-bottom: 25px;">
+                        <img src="/sgichs_reporting/static/description/logo.png" 
+                             style="height: 80px; margin-right: 20px;"/>
+                        <h1 style="color: #0077B6; display: inline-block; vertical-align: top;">
+                            Ficha Técnica de Hardware
+                        </h1>
+                    </div>
+
+                    <!-- Introducción Personalizada -->
+                    <div class="introduction" style="margin-bottom: 30px;">
+                        <p style="font-style: italic; color: #666;">
+                            Este documento describe las características técnicas del activo de hardware registrado en el sistema, incluyendo sus componentes, configuración y estado actual.
+                        </p>
+                    </div>
+
+                    <t t-foreach="docs" t-as="o">
+                        <!-- Detalles Principales -->
+                        <div class="main-details" style="margin-bottom: 40px;">
+                            <h2 style="color: #0077B6; border-bottom: 1px solid #EEE; padding-bottom: 5px;">
+                                Datos del Equipo: <span t-field="o.name"/>
+                            </h2>
+                            
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <tr t-if="'inventory_number' in o">
+                                    <td style="width: 30%; padding: 8px; border: 1px solid #EEE;"><strong>N° Inventario</strong></td>
+                                    <td style="padding: 8px; border: 1px solid #EEE;"><span t-field="o.inventory_number"/></td>
+                                </tr>
+                                <tr t-if="'subtype' in o">
+                                    <td style="padding: 8px; border: 1px solid #EEE;"><strong>Subtipo</strong></td>
+                                    <td style="padding: 8px; border: 1px solid #EEE;"><span t-field="o.subtype"/></td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px; border: 1px solid #EEE;"><strong>Responsable</strong></td>
+                                    <td style="padding: 8px; border: 1px solid #EEE;"><span t-field="o.responsible_id"/></td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- Componentes -->
+                        <div class="components" style="margin-bottom: 40px;">
+                            <h2 style="color: #0077B6; border-bottom: 1px solid #EEE; padding-bottom: 5px;">
+                                Componentes Instalados
+                            </h2>
+                            
+                            <t t-if="'components_ids' in o and o.components_ids">
+                                <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                                    <tr style="background-color: #F8F9FA;">
+                                        <th style="padding: 10px; border: 1px solid #EEE;">Modelo</th>
+                                        <th style="padding: 10px; border: 1px solid #EEE;">Subtipo</th>
+                                        <th style="padding: 10px; border: 1px solid #EEE;">N° Serie</th>
+                                        <th style="padding: 10px; border: 1px solid #EEE;">Estado</th>
+                                    </tr>
+                                    <tr t-foreach="o.components_ids" t-as="component">
+                                        <td style="padding: 8px; border: 1px solid #EEE;">
+                                            <span t-field="component.model"/>
+                                        </td>
+                                        <td style="padding: 8px; border: 1px solid #EEE;">
+                                            <span t-field="component.subtype_id"/>
+                                        </td>
+                                        <td style="padding: 8px; border: 1px solid #EEE;">
+                                            <span t-field="component.serial_number"/>
+                                        </td>
+                                        <td style="padding: 8px; border: 1px solid #EEE;">
+                                            <span t-field="component.status"/>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </t>
+                            <t t-else="">
+                                <p style="color: #999; font-style: italic;">Sin componentes registrados</p>
+                            </t>
+                        </div>
+
+                        <!-- Direcciones IP (solo si el módulo de red está instalado) -->
+                        <div t-if="'ip_ids' in o" class="mt-4">
+                            <h2 style="color: #0077B6; border-bottom: 1px solid #EEE; padding-bottom: 5px;">
+                                Direcciones IP
+                            </h2>
+                            
+                            <t t-if="o.ip_ids">
+                                <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                                    <tr style="background-color: #F8F9FA;">
+                                        <th style="padding: 10px; border: 1px solid #EEE;">Dirección IP</th>
+                                        <th style="padding: 10px; border: 1px solid #EEE;">Descripción</th>
+                                    </tr>
+                                    <tr t-foreach="o.ip_ids" t-as="ip">
+                                        <td style="padding: 8px; border: 1px solid #EEE;">
+                                            <span t-field="ip.address"/>
+                                        </td>
+                                        <td style="padding: 8px; border: 1px solid #EEE;">
+                                            <span t-field="ip.description"/>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </t>
+                            <t t-else="">
+                                <p style="color: #999; font-style: italic;">Sin direcciones IP asignadas</p>
+                            </t>
+                        </div>
+                    </t>
+
+                    <!-- Footer con información adicional -->
+                    <div class="footer" style="margin-top: 50px; padding-top: 20px; border-top: 1px solid #EEE; font-size: 12px; color: #666;">
+                        <p>Documento generado el <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M')"/></p>
+                        <p>Sistema de Gestión de Activos IT - ASI S.U.R.L</p>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <record id="action_hardware_technical_sheet" model="ir.actions.report">
+        <field name="name">Ficha Técnica de Hardware</field>
+        <field name="model">it.asset.hardware</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">sgichs_reporting.hardware_technical_sheet</field>
+        <field name="binding_model_id" ref="sgichs_hardware.model_it_asset_hardware"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

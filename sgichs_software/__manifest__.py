@@ -1,0 +1,18 @@
+{
+    'name': 'SGICH Software Management',
+    'summary': 'Gestión de software y listas de control',
+    'author': 'Tu Nombre',
+    'website': 'https://www.tudominio.com',
+    'category': 'IT/Software',
+    'version': '16.0.1.0.0',
+    'depends': ['sgichs_core2'],
+    'data': [
+        'security/ir.model.access.csv',
+        'views/software_views.xml',
+        'views/hw_list_views.xml',
+        'views/menus.xml',
+    ],
+    'installable': True,
+    'application': False,
+    'auto_install': False,
+}
