@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Acción de servidor para firma múltiple -->
+    <record id="action_server_firma_multiple" model="ir.actions.server">
+        <field name="name">🖊️ Firmar PDFs Seleccionados</field>
+        <field name="model_id" ref="model_alfresco_file"/>
+        <field name="binding_model_id" ref="model_alfresco_file"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+# Verificar que hay archivos seleccionados
+if not records:
+    raise UserError("Debe seleccionar al menos un archivo PDF para firmar.")
+
+# Crear el wizard con los archivos seleccionados (sin validaciones que requieran campos obligatorios)
+wizard = env['alfresco.firma.wizard'].create({
+    'file_ids': [(6, 0, records.ids)]
+})
+
+# Abrir el wizard
+action = {
+    'type': 'ir.actions.act_window',
+    'name': 'Firmar PDFs de Alfresco',
+    'res_model': 'alfresco.firma.wizard',
+    'res_id': wizard.id,
+    'view_mode': 'form',
+    'target': 'new',
+}
+        </field>
+    </record>
+</odoo>
