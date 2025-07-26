@@ -11,7 +11,7 @@ _logger = logging.getLogger(__name__)
 class IaService(models.AbstractModel):
     _name = 'asi_ia.service'
     _description = 'Servicio de conexión a IA (local o externa)'
-
+    _inherit = ['mail.thread', 'mail.activity.mixin']
     
     def get_ai_response(self, prompt):
         ICP = self.env['ir.config_parameter'].sudo()
@@ -68,7 +68,9 @@ class IaService(models.AbstractModel):
                     data = response.json()
                     # Asumimos que la respuesta es una lista de diccionarios
                     if isinstance(data, list) and len(data) > 0 and isinstance(data[0], dict):
-                        return data[0].get("output", "")
+                        ia_response=data[0].get("output", "")
+                        #self.message_post(body=f"<b>Respuesta de la IA:</b><br/><pre>{ia_response}</pre>", subtype_xmlid="mail.mt_note" )
+                        return ia_response
                     else:
                         raise UserError(_('La respuesta JSON no es una lista de diccionarios válida: %s') % str(data))
                 except ValueError:

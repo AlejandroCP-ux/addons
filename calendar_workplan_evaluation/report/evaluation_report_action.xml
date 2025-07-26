@@ -1,0 +1,9 @@
+<odoo>
+<record id="action_report_calendar_workplan_evaluation" model="ir.actions.report">
+    <field name="name">Evaluación del Plan de Trabajo</field>
+    <field name="model">calendar_workplan.evaluation</field>
+    <field name="report_type">qweb-pdf</field>
+    <field name="report_name">calendar_workplan_evaluation.report_calendar_workplan_evaluation</field>
+    <field name="report_file">calendar_workplan_evaluation.report_calendar_workplan_evaluation</field>
+</record>
+</odoo>
