@@ -51,3 +51,5 @@ class LocalAIModel(models.Model):
             _logger.error(f"Unexpected error: {str(e)}")
         
         return False
+
+    

@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 <odoo>
-    <record id="is_chatgpt_res_config_settings_view" model="ir.ui.view">
-        <field name="name">res.config.settings.view.form.asi.ai.inherit</field>
-        <field name="model">res.config.settings</field>
-        <field name="inherit_id" ref="base_setup.res_config_settings_view_form"/>
-        <field name="arch" type="xml">
-                    <xpath expr="//div[hasclass('settings')]" position="inside">
+   <record id="is_chatgpt_res_config_settings_view" model="ir.ui.view">
+    <field name="name">res.config.settings.view.form.asi.ai.inherit</field>
+    <field name="model">res.config.settings</field>
+    <field name="inherit_id" ref="base_setup.res_config_settings_view_form"/>
+    <field name="arch" type="xml">
+        <xpath expr="//div[hasclass('settings')]" position="inside">
             <div class="app_settings_block" string="ASI IA" data-key="asi_ia">
 
-                <!-- Activador -->
+                <!-- Activador del módulo -->
                 <div class="row mt16">
                     <div class="col-12 col-lg-6 o_setting_box">
                         <div class="o_setting_left_pane">
@@ -16,58 +16,63 @@
                         </div>
                         <div class="o_setting_right_pane">
                             <label for="module_asi_ia"/>
-                            <div class="text-muted">
-                                Activar integración con IA local.
-                            </div>
+                            <div class="text-muted">Activar integración con IA local.</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Campos de configuración -->
-                <div class="row" attrs="{'invisible': [('module_asi_ia', '=', False)]}">
-
-                    <!-- Columna izquierda -->
-                    <div class="col-6 col-lg-6 o_setting_box">
-                        <div class="o_setting_left_pane"/>
+                <!-- Configuración del modo de conexión -->
+                <div class="row mt16" attrs="{'invisible': [('module_asi_ia', '=', False)]}">
+                    <div class="col-12 col-lg-6 o_setting_box">
+                        <div class="o_setting_left_pane">
+                            <field name="use_external_ia"/>
+                        </div>
                         <div class="o_setting_right_pane">
-                            <div class="mb-2">
-                                <label for="openapi_baseurl"/>
-                                <field name="openapi_baseurl"/>
-                            </div>
-                            <div class="mb-2">
-                                <label for="localai_model_id"/>
-                                <field name="localai_model_id"/>
-                            </div>
+                            <label for="use_external_ia"/>
+                            <div class="text-muted">Activa el uso de una IA externa en vez de la IA local.</div>
                         </div>
                     </div>
-
-                    <!-- Columna derecha -->
-                    <div class="col-6 col-lg-6 o_setting_box">
-                        <div class="o_setting_left_pane"/>
-                        <div class="o_setting_right_pane">
-                            
-                            <div class="mt16">
-                                <button name="action_refresh_localai_models"
-                                        type="object"
-                                        string="Refresh Models"
-                                        class="btn btn-primary"/>
-                                <span class="mx-1"/>
-
-                            </div>
-                        </div>
-                    </div>
-
                 </div>
+
+                <!-- Campo de URL del endpoint externo -->
+                <div class="row mt16" attrs="{'invisible': [('use_external_ia','=',False)]}">
+                    <div class="col-12 col-lg-6 o_setting_box">
+                        <div class="o_setting_left_pane"/>
+                        <div class="o_setting_right_pane">
+                            <label for="external_ia_url"/>
+                            <field name="external_ia_url" class="w-100"/>
+                            <div class="text-muted">Especifica la URL del endpoint externo.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Configuración de IA local -->
+                <div class="row mt16" attrs="{'invisible': [('module_asi_ia', '=', False)]}">
+                    <div class="col-12 col-lg-6 o_setting_box">
+                        <div class="o_setting_left_pane"/>
+                        <div class="o_setting_right_pane">
+                            <label for="openapi_baseurl"/>
+                            <field name="openapi_baseurl" class="w-100"/>
+                            <label for="localai_model_id"/>
+                            <field name="localai_model_id" class="w-100"/>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-lg-6 o_setting_box">
+                        <div class="o_setting_left_pane"/>
+                        <div class="o_setting_right_pane">
+                            <button name="action_refresh_localai_models"
+                                    type="object"
+                                    string="Actualizar Modelos"
+                                    class="btn btn-primary mt16"/>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </xpath>
-   
+    </field>
+</record>
 
-        </field>
-    </record>
-    
-
-    
-    
-    
     
 </odoo>

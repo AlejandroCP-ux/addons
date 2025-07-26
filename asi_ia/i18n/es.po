@@ -1,0 +1,144 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* asi_ia
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 16.0-20240603\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-04-17 11:16+0000\n"
+"PO-Revision-Date: 2025-04-17 11:16+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: asi_ia
+#: model_terms:ir.ui.view,arch_db:asi_ia.is_chatgpt_res_config_settings_view
+msgid "<span class=\"o_form_label\">AI Model</span>"
+msgstr "Modelo IA"
+
+#. module: asi_ia
+#: model:ir.model.fields,field_description:asi_ia.field_res_config_settings__localai_model_id
+msgid "AI Model"
+msgstr "Modelo IA"
+
+#. module: asi_ia
+#: model:ir.model.fields,field_description:asi_ia.field_res_config_settings__openapi_api_key
+msgid "API Key"
+msgstr ""
+
+#. module: asi_ia
+#: model:ir.model.fields,field_description:asi_ia.field_res_config_settings__openapi_baseurl
+#: model_terms:ir.ui.view,arch_db:asi_ia.is_chatgpt_res_config_settings_view
+msgid "Base URL"
+msgstr "URL de la IA"
+
+#. module: asi_ia
+#: model:ir.model,name:asi_ia.model_res_config_settings
+msgid "Config Settings"
+msgstr "Opciones de configuración"
+
+#. module: asi_ia
+#: model:ir.model.fields,field_description:asi_ia.field_localai_model__create_uid
+msgid "Created by"
+msgstr ""
+
+#. module: asi_ia
+#: model:ir.model.fields,field_description:asi_ia.field_localai_model__create_date
+msgid "Created on"
+msgstr ""
+
+#. module: asi_ia
+#: model:ir.model,name:asi_ia.model_mail_channel
+msgid "Discussion Channel"
+msgstr "Canales"
+
+#. module: asi_ia
+#: model:ir.model.fields,field_description:asi_ia.field_localai_model__display_name
+msgid "Display Name"
+msgstr "Nombre a Mostrar"
+
+#. module: asi_ia
+#. odoo-python
+#: code:addons/asi_ia/models/mail_channel.py:0
+#, python-format
+msgid "Error al procesar la respuesta de la IA Local: %s"
+msgstr ""
+
+#. module: asi_ia
+#: model:ir.model.fields,field_description:asi_ia.field_localai_model__id
+msgid "ID"
+msgstr ""
+
+#. module: asi_ia
+#: model:ir.model.fields,field_description:asi_ia.field_localai_model__is_active
+msgid "Is Active"
+msgstr "Activo"
+
+#. module: asi_ia
+#: model:ir.model.fields,field_description:asi_ia.field_localai_model____last_update
+msgid "Last Modified on"
+msgstr ""
+
+#. module: asi_ia
+#: model:ir.model.fields,field_description:asi_ia.field_localai_model__write_uid
+msgid "Last Updated by"
+msgstr ""
+
+#. module: asi_ia
+#: model:ir.model.fields,field_description:asi_ia.field_localai_model__write_date
+msgid "Last Updated on"
+msgstr ""
+
+#. module: asi_ia
+#: model_terms:ir.ui.view,arch_db:asi_ia.is_chatgpt_res_config_settings_view
+msgid "Local AI"
+msgstr "IA Local"
+
+#. module: asi_ia
+#: model:ir.model,name:asi_ia.model_localai_model
+msgid "Local AI Models"
+msgstr "Modelos de IA"
+
+#. module: asi_ia
+#: model:ir.model,name:asi_ia.model_mail_message
+msgid "Message"
+msgstr ""
+
+#. module: asi_ia
+#: model:ir.model.fields,field_description:asi_ia.field_localai_model__model_id
+msgid "Model ID"
+msgstr "Id Modelo"
+
+#. module: asi_ia
+#: model_terms:ir.ui.view,arch_db:asi_ia.is_chatgpt_res_config_settings_view
+msgid "Model for the Local AI request"
+msgstr "Modelo IA"
+
+#. module: asi_ia
+#: model:ir.model.fields,field_description:asi_ia.field_localai_model__name
+msgid "Name"
+msgstr "Nombre"
+
+#. module: asi_ia
+#: model_terms:ir.ui.view,arch_db:asi_ia.is_chatgpt_res_config_settings_view
+msgid "OpenAPI Base URL"
+msgstr "URL base del API"
+
+#. module: asi_ia
+#: model:ir.model.fields,help:asi_ia.field_res_config_settings__openapi_api_key
+msgid "Provide the API key here"
+msgstr "Escriba aquí el Api key del proveedor"
+
+#. module: asi_ia
+#: model:ir.model.fields,help:asi_ia.field_res_config_settings__openapi_baseurl
+msgid "Provide the Base URL to local AI"
+msgstr "Escriba la URL de la IA"
+
+#. module: asi_ia
+#: model_terms:ir.ui.view,arch_db:asi_ia.is_chatgpt_res_config_settings_view
+msgid "Refresh Models"
+msgstr "Actualizar Modelos"
