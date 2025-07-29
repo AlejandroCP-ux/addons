@@ -24,6 +24,26 @@ class CalendarWorkplanPlan(models.Model):
     _order = 'plan_sequence'
 
     @api.model
+    def default_get(self, fields_list):
+        res = super().default_get(fields_list)
+        
+        # Establecer presented_by_partner_id para planes individuales
+        if self._context.get('default_scope') == 'individual':
+            res['presented_by_partner_id'] = self.env.user.partner_id.id
+        
+        # Si hay un padre definido y es plan individual
+        parent_id = self._context.get('default_parent_id') or res.get('parent_id')
+        if parent_id and self._context.get('default_scope') == 'individual':
+            parent_plan = self.env['calendar_workplan.plan'].browse(parent_id)
+            if parent_plan.exists():
+                res['date_start'] = parent_plan.date_start
+                res['date_end'] = parent_plan.date_end
+                res['plan_month'] = parent_plan.plan_month
+                res['plan_year'] = parent_plan.plan_year
+        
+        return res
+
+    @api.model
     def _get_years(self):
         current_year = fields.Datetime.today().year
         return [('%04d' % year_number, '%02d' % year_number) for year_number in range(current_year, current_year+3)]
@@ -78,8 +98,10 @@ class CalendarWorkplanPlan(models.Model):
         return self.env.ref('base.partner_admin').id
 
        
-    name = fields.Char("Plan Name", required=True, compute='_compute_name',
-                       store=True, translate=True)
+    name = fields.Char(string="Plan name", compute="_compute_name")  # Almacenado
+    display_name = fields.Char(string="Nombre completo", compute="_compute_display_name", store=True)
+
+   
     date_start = fields.Date("Start Date", required=True, tracking=True)
     date_end = fields.Date("End Date", required=True, tracking=True)
     utc_start = fields.Datetime(compute="_compute_utc_period_limits", store=True)
@@ -170,34 +192,50 @@ class CalendarWorkplanPlan(models.Model):
          "CHECK (plan_tz IN %s)" % str(tuple(pytz.all_timezones)),  # Lista de todas las zonas válidas
          "La zona horaria seleccionada no es válida")
 ]
-    
-    @api.depends('plan_month', 'plan_year', 'company_id')
+
+    @api.constrains('name', 'parent_id')
+    def _check_unique_name(self):
+        for plan in self:
+            # Buscar planes con el mismo nombre y mismo padre
+            existing_plans = self.search([
+                ('name', '=', plan.name),
+                ('parent_id', '=', plan.parent_id.id),
+                ('id', '!=', plan.id)
+            ])
+            if existing_plans:
+                raise ValidationError("⚠️ Ya existe un plan con el mismo nombre bajo este padre.")
+
+    @api.depends("scope", "plan_year", "plan_month", "company_id", "presented_by_partner_id")
     def _compute_name(self):
-        for record in self:
-            plan_year = record.plan_year
-            plan_sequence = plan_name = ''
-            
-            # Handle plan year
-            if plan_year:
-                plan_sequence = plan_name = f"{plan_year}"
-                
-                if record.plan_month:
-                    plan_sequence = f"{plan_sequence}-{record.plan_month}"
-                    plan_name = f"{plan_name}/{record.plan_month}"
-                
-                # Handle individual plans
-                if record.scope == 'individual':
-                    plan_sequence = f"{plan_year}-{record.date_start:02d}-{record.presented_by_partner_id.name}"
-                    plan_name = f"{plan_name}-{record.presented_by_partner_id.name}"
-            
-            # Handle company ID
-            if record.company_id:
-                plan_sequence = f"{plan_sequence}-{record.company_id.id}"
-                plan_name = f"{plan_name}-{record.company_id.name}"
-            
-            # Set computed values
-            record.plan_sequence = plan_sequence
-            record.name = plan_name
+        for plan in self:
+            if plan.scope == "annual":
+                # Formato: aaaa-NombreCompañia
+                plan.name = f"{plan.plan_year}-{plan.company_id.name}"
+            elif plan.scope == "monthly":
+                # Formato: aaaa/mm-NombreCompañia
+                plan.name = f"{plan.plan_year}/{plan.plan_month}-{plan.company_id.name}"
+            elif plan.scope == "individual":
+                # Formato: aaaa/mm-NombreCompañia-Usuario
+                plan.name = (
+                    f"{plan.plan_year}/{plan.plan_month}-"
+                    f"{plan.presented_by_partner_id.name}"
+                )
+            else:
+                # Fallback por si hay nuevos alcances no contemplados
+                plan.name = plan_year
+ 
+    @api.depends("scope", "plan_year", "plan_month", "company_id", "presented_by_partner_id")
+    def _compute_display_name(self):
+        for plan in self:
+            if plan.scope == "annual":
+                plan.display_name = f"PA-{plan.name}"
+            elif plan.scope == "monthly":
+               plan.display_name = f"PM-{plan.name}"
+            elif plan.scope == "individual":
+               plan.display_name = f"PI-{plan.name}"
+            else:
+                # Fallback por si hay nuevos alcances no contemplados
+                plan.display_name = plan.name
    
 
     def _is_event_in_plan_date_range(self, event, plan_tz):
@@ -270,13 +308,19 @@ class CalendarWorkplanPlan(models.Model):
     def onchange_periodicity(self):
         if self.scope == 'annual':
             self.plan_month = None
-        else:
+        elif self.scope == 'monthly':
             self.plan_month = '%02d' % fields.Datetime.today().month
 
     @api.onchange('parent_id')
     def onchange_parent_id(self):
         if self.parent_id:
             self.plan_year = self.parent_id.plan_year
+        # Solo para planes individuales
+            if self.scope == 'individual':
+                self.date_start = self.parent_id.date_start
+                self.date_end = self.parent_id.date_end
+
+
     
     @api.onchange('scope', 'plan_year', 'plan_month')
     def onchange_period_related_fields(self):
@@ -337,10 +381,37 @@ class CalendarWorkplanPlan(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        for vals in vals_list:
+            parent = None
+
+            # Heredar datos desde el padre si existe
+            if vals.get('parent_id'):
+                parent = self.browse(vals['parent_id'])
+                today = fields.Date.today()
+                if parent.scope == 'monthly':
+                    vals.update({
+                        'plan_year': parent.plan_year,                        
+                    })
+                elif vals.get('scope') == 'individual':
+                    vals.setdefault('plan_year', parent.plan_year)
+                    vals.setdefault('plan_month', parent.plan_month)
+                    vals.setdefault('date_start', parent.date_start)
+                    vals.setdefault('date_end', parent.date_end)
+                    vals.update({
+                        'plan_month': parent.plan_month, }) 
+        # Crear registros
         plans = super().create(vals_list)
+
+        # Asociar secciones para planes anuales
         sections = self.env['calendar_workplan.section'].search([])
         for section in sections:
-            section.update({'workplan_ids': [Command.link(plan.id) for plan in plans.filtered(lambda it: it.scope == 'annual')]})
+            section.update({
+                'workplan_ids': [
+                    Command.link(plan.id) 
+                    for plan in plans.filtered(lambda it: it.scope == 'annual')
+                ]
+            })
+
         return plans
         
     @api.model
@@ -759,7 +830,51 @@ class CalendarWorkplanPlan(models.Model):
         }
         
         
-       
     def action_print_report(self):
         # Llamar al reporte directamente
         return self.env.ref('calendar_workplan.action_report_workplan').report_action(self)
+        
+    def action_post_plan(self):
+        for plan in self:
+            #  Verificar si el usuario es presentador o administrador
+            is_presenter = plan.presented_by_partner_id == self.env.user.partner_id
+            is_admin = self.env.user.has_group("calendar_workplan.calendar_workplan_group_manager")  # Grupo de administradores
+            
+            if not (is_presenter or is_admin):
+                raise UserError("Solo el presentador o un administrador pueden publicar este plan.")
+            
+            if plan.state != 'draft':
+                raise UserError("El plan debe estar en estado 'Borrador' para ser publicado.")
+            
+            plan.write({'state': 'posted'})
+        return True
+        
+    
+    def action_approve_plan(self):
+        # Validar todos los registros seleccionados
+        if any(plan.approved_by_partner_id != self.env.user.partner_id for plan in self):
+            raise UserError("Solo el usuario aprobador puede aprobar estos planes.")
+        if any(plan.state != 'posted' for plan in self):
+            raise UserError("Todos los planes deben estar en estado 'Solicitado' para ser aprobados.")
+        
+        # Aplicar cambios masivamente
+        self.write({'state': 'approved'})
+        return True
+    
+    def action_decline_plan(self):
+        if any(plan.approved_by_partner_id != self.env.user.partner_id for plan in self):
+            raise UserError("Solo el usuario aprobador puede desaprobar estos planes.")
+        if any(plan.state != 'posted' for plan in self):
+            raise UserError("Todos los planes deben estar en estado 'Solicitado' para ser desaprobados.")
+        
+        self.write({'state': 'draft'})
+        return True
+    
+    def action_close_plan(self):
+        if any(plan.approved_by_partner_id != self.env.user.partner_id for plan in self):
+            raise UserError("Solo el usuario aprobador puede cerrar estos planes.")
+        if any(plan.state != 'posted' for plan in self):
+            raise UserError("Todos los planes deben estar en estado 'Solicitado' para ser cerrados.")
+        
+        self.write({'state': 'closed'})
+        return True 

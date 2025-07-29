@@ -2,6 +2,8 @@ import ast
 from odoo import models, fields, api, Command
 from odoo.tools import ustr
 from dateutil.rrule import rrulestr
+from dateutil.relativedelta import relativedelta
+from odoo.exceptions import ValidationError
 from datetime import datetime
 import calendar  
 import logging  
@@ -18,7 +20,49 @@ class CalendarEvent(models.Model):
     priority = fields.Selection([('0', 'Normal'), ('1', 'High')], default='0', string="Priority")
     attendees_filter_domain = fields.Char(string='Attendees filter', compute='_compute_attendees_filter_domain')
     
+#***** Limitando la creacion de eventos fuera del año actual
+    @api.constrains('start', 'stop', 'recurrency')
+    def _check_dates_within_current_year(self):
+        current_year = datetime.now().year
+        max_date = datetime(current_year, 12, 31)
     
+        for event in self:
+            # Validar fechas del evento principal
+            start_date = event.start.date() if event.start else None
+            stop_date = event.stop.date() if event.stop else None
+    
+            if (start_date and start_date > max_date.date()) or (stop_date and stop_date > max_date.date()):
+                raise ValidationError("❌ Las fechas del evento no pueden superar el 31/12/%s" % current_year)
+    
+            # Validar fecha de recurrencia (solo si existe el campo)
+            if hasattr(event, 'until') and event.recurrency and event.until and event.until > max_date.date():
+                raise ValidationError("❌ La recurrencia no puede extenderse más allá del 31/12/%s" % current_year)
+
+
+    def _get_recurrence_dates(self, dtstart, until_date=None):
+        """Generar fechas de recurrencia hasta el 31/12 del año actual"""
+        current_year = datetime.now().year
+        max_date = datetime(current_year, 12, 31)
+        
+        # Limitar until_date al 31/12 si es mayor
+        if until_date and until_date > max_date:
+            until_date = max_date
+        
+        # Llamar al método original con la fecha limitada
+        return super()._get_recurrence_dates(dtstart, until_date)
+        
+    @api.model_create_multi
+    def create(self, vals_list):
+        current_year = datetime.now().year
+        max_date = datetime(current_year, 12, 31).date()
+        
+        for vals in vals_list:
+            if vals.get('recurrency') and vals.get('until_date') and vals['until_date'] > max_date:
+                vals['until_date'] = max_date
+                
+        return super().create(vals_list)        
+        
+#*****   
     @api.depends('channel_ids')
     def _compute_attendees_filter_domain(self):
         for record in self:

@@ -25,23 +25,46 @@
                                         type="action"
                                         name="%(calendar_workplan.action_report_annual_plan)d"
                                         class="btn-primary"
-                                        attrs="{'invisible': [('scope', '!=', 'annual')]}"/>       
-
-                    
-               
-            
+                                        attrs="{'invisible': [('scope', '!=', 'annual')]}"/>                      
+                              
+                                                            <button 
+                                    string="Solicitar aprobación" 
+                                    type="object" 
+                                    name="action_post_plan" 
+                                    class="btn-primary"
+                                    attrs="{'invisible': [('state', '!=', 'draft')]}"/>   
+                                   /> 
+                              <button 
+                                    string="Aprobar Plan" 
+                                    type="object" 
+                                    name="action_approve_plan" 
+                                    class="btn-success"
+                                    attrs="{'invisible': [('state', '!=', 'posted')]}"/>   
+                                   />                             
+                                                             
+                                <button 
+                                    string="Rechazar Plan" 
+                                    type="object" 
+                                    name="action_decline_plan" 
+                                    class="btn-danger"
+                                    attrs="{'invisible': [('state', '!=', 'posted')]}"/>   
+                                   />                             
                                 </header>
+                                
                                 <sheet>
-                                        <group>
+                                        <div>
                                             <field name="state" widget="statusbar"/>
-                                        </group>
+                                        </div>
                                         <div class="oe_button_box" name="button_box">
                                                 <button class="oe_stat_button" name="child_ids_view"
-                                                        type="object" icon="fa-sitemap">
-                                                        <field string="Child plans"
-                                                                name="child_ids"
-                                                                widget="statinfo" />
+                                                        type="object" icon="fa-sitemap"
+                                                        attrs="{'invisible': [('scope', '=', 'individual')]}">
+                                                    <field string="Child plans"
+                                                            name="child_ids"
+                                                            widget="statinfo" />
                                                 </button>
+
+
                                                 <button class="oe_stat_button"
                                                         name="meeting_ids_view"
                                                         type="object" icon="fa-sitemap">
@@ -53,14 +76,15 @@
                                         <widget name="web_ribbon" title="Archived"
                                                 bg_color="bg-danger"
                                                 attrs="{'invisible': [('active', '=', True)]}" />
-                                        <div class="oe_title">
-                                                <h1 class="d-flex flex-row">
-                                                        <field name="name" placeholder="Plan's Name"
-                                                                style="font-size: min(4vw, 2.6rem);"
-                                                                force_save="1" />
-                                                </h1>
-                                        </div>
-                                        <group name="generals">
+                                                <div class="oe_title">
+                                                                <h1 class="d-flex flex-row">
+                                                                    <field name="display_name" placeholder="Plan's Name"
+                                                                            attrs="{'readonly': [('date_start', '!=', False)]}"
+                                                                            style="font-size: min(4vw, 2.6rem);"
+                                                                            force_save="1" />
+                                                                </h1>
+                                                </div>    
+                                                <group name="generals">
                                                 <group>
                                                         <field name="scope" readonly="1" />
                                                         <field name="plan_year" force_save="1"
@@ -70,32 +94,34 @@
                                                                 attrs="{'invisible': [('scope', '!=', 'monthly')]}" />
                                                 </group>
                                                 <group>
-                                                        <field name="presented_by_partner_id" />
+                                                        <field name="presented_by_partner_id" 
+                                                               attrs="{'readonly': [('scope', '=', 'individual')]}"/>
                                                         <field name="approved_by_partner_id" />
                                                         <field name="company_id"
                                                                 placeholder="Company"
                                                                 options="{'no_create': True}"
                                                                 groups="base.group_multi_company" />
                                                         <field name="plan_tz" force_save="1" />
-
                                                 </group>
                                         </group>
-                                        <group name="work_plan_date_range">
+
+                                            <group name="work_plan_date_range">
                                                 <label for="date_start" string="Work Plan Period" />
                                                 <div class="o_row">
-                                                        <field name="date_start" force_save="1"
-                                                                readonly="1"
-                                                                class="oe_inline" widget="daterange"
-                                                                options="{'related_end_date': 'date_end'}" />
-                                                        <i class="fa fa-long-arrow-right mx-2"
-                                                                aria-label="Arrow icon"
-                                                                title="Arrow" />
-                                                        <field name="date_end" force_save="1"
-                                                                readonly="1"
-                                                                class="oe_inline" widget="daterange"
-                                                                options="{'related_start_date': 'date_start'}" />
+                                                    <field name="date_start" force_save="1"
+                                                            attrs="{'readonly': [('scope', '=', 'individual'), ('parent_id', '!=', False)]}"
+                                                            class="oe_inline" widget="daterange"
+                                                            options="{'related_end_date': 'date_end'}" />
+                                                    <i class="fa fa-long-arrow-right mx-2"
+                                                            aria-label="Arrow icon"
+                                                            title="Arrow" />
+                                                    <field name="date_end" force_save="1"
+                                                            attrs="{'readonly': [('scope', '=', 'individual'), ('parent_id', '!=', False)]}"
+                                                            class="oe_inline" widget="daterange"
+                                                            options="{'related_start_date': 'date_start'}" />
                                                 </div>
-                                        </group>
+                                            </group>
+
                                         <notebook>
                                                 <page name="goals" string="Goals"
                                                         attrs="{'invisible': [('scope', '!=', 'annual')]}">
@@ -123,7 +149,7 @@
                 <field name="model">calendar_workplan.plan</field>
                 <field name="arch" type="xml">
                         <tree string="Plans" sample="1" decoration-muted="(not active)">
-                                <field name="name" />
+                                <field name="display_name" />
                                 <field name="active" invisible="1" />
                                 <field name="date_start" />
                                 <field name="date_end" />
@@ -169,7 +195,7 @@
                 </field>
         </record>
 
-        <!-- actions opening views on models -->
+        <!-- actions opening views on models  -->
         <record id="calendar_workplan_plan_action" model="ir.actions.act_window">
                 <field name="name">Plans</field>
                 <field name="res_model">calendar_workplan.plan</field>
@@ -177,7 +203,17 @@
                 <field name="context">{'search_default_filter_date_start': 1,
                         'search_default_filter_my_plans': 1}</field>
         </record>
-
+        
+        <record id="action_approve_multiple_plans" model="ir.actions.server">
+            <field name="name">Aprobar Planes Seleccionados</field>
+            <field name="model_id" ref="model_calendar_workplan_plan"/>
+            <field name="binding_model_id" ref="model_calendar_workplan_plan"/>
+            <field name="code">
+                if records:
+                    records.action_approve_plan()
+            </field>
+            
+</record>
        <record id="mail_template_plan_approval_request" model="mail.template">
             <field name="name">Workplan Approval Request</field>
             <field name="model_id" ref="model_calendar_workplan_plan"/>
