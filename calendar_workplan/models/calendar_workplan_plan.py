@@ -98,7 +98,7 @@ class CalendarWorkplanPlan(models.Model):
         return self.env.ref('base.partner_admin').id
 
        
-    name = fields.Char(string="Plan name", compute="_compute_name")  # Almacenado
+    name = fields.Char(string="Plan name", compute="_compute_name")
     display_name = fields.Char(string="Nombre completo", compute="_compute_display_name", store=True)
 
    
@@ -193,17 +193,21 @@ class CalendarWorkplanPlan(models.Model):
          "La zona horaria seleccionada no es válida")
 ]
 
-    @api.constrains('name', 'parent_id')
+
+    @api.constrains('scope', 'plan_year', 'plan_month', 'presented_by_partner_id', 'parent_id')
     def _check_unique_name(self):
         for plan in self:
-            # Buscar planes con el mismo nombre y mismo padre
-            existing_plans = self.search([
-                ('name', '=', plan.name),
-                ('parent_id', '=', plan.parent_id.id),
-                ('id', '!=', plan.id)
-            ])
-            if existing_plans:
-                raise ValidationError("⚠️ Ya existe un plan con el mismo nombre bajo este padre.")
+            # Sólo aplicamos cuando ya tenemos fechas y scope definidos
+            # (puedes ajustar la lista de campos si tienes otras fuentes de name)
+            # Buscamos todos los planes bajo el mismo padre
+            siblings = self.search([('parent_id', '=', plan.parent_id.id or False)])
+            # Recorremos y comparamos el nombre generado
+            for sib in siblings:
+                if sib.id != plan.id and sib.name == plan.name:
+                    raise ValidationError(
+                        _("⚠️ Ya existe un plan con el mismo nombre bajo este padre: %s") 
+                        % plan.name
+                    )
 
     @api.depends("scope", "plan_year", "plan_month", "company_id", "presented_by_partner_id")
     def _compute_name(self):

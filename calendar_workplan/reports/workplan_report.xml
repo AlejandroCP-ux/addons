@@ -16,7 +16,7 @@
 
                         
                             <!-- Sección de Actividades Principales -->
-                            <h3>Main Activities</h3>
+                            <h3>Actividades Principales</h3>
                             <ul>
                                 <t t-set="main_activities" t-value="doc.get_main_month_activities()"/>
                                 <t t-foreach="main_activities" t-as="activity">
