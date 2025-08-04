@@ -23,6 +23,11 @@ class AlfrescoFile(models.Model):
     pdf_content = fields.Binary(string="Contenido PDF", attachment=True)
     pdf_filename = fields.Char(string="Nombre archivo PDF")
 
+
+
+    def _get_config_param(self, key):
+        return self.env['ir.config_parameter'].sudo().get_param(key)
+
     @api.depends('file_size')
     def _compute_file_size_human(self):
         for record in self:
@@ -39,8 +44,8 @@ class AlfrescoFile(models.Model):
     @api.depends('alfresco_node_id')
     def _compute_content_url(self):
         """Genera la URL para descargar el contenido del archivo"""
-        config = self.env['ir.config_parameter'].sudo()
-        base_url = config.get_param('asi_alfresco_integration.alfresco_server_url')
+        
+        base_url = self._get_config_param('asi_alfresco_integration.alfresco_server_url')
         
         for record in self:
             if record.alfresco_node_id and base_url:
@@ -63,10 +68,9 @@ class AlfrescoFile(models.Model):
         """
         self.ensure_one()
         
-        config = self.env['ir.config_parameter'].sudo()
-        url = config.get_param('asi_alfresco_integration.alfresco_server_url')
-        user = config.get_param('asi_alfresco_integration.alfresco_username')
-        pwd = config.get_param('asi_alfresco_integration.alfresco_password')
+        url = self._get_config_param('asi_alfresco_integration.alfresco_server_url')
+        user = self._get_config_param('asi_alfresco_integration.alfresco_username')
+        pwd = self._get_config_param('asi_alfresco_integration.alfresco_password')
         
         if not all([url, user, pwd, self.alfresco_node_id]):
             return {
@@ -125,10 +129,9 @@ class AlfrescoFile(models.Model):
         """Descarga el contenido del archivo desde Alfresco"""
         self.ensure_one()
         
-        config = self.env['ir.config_parameter'].sudo()
-        url = config.get_param('asi_alfresco_integration.alfresco_server_url')
-        user = config.get_param('asi_alfresco_integration.alfresco_username')
-        pwd = config.get_param('asi_alfresco_integration.alfresco_password')
+        url = self._get_config_param('asi_alfresco_integration.alfresco_server_url')
+        user = self._get_config_param('asi_alfresco_integration.alfresco_username')
+        pwd = self._get_config_param('asi_alfresco_integration.alfresco_password')
         
         if not all([url, user, pwd, self.alfresco_node_id]):
             return {
@@ -167,10 +170,9 @@ class AlfrescoFile(models.Model):
         self.ensure_one()
         
         # Primero cargar el contenido del PDF
-        config = self.env['ir.config_parameter'].sudo()
-        url = config.get_param('asi_alfresco_integration.alfresco_server_url')
-        user = config.get_param('asi_alfresco_integration.alfresco_username')
-        pwd = config.get_param('asi_alfresco_integration.alfresco_password')
+        url = self._get_config_param('asi_alfresco_integration.alfresco_server_url')
+        user = self._get_config_param('asi_alfresco_integration.alfresco_username')
+        pwd = self._get_config_param('asi_alfresco_integration.alfresco_password')
         
         if not all([url, user, pwd, self.alfresco_node_id]):
             return {
@@ -219,10 +221,9 @@ class AlfrescoFile(models.Model):
         """Carga el contenido del PDF para preview en Odoo"""
         self.ensure_one()
         
-        config = self.env['ir.config_parameter'].sudo()
-        url = config.get_param('asi_alfresco_integration.alfresco_server_url')
-        user = config.get_param('asi_alfresco_integration.alfresco_username')
-        pwd = config.get_param('asi_alfresco_integration.alfresco_password')
+        url = self._get_config_param('asi_alfresco_integration.alfresco_server_url')
+        user = self._get_config_param('asi_alfresco_integration.alfresco_username')
+        pwd = self._get_config_param('asi_alfresco_integration.alfresco_password')
         
         if not all([url, user, pwd, self.alfresco_node_id]):
             return False
