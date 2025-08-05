@@ -30,13 +30,7 @@
                     string="Sincronizar"
                     class="btn-success"
                     icon="fa-refresh" />
-                <button name="action_delete_from_alfresco"
-                    type="object"
-                    string="🗑️ Eliminar de Alfresco"
-                    class="btn-danger"
-                    icon="fa-trash"
-                    attrs="{'invisible': ['|', ('subfolder_count', '>', 0), ('file_count', '>', 0)]}"
-                    confirm="¿Está seguro de que desea eliminar esta carpeta de Alfresco? Esta acción no se puede deshacer." />
+                
             </tree>
         </field>
     </record>
@@ -68,12 +62,7 @@
                     string="🖊️ Firmar"
                     class="btn-warning"
                     icon="fa-pen" />-->
-                <button name="action_delete_from_alfresco"
-                    type="object"
-                    string="🗑️ Eliminar de Alfresco"
-                    class="btn-danger"
-                    icon="fa-trash"
-                    confirm="¿Está seguro de que desea eliminar este archivo de Alfresco? Esta acción no se puede deshacer." />
+                
             </tree>
         </field>
     </record>
@@ -131,11 +120,7 @@
                                             type="object"
                                             class="btn btn-warning btn-sm">
                                             <i class="fa fa-pen" /> Firmar </button>-->
-                                        <button name="action_delete_from_alfresco"
-                                            type="object"
-                                            class="btn btn-danger btn-sm"
-                                            confirm="¿Está seguro de que desea eliminar este archivo de Alfresco? Esta acción no se puede deshacer.">
-                                            <i class="fa fa-trash" /> Eliminar </button>
+                                       
                                     </div>
                                 </div>
                             </div>
@@ -170,13 +155,7 @@
                         string="Sincronizar"
                         class="btn-success"
                         icon="fa-refresh" />
-                    <button name="action_delete_from_alfresco"
-                        type="object"
-                        string="🗑️ Eliminar de Alfresco"
-                        class="btn-danger"
-                        icon="fa-trash"
-                        attrs="{'invisible': ['|', ('subfolder_count', '>', 0), ('file_count', '>', 0)]}"
-                        confirm="¿Está seguro de que desea eliminar esta carpeta de Alfresco? Esta acción no se puede deshacer." />
+                   
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">

@@ -2,4 +2,3 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_alfresco_report_mapping,access_alfresco_report_mapping,model_alfresco_report_mapping,group_alfresco_admin,1,1,1,1
 access_alfresco_folder,access_alfresco_folder,model_alfresco_folder,group_alfresco_user,1,1,0,0
 access_alfresco_file,alfresco.file,model_alfresco_file,group_alfresco_user,1,1,0,0
-access_alfresco_firma_wizard,alfresco.firma.wizard,model_alfresco_firma_wizard,base.group_user,1,1,1,1
