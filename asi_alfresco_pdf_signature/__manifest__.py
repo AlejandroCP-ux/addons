@@ -11,8 +11,9 @@
     ],
     'external_dependencies': {
     'python': ['requests','endesive', 'pypdf', 'Pillow', 'pyOpenSSL']
-}
+    },
     "data": [
+        "security/ir.model.access.csv",
         "views/alfresco_firma_wizard_views.xml"
     ],
     "installable": True,
