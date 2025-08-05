@@ -1,0 +1,27 @@
+<odoo>
+    <record id="view_alfresco_firma_wizard_form" model="ir.ui.view">
+        <field name="name">alfresco.firma.wizard.form</field>
+        <field name="model">alfresco.firma.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Firmar Documento PDF">
+                <group>
+                    <field name="file_id" readonly="1"/>
+                    <field name="signature_reason"/>
+                    <field name="signature_location"/>
+                    <field name="signature_visible"/>
+                </group>
+                <footer>
+                    <button name="action_sign_pdf" string="Firmar" type="object" class="btn-primary"/>
+                    <button string="Cancelar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_alfresco_firma_wizard" model="ir.actions.act_window">
+        <field name="name">Firmar Documento</field>
+        <field name="res_model">alfresco.firma.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

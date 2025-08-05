@@ -8,7 +8,7 @@
     'website': 'https://antasi.asisurl.cu',
     "depends": ["base", "web", "asi_pdf_signature"],
     'external_dependencies': {
-        'python': ['requests', 'Pillow', 'endesive', 'pypdf','pyOpenSSL'],
+        'python': ['requests','pypdf'],
     },
     "data": [
         "security/alfresco_groups.xml",
@@ -17,7 +17,6 @@
         "views/alfresco_report_mapping_views.xml",
         "views/alfresco_views.xml",
         "data/alfresco_actions.xml",
-        "wizards/alfresco_firma_wizard_views.xml",
         "data/cron_sync_alfresco.xml",
         "data/cron_export_reports.xml",
     ],
