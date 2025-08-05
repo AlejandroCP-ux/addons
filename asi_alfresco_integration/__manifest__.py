@@ -11,6 +11,7 @@
         'python': ['requests', 'Pillow', 'endesive', 'pypdf','pyOpenSSL'],
     },
     "data": [
+        "security/alfresco_groups.xml",
         "security/ir.model.access.csv",
         "views/res_config_settings_views.xml",
         "views/alfresco_report_mapping_views.xml",

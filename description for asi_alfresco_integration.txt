@@ -1,5 +1,40 @@
  
  
+==== Archivo: C:\Users\javier\Documents\GitHub\addons_antasi\asi_alfresco_integration\data\alfresco_actions.xml ==== 
+ 
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Acción de servidor para firma múltiple -->
+    <record id="action_server_firma_multiple" model="ir.actions.server">
+        <field name="name">🖊️ Firmar PDFs Seleccionados</field>
+        <field name="model_id" ref="model_alfresco_file"/>
+        <field name="binding_model_id" ref="model_alfresco_file"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+# Verificar que hay archivos seleccionados
+if not records:
+    raise UserError("Debe seleccionar al menos un archivo PDF para firmar.")
+
+# Crear el wizard con los archivos seleccionados (sin validaciones que requieran campos obligatorios)
+wizard = env['alfresco.firma.wizard'].create({
+    'file_ids': [(6, 0, records.ids)]
+})
+
+# Abrir el wizard
+action = {
+    'type': 'ir.actions.act_window',
+    'name': 'Firmar PDFs de Alfresco',
+    'res_model': 'alfresco.firma.wizard',
+    'res_id': wizard.id,
+    'view_mode': 'form',
+    'target': 'new',
+}
+        </field>
+    </record>
+</odoo>
+ 
+ 
 ==== Archivo: C:\Users\javier\Documents\GitHub\addons_antasi\asi_alfresco_integration\data\cron_export_reports.xml ==== 
  
 
@@ -46,7 +81,9 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_alfresco_report_mapping,access_alfresco_report_mapping,model_alfresco_report_mapping,,1,1,1,1
 access_alfresco_folder,access_alfresco_folder,model_alfresco_folder,,1,1,1,1
-access_alfresco_file,alfresco.file,model_alfresco_file,,1,1,1,1 
+access_alfresco_file,alfresco.file,model_alfresco_file,,1,1,1,1
+access_alfresco_firma_wizard,alfresco.firma.wizard,model_alfresco_firma_wizard,base.group_user,1,1,1,1
+ 
  
 ==== Archivo: C:\Users\javier\Documents\GitHub\addons_antasi\asi_alfresco_integration\views\alfresco_report_mapping_views.xml ==== 
  
@@ -64,9 +101,9 @@ access_alfresco_file,alfresco.file,model_alfresco_file,,1,1,1,1
                     <group>
                         <field name="folder_id" required="1"/>
                         <field name="related_model_name" invisible="1"/>
-                        <field name="record_domain"/>
+                        <field name="record_domain"/>                      
                         <field name="metadata_field_ids"
-                               widget="many2many_tags"
+                               widget="many2many_tags" 
                                options="{'no_create': True}"
                                domain="[('model', '=', model)]"
                                placeholder="Seleccionar campos de metadata"/>
@@ -87,62 +124,375 @@ access_alfresco_file,alfresco.file,model_alfresco_file,,1,1,1,1
 ==== Archivo: C:\Users\javier\Documents\GitHub\addons_antasi\asi_alfresco_integration\views\alfresco_views.xml ==== 
  
 <odoo>
-    <record id="view_alfresco_folder_tree" model="ir.ui.view">
-        <field name="name">alfresco.folder.tree</field>
+    <!-- Vista principal del explorador - Carpetas con navegación -->
+    <record id="view_alfresco_folder_explorer_tree" model="ir.ui.view">
+        <field name="name">alfresco.folder.explorer.tree</field>
         <field name="model">alfresco.folder</field>
         <field name="arch" type="xml">
-            <tree string="Carpetas Alfresco" >
-                <!-- Odoo detecta automáticamente parent_id y child_ids
-                     gracias a _parent_name = 'parent_id' en el modelo  -->
-                <field name="name"/>
-                <field name="complete_path"/>
-                <field name="node_id"/>
-                <field name="subfolder_count"/>
-           
-                <!-- parent_id no es necesario mostrarlo, se usa internamente -->
-                <field name="parent_id" invisible="1"/>
+            <tree string="Explorador de Alfresco" create="false" edit="false" delete="false">
+                <field name="name" string="📁 Nombre" />
+                <field name="subfolder_count" string="Subcarpetas" />
+                <field name="file_count" string="Archivos PDF" />
+                <field name="last_sync" string="Última Sync" />
+
+                <!-- Botones de navegación -->
+                <button name="action_view_content"
+                    type="object"
+                    string="Abrir Carpeta"
+                    class="btn-primary"
+                    icon="fa-folder-open"
+                    attrs="{'invisible': [('subfolder_count', '=', 0)]}" />
+
+                <button name="action_view_files"
+                    type="object"
+                    string="Ver PDFs"
+                    class="btn-info"
+                    icon="fa-file-pdf-o"
+                    attrs="{'invisible': [('file_count', '=', 0)]}" />
+
+                <button name="action_sync_folder"
+                    type="object"
+                    string="Sincronizar"
+                    class="btn-success"
+                    icon="fa-refresh" />
+                <button name="action_delete_from_alfresco"
+                    type="object"
+                    string="🗑️ Eliminar de Alfresco"
+                    class="btn-danger"
+                    icon="fa-trash"
+                    attrs="{'invisible': ['|', ('subfolder_count', '>', 0), ('file_count', '>', 0)]}"
+                    confirm="¿Está seguro de que desea eliminar esta carpeta de Alfresco? Esta acción no se puede deshacer." />
             </tree>
         </field>
     </record>
 
+    <!-- Vista de árbol para archivos PDF (PRINCIPAL) -->
+    <record id="view_alfresco_file_tree" model="ir.ui.view">
+        <field name="name">alfresco.file.tree</field>
+        <field name="model">alfresco.file</field>
+        <field name="arch" type="xml">
+            <tree string="Archivos PDF" create="false" edit="false" multi_edit="1">
+                <field name="name" string="📄 Nombre" />
+                <field name="folder_id" />
+                <field name="file_size_human" />
+                <field name="modified_at" />
+                <!--<button
+                name="action_preview_file"
+                    type="object"
+                    string="Preview"
+                    class="btn-primary"
+                    icon="fa-eye" />-->
+                <button name="action_download_file"
+                    type="object"
+                    string="Descargar"
+                    class="btn-secondary"
+                    icon="fa-download" />
+                <!-- BOTÓN DE FIRMA HABILITADO 
+                <button name="action_open_firma_wizard"
+                    type="object"
+                    string="🖊️ Firmar"
+                    class="btn-warning"
+                    icon="fa-pen" />-->
+                <button name="action_delete_from_alfresco"
+                    type="object"
+                    string="🗑️ Eliminar de Alfresco"
+                    class="btn-danger"
+                    icon="fa-trash"
+                    confirm="¿Está seguro de que desea eliminar este archivo de Alfresco? Esta acción no se puede deshacer." />
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vista kanban para archivos PDF (SECUNDARIA) -->
+    <record id="view_alfresco_file_kanban" model="ir.ui.view">
+        <field name="name">alfresco.file.kanban</field>
+        <field name="model">alfresco.file</field>
+        <field name="arch" type="xml">
+            <kanban string="Archivos PDF" create="false" edit="false">
+                <field name="id" />
+                <field name="name" />
+                <field name="file_size_human" />
+                <field name="modified_at" />
+                <field name="folder_id" />
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_card oe_kanban_global_click"
+                            style="width: 280px; margin: 10px;">
+                            <div class="o_kanban_image text-center" style="padding: 20px;">
+                                <i class="fa fa-file-pdf-o fa-4x text-danger" />
+                            </div>
+                            <div class="oe_kanban_details" style="padding: 15px;">
+                                <div class="o_kanban_record_top">
+                                    <div class="o_kanban_record_headings">
+                                        <strong class="o_kanban_record_title"
+                                            style="font-size: 14px;">
+                                            <field name="name" />
+                                        </strong>
+                                    </div>
+                                </div>
+                                <div class="o_kanban_record_body" style="margin: 10px 0;">
+                                    <div class="text-muted" style="margin-bottom: 5px;">
+                                        <i class="fa fa-hdd-o" />
+                                        <field name="file_size_human" />
+                                    </div>
+                                    <div class="text-muted" t-if="record.modified_at.raw_value">
+                                        <i class="fa fa-calendar" />
+                                        <field name="modified_at" />
+                                    </div>
+                                </div>
+                                <div class="o_kanban_record_bottom">
+                                    <div class="btn-group" role="group">
+                                        <!--<button
+                                        name="action_preview_file"
+                                            type="object"
+                                            class="btn btn-primary btn-sm">
+                                            <i class="fa fa-eye" /> Preview </button>-->
+                                        <button name="action_download_file"
+                                            type="object"
+                                            class="btn btn-secondary btn-sm">
+                                            <i class="fa fa-download" /> Descargar </button>
+                                        <!-- BOTÓN DE FIRMA EN KANBAN HABILITADO 
+                                        <button name="action_open_firma_wizard"
+                                            type="object"
+                                            class="btn btn-warning btn-sm">
+                                            <i class="fa fa-pen" /> Firmar </button>-->
+                                        <button name="action_delete_from_alfresco"
+                                            type="object"
+                                            class="btn btn-danger btn-sm"
+                                            confirm="¿Está seguro de que desea eliminar este archivo de Alfresco? Esta acción no se puede deshacer.">
+                                            <i class="fa fa-trash" /> Eliminar </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Vista de formulario para carpetas -->
     <record id="view_alfresco_folder_form" model="ir.ui.view">
         <field name="name">alfresco.folder.form</field>
         <field name="model">alfresco.folder</field>
         <field name="arch" type="xml">
-            <form>
+            <form string="Carpeta Alfresco" create="false" edit="false">
                 <header>
-                    <button name="action_open_subfolders" type="object" class="oe_stat_button" icon="fa-folder">
-                        <field name="subfolder_count" widget="statinfo" string=" Subcarpetas"/>
-                    </button>
-                    <!-- Botón de sincronización agregado aquí -->
-                    <button name="action_sync_folder" 
-                            type="object" 
-                            string="Sincronizar carpeta" 
-                            class="oe_highlight" 
-                            icon="fa-refresh"/>
+                    <button name="action_view_content"
+                        type="object"
+                        string="Ver Subcarpetas"
+                        class="oe_highlight"
+                        icon="fa-folder-open"
+                        attrs="{'invisible': [('subfolder_count', '=', 0)]}" />
+                    <button name="action_view_files"
+                        type="object"
+                        string="Ver Archivos PDF"
+                        class="btn-info"
+                        icon="fa-file-pdf-o"
+                        attrs="{'invisible': [('file_count', '=', 0)]}" />
+                    <button name="action_sync_folder"
+                        type="object"
+                        string="Sincronizar"
+                        class="btn-success"
+                        icon="fa-refresh" />
+                    <button name="action_delete_from_alfresco"
+                        type="object"
+                        string="🗑️ Eliminar de Alfresco"
+                        class="btn-danger"
+                        icon="fa-trash"
+                        attrs="{'invisible': ['|', ('subfolder_count', '>', 0), ('file_count', '>', 0)]}"
+                        confirm="¿Está seguro de que desea eliminar esta carpeta de Alfresco? Esta acción no se puede deshacer." />
                 </header>
                 <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_files" type="object" class="oe_stat_button"
+                            icon="fa-file-pdf-o">
+                            <field name="file_count" widget="statinfo" string="Archivos PDF" />
+                        </button>
+                        <button name="action_view_content" type="object" class="oe_stat_button"
+                            icon="fa-folder">
+                            <field name="subfolder_count" widget="statinfo" string="Subcarpetas" />
+                        </button>
+                    </div>
                     <group>
-                        <field name="name"/>
-                        <field name="node_id"/>
-                        <field name="parent_id"/>
+                        <group>
+                            <field name="name" />
+                            <field name="complete_path" />
+                            <field name="node_id" />
+                        </group>
+                        <group>
+                            <field name="parent_id" />
+                            <field name="last_sync" />
+                            <field name="external_modified" />
+                        </group>
                     </group>
                 </sheet>
             </form>
         </field>
     </record>
 
-    <record id="action_alfresco_folders" model="ir.actions.act_window">
-        <field name="name">Carpetas Alfresco</field>
-        <field name="res_model">alfresco.folder</field>
-        <field name="view_mode">tree,form</field>
+    <!-- Vista de formulario para archivos -->
+    <record id="view_alfresco_file_form" model="ir.ui.view">
+        <field name="name">alfresco.file.form</field>
+        <field name="model">alfresco.file</field>
+        <field name="arch" type="xml">
+            <form string="Archivo PDF" create="false" edit="false">
+                <header>
+                    <!--<button
+                    name="action_preview_file"
+                        type="object"
+                        string="Cargar Preview"
+                        class="oe_highlight"
+                        icon="fa-eye" />-->
+                    <button name="action_download_file"
+                        type="object"
+                        string="Descargar"
+                        class="btn-secondary"
+                        icon="fa-download" />
+                    <!-- BOTÓN DE FIRMA EN FORM HABILITADO 
+                    <button name="action_open_firma_wizard"
+                        type="object"
+                        string="🖊️ Firmar Documento"
+                        class="btn-warning"
+                        icon="fa-pen" />-->
+                    <button name="action_delete_from_alfresco"
+                        type="object"
+                        string="🗑️ Eliminar de Alfresco"
+                        class="btn-danger"
+                        icon="fa-trash"
+                        confirm="¿Está seguro de que desea eliminar este archivo de Alfresco? Esta acción no se puede deshacer." />
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name" />
+                            <field name="folder_id" />
+                            <field name="file_size_human" />
+                            <field name="modified_at" />
+                        </group>
+                        <group>
+                            <field name="alfresco_node_id" />
+                            <field name="mime_type" />
+                            <field name="content_url" widget="url" />
+                            <field name="preview_url" widget="url" />
+                        </group>
+                    </group>
+
+                    <!-- Preview del PDF integrado 
+                    <div class="row" attrs="{'invisible': [('pdf_content', '=', False)]}">
+                        <div class="col-12">
+                            <h3>📄 Preview del PDF</h3>
+                            <field name="pdf_content"
+                                widget="pdf_preview"
+                                filename="pdf_filename"
+                                options="{'height': '800px', 'width': '100%'}" />
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info text-center"
+                        attrs="{'invisible': [('pdf_content', '!=', False)]}">
+                        <i class="fa fa-info-circle fa-2x mb-3" />
+                        <h4>Preview no cargado</h4>
+                        <p>Haz clic en "Cargar Preview" para ver el contenido del PDF aquí mismo.</p>
+                    </div>-->
+                </sheet>
+            </form>
+        </field>
     </record>
 
-    <menuitem id="menu_alfresco_root" name="Alfresco"/>
-    <menuitem id="menu_alfresco_folders"
-              name="Carpetas"
-              parent="menu_alfresco_root"
-              action="action_alfresco_folders"/>
+    <!-- Vista heredada para reportes -->
+    <record id="view_alfresco_report_tree" model="ir.ui.view">
+        <field name="name">alfresco.report.tree</field>
+        <field name="model">ir.actions.report</field>
+        <field name="inherit_id" ref="base.act_report_xml_view_tree" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='model']" position="after">
+                <field name="alfresco_archive" />
+                <field name="folder_id" />
+                <field name="metadata_field_ids" widget="many2many_tags" />
+                <field name="record_domain" />
+                <field name="last_sync_date" />
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Acción mejorada del explorador con botón de sincronización -->
+    <record id="action_alfresco_explorer" model="ir.actions.act_window">
+        <field name="name">🗂️ Explorador de Alfresco</field>
+        <field name="res_model">alfresco.folder</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="view_alfresco_folder_explorer_tree" />
+        <field name="domain">[('parent_id', '=', False)]</field>
+        <field name="context">{
+            'search_default_group_by_parent': 1,
+            }</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                ¡Explora el contenido de Alfresco!
+            </p>
+            <p> Aquí puedes navegar por las carpetas sincronizadas desde Alfresco.<br /> • <strong>Abrir
+                Carpeta</strong>: Navegar a las subcarpetas<br /> • <strong>Ver PDFs</strong>: Ver
+                archivos PDF de la carpeta<br /> • <strong>Sincronizar</strong>: Actualizar
+                contenido desde Alfresco<br /> • <strong>🔄 Sincronizar Todo</strong>: Actualizar
+                todas las carpetas </p>
+        </field>
+    </record>
+
+    <!-- CAMBIO PRINCIPAL: Tree primero, luego Kanban -->
+    <record id="action_alfresco_files" model="ir.actions.act_window">
+        <field name="name">📄 Todos los Archivos PDF</field>
+        <field name="res_model">alfresco.file</field>
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                ¡No hay archivos PDF sincronizados!
+            </p>
+            <p> Los archivos aparecerán aquí después de sincronizar las carpetas desde Alfresco.<br />
+                • <strong>Preview</strong>: Ver contenido del PDF<br /> • <strong>Descargar</strong>:
+                Descargar archivo original<br /> • <strong>🖊️ Firmar</strong>: Firmar digitalmente
+                el documento<br /> • <strong>Eliminar</strong>: Eliminar archivo de Odoo y Alfresco </p>
+        </field>
+    </record>
+
+    <record id="action_alfresco_report_config" model="ir.actions.act_window">
+        <field name="name">Configuraciones de Reportes</field>
+        <field name="res_model">ir.actions.report</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="view_alfresco_report_tree" />
+    </record>
+
+    <!-- Acción de servidor para sincronización global - CORREGIDA LA INDENTACIÓN -->
+    <record id="action_server_sync_all_alfresco" model="ir.actions.server">
+        <field name="name">🔄 Sincronizar Todo desde Alfresco</field>
+        <field name="model_id" ref="model_alfresco_folder" />
+        <field name="binding_model_id" ref="model_alfresco_folder" />
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">action = env['alfresco.folder'].action_sync_all_folders()</field>
+    </record>
+
+    <!-- Menús -->
+    <menuitem id="menu_alfresco_root" name="Alfresco" />
+
+    <menuitem id="menu_alfresco_explorer"
+        name="🗂️ Explorador"
+        parent="menu_alfresco_root"
+        action="action_alfresco_explorer"
+        sequence="1" />
+
+    <menuitem id="menu_alfresco_files"
+        name="📄 Todos los PDFs"
+        parent="menu_alfresco_root"
+        action="action_alfresco_files"
+        sequence="2" />
+
+    <menuitem id="menu_alfresco_config" name="Configuraciones" parent="menu_alfresco_root"
+        sequence="10" />
+
+    <menuitem id="menu_alfresco_report_config"
+        name="Reportes"
+        parent="menu_alfresco_config"
+        action="action_alfresco_report_config" />
 </odoo> 
  
 ==== Archivo: C:\Users\javier\Documents\GitHub\addons_antasi\asi_alfresco_integration\views\res_config_settings_views.xml ==== 
@@ -228,3 +578,158 @@ access_alfresco_file,alfresco.file,model_alfresco_file,,1,1,1,1
  
 </odoo>
  
+ 
+==== Archivo: C:\Users\javier\Documents\GitHub\addons_antasi\asi_alfresco_integration\wizards\alfresco_firma_wizard_views.xml ==== 
+ 
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_alfresco_firma_wizard_form" model="ir.ui.view">
+        <field name="name">alfresco.firma.wizard.form</field>
+        <field name="model">alfresco.firma.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Firma Digital de PDFs de Alfresco">
+                <field name="estado" invisible="1" />
+                <field name="file_count" invisible="1" />
+
+                <!-- Estado: Configuración -->
+                <div attrs="{'invisible': [('estado', '!=', 'borrador')]}">
+                    <!-- 
+                    <div class="alert alert-info" role="alert">
+                        <h4><i class="fa fa-pen"/> Configuración de Firma Digital</h4>
+                        <p>Configure los parámetros para firmar <strong><field name="file_count"/> archivo(s) PDF</strong>
+                    seleccionado(s) desde Alfresco.</p>
+                        <p>Los documentos firmados se subirán como nuevos archivos a Alfresco con el formato "_X_firmas"
+                    donde X es el número total de firmas digitales.</p>
+                    </div>
+                -->
+                    <group>
+                        <group>
+                            <field name="rol_firma"
+                                placeholder="ej: Aprobado por:, Contabilizado por:, etc."
+                                required="1" />
+                            <field name="posicion_firma" widget="radio" />
+                        </group>
+                        <group>
+                            <field name="contrasena_firma" password="True" required="1" />
+                        </group>
+                    </group>
+
+                    <!-- Lista de archivos seleccionados - A TODO EL ANCHO -->
+                    <group string="📄 Archivos Seleccionados" col="1">
+                        <field name="file_ids" nolabel="1" readonly="1" widget="many2many">
+                            <tree create="false" edit="false" delete="false">
+                                <field name="name" />
+                                <field name="folder_id" />
+                                <field name="file_size_human" />
+                            </tree>
+                        </field>
+                    </group>
+
+                    <footer>
+                        <button name="action_firmar_documentos"
+                            string="🖊️ Firmar Documentos"
+                            type="object"
+                            class="btn-primary"
+                            attrs="{'invisible': ['|', '|', '|', ('rol_firma', '=', False), ('rol_firma', '=', ''), ('contrasena_firma', '=', False), ('file_count', '=', 0)]}" />
+                        <!--<button
+                        string="Cancelar" class="btn-secondary" special="cancel"/>-->
+                    </footer>
+
+                </div>
+
+                <!-- Estado: Procesando -->
+                <div attrs="{'invisible': [('estado', '!=', 'procesando')]}">
+                    <div class="alert alert-warning" role="alert">
+                        <h4><i class="fa fa-spinner fa-spin" /> Procesando Firma Digital</h4>
+                        <p>Por favor espere mientras se procesan los documentos...</p>
+                        <field name="mensaje_resultado" readonly="1" />
+                    </div>
+
+                    <div class="progress" style="margin: 20px 0;">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated"
+                            role="progressbar"
+                            t-att-style="'width: ' + str(record.archivos_procesados.raw_value * 100 / record.file_count.raw_value) + '%'">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Estado: Completado -->
+                <div attrs="{'invisible': [('estado', '!=', 'completado')]}">
+                    <div class="alert alert-success" role="alert">
+                        <h4><i class="fa fa-check-circle" /> ¡Proceso Completado!</h4>
+                        <field name="mensaje_resultado" readonly="1" nolabel="1" />
+                    </div>
+
+                    <div class="row text-center" style="margin: 20px 0;">
+                        <div class="col-6">
+                            <div class="card bg-success text-white">
+                                <div class="card-body">
+                                    <h3>
+                                        <field name="archivos_procesados" />
+                                    </h3>
+                                    <p>Archivos Firmados</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="card bg-info text-white">
+                                <div class="card-body">
+                                    <h3>
+                                        <field name="file_count" />
+                                    </h3>
+                                    <p>Total Procesados</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Estado: Error -->
+                <div attrs="{'invisible': [('estado', '!=', 'error')]}">
+                    <div class="alert alert-danger" role="alert">
+                        <h4><i class="fa fa-exclamation-triangle" /> Error en el Proceso</h4>
+                        <field name="mensaje_resultado" readonly="1" nolabel="1" />
+                    </div>
+
+                    <div class="row text-center" style="margin: 20px 0;"
+                        attrs="{'invisible': [('archivos_procesados', '=', 0)]}">
+                        <div class="col-4">
+                            <div class="card bg-success text-white">
+                                <div class="card-body">
+                                    <h3>
+                                        <field name="archivos_procesados" />
+                                    </h3>
+                                    <p>Exitosos</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="card bg-danger text-white">
+                                <div class="card-body">
+                                    <h3>
+                                        <field name="archivos_con_error" />
+                                    </h3>
+                                    <p>Con Error</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="card bg-info text-white">
+                                <div class="card-body">
+                                    <h3>
+                                        <field name="file_count" />
+                                    </h3>
+                                    <p>Total</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <footer>
+                        <button string="Cancelar" class="btn-secondary" special="cancel" />
+                    </footer>
+                </div>
+            </form>
+        </field>
+    </record>
+</odoo> 

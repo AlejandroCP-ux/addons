@@ -6,7 +6,7 @@
       <field name="name">Sync Alfresco Folders</field>
       <field name="model_id" ref="model_alfresco_folder"/>
       <field name="state">code</field>
-      <field name="code">model.sync_from_alfresco()</field>
+      <field name="code">model.sync_from_alfresco(batch_size=100)</field>
       <field name="interval_number">1</field>
       <field name="interval_type">hours</field>
       <field name="numbercall">-1</field>
