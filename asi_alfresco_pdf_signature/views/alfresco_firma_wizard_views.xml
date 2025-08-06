@@ -5,7 +5,7 @@
         <field name="arch" type="xml">
             <form string="Firmar Documento PDF">
                 <group>
-                    <field name="file_id" readonly="1"/>
+                    <field name="file_ids" readonly="1"/>
                     <field name="signature_reason"/>
                     <field name="signature_location"/>
                     <field name="signature_visible"/>

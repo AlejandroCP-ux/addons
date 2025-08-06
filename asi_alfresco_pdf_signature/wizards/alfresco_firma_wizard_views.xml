@@ -149,4 +149,12 @@
             </form>
         </field>
     </record>
+
+    <record id="action_alfresco_firma_wizard" model="ir.actions.act_window">
+        <field name="name">Firmar Documento</field>
+        <field name="res_model">alfresco.firma.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+    
 </odoo>

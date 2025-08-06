@@ -26,7 +26,5 @@
     </record>
 
 
-    <!-- Menús -->
-    <menuitem id="menu_alfresco_root" name="Alfresco"/>
    
 </odoo>

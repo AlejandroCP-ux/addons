@@ -6,9 +6,9 @@
     'author': 'Javier, F3nrir',
     'company': 'ASI S.U.R.L.',
     'website': 'https://antasi.asisurl.cu',
-    "depends": ["base", "web", "asi_pdf_signature"],
+    "depends": ["base", "web"],
     'external_dependencies': {
-        'python': ['requests','pypdf'],
+        'python': ['requests','pypdf']
     },
     "data": [
         "security/alfresco_groups.xml",

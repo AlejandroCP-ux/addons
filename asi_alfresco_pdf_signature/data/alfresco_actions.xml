@@ -3,8 +3,8 @@
     <!-- Acción de servidor para firma múltiple -->
     <record id="action_server_firma_multiple" model="ir.actions.server">
         <field name="name">🖊️ Firmar PDFs Seleccionados</field>
-        <field name="model_id" ref="model_alfresco_file"/>
-        <field name="binding_model_id" ref="model_alfresco_file"/>
+        <field name="model_id" ref="asi_alfresco_integration.model_alfresco_file"/>
+        <field name="binding_model_id" ref="asi_alfresco_integration.model_alfresco_file"/>
         <field name="binding_view_types">list</field>
         <field name="state">code</field>
         <field name="code">

@@ -14,7 +14,7 @@
     },
     "data": [
         "security/ir.model.access.csv",
-        "views/alfresco_firma_wizard_views.xml"
+        "wizards/alfresco_firma_wizard_views.xml",
         "data/alfresco_actions.xml",
     ],
     "installable": True,
