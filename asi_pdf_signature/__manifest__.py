@@ -14,6 +14,7 @@
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',
+        'data/signature_tags.xml',
         'views/res_users_views.xml',
         'wizards/firma_documento_views.xml',
         'views/firma_digital_menu.xml',

@@ -38,6 +38,13 @@ except ImportError:
 
 _logger = logging.getLogger(__name__)
 
+class DocumentSignatureTag(models.Model):
+    _name = 'document.signature.tag'
+    _description = 'Etiqueta de Firma'
+
+    name = fields.Char(string="Nombre", required=True)
+
+
 class FirmaDocumentoWizard(models.TransientModel):
     _name = 'firma.documento.wizard'
     _description = 'Asistente para Firma Digital de Documentos'
@@ -46,6 +53,32 @@ class FirmaDocumentoWizard(models.TransientModel):
     nombre_documento = fields.Char(string='Nombre del Documento')
     contrasena_firma = fields.Char(string='Contraseña del Certificado', required=True)
     mostrar_contrasena = fields.Boolean(string='Mostrar Contraseña', default=False)
+    signature_tag_id = fields.Many2one(
+        comodel_name='document.signature.tag',
+        string='Etiqueta de Firma',
+        help='Selecciona una etiqueta para este campo, como "Aprobado", "Revisado", etc.'
+    )
+    signature_visible = fields.Boolean(string="Firma visible", default=True)    
+    signature_location = fields.Selection([
+        ('izquierda', 'Izquierda'),
+        ('centro_izquierda', 'Centro-Izquierda'),
+        ('centro_derecha', 'Centro-Derecha'),
+        ('derecha', 'Derecha')
+    ], string='Posición de la Firma', required=True, default='derecha',
+       help='Posición en la parte inferior de la página donde se colocará la firma')
+        
+    # Campos de estado
+    estado = fields.Selection([
+        ('borrador', 'Configuración'),
+        ('procesando', 'Procesando'),
+        ('completado', 'Completado'),
+        ('error', 'Error')
+    ], string='Estado', default='borrador', required=True)
+    
+    mensaje_resultado = fields.Text(string='Resultado del Proceso', readonly=True)
+    archivos_procesados = fields.Integer(string='Archivos Procesados', default=0)
+    archivos_con_error = fields.Integer(string='Archivos con Error', default=0)
+
     pdf_firmado = fields.Binary(string='Documento Firmado', readonly=True)
     estado = fields.Selection([
         ('borrador', 'Borrador'),

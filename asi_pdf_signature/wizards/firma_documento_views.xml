@@ -11,12 +11,15 @@
                 <div attrs="{'invisible': [('estado', '!=', 'borrador')]}">
                     <div class="alert alert-info" role="alert">
                         <p>Seleccione un documento PDF para firmar digitalmente.</p>
-                        <p>El documento firmado incluirá su firma digital y su imagen de firma en la esquina inferior derecha de la última página.</p>
+                        <p>El documento firmado incluirá su firma digital y su imagen de firma en la última página del documento.</p>
                     </div>
-                    
+                    <group>
+                        <field name="signature_tag_id" widget="many2one_tag"/>
+                        <field name="signature_location" widget="radio" />
+                        </group>
                     <group>
                         <field name="pdf_documento" filename="nombre_documento" widget="binary" required="1"/>
-                        <field name="nombre_documento" invisible="1"/>
+                        <field name="nombre_documento" invisible="1"/>                    
                         <field name="contrasena_firma" password="True" required="1"/>
                     </group>
                     

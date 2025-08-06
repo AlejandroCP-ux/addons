@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record id="signature_tag_aprobado" model="document.signature.tag">
+            <field name="name">Aprobado por</field>
+        </record>
+        <record id="signature_tag_autorizado" model="document.signature.tag">
+            <field name="name">Autorizado por</field>
+        </record>
+        <record id="signature_tag_elaborado" model="document.signature.tag">
+            <field name="name">Elaborado por</field>
+        </record>
+        <record id="signature_tag_solicitado" model="document.signature.tag">
+            <field name="name">Solicitado por</field>
+        </record>
+    </data>
+</odoo>

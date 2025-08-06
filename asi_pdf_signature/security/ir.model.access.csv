@@ -1,2 +1,4 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_firma_documento_wizard,access.firma.documento.wizard,model_firma_documento_wizard,base.group_user,1,1,1,1
+access_document_signature_tag_user,document.signature.tag.user,model_document_signature_tag,,1,0,0,0
+access_document_signature_tag_admin,document.signature.tag.admin,model_document_signature_tag,base.group_system,1,1,1,1
