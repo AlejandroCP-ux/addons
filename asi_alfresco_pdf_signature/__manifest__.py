@@ -11,7 +11,7 @@
     ],
     'external_dependencies': {
     'python': ['requests','endesive', 'pypdf', 'Pillow', 'pyOpenSSL']
-}
+},
     "data": [
         "views/alfresco_firma_wizard_views.xml"
     ],
