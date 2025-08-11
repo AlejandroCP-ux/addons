@@ -1,9 +1,31 @@
  
  
+==== Archivo: C:\Users\javier\Documents\GitHub\addons_antasi\asi_pdf_signature\data\signature_tags.xml ==== 
+ 
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record id="signature_tag_aprobado" model="document.signature.tag">
+            <field name="name">Aprobado por</field>
+        </record>
+        <record id="signature_tag_autorizado" model="document.signature.tag">
+            <field name="name">Autorizado por</field>
+        </record>
+        <record id="signature_tag_elaborado" model="document.signature.tag">
+            <field name="name">Elaborado por</field>
+        </record>
+        <record id="signature_tag_solicitado" model="document.signature.tag">
+            <field name="name">Solicitado por</field>
+        </record>
+    </data>
+</odoo> 
+ 
 ==== Archivo: C:\Users\javier\Documents\GitHub\addons_antasi\asi_pdf_signature\security\ir.model.access.csv ==== 
  
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_firma_documento_wizard,access.firma.documento.wizard,model_firma_documento_wizard,base.group_user,1,1,1,1
+access_document_signature_tag_user,document.signature.tag.user,model_document_signature_tag,,1,0,0,0
+access_document_signature_tag_admin,document.signature.tag.admin,model_document_signature_tag,base.group_system,1,1,1,1
  
  
 ==== Archivo: C:\Users\javier\Documents\GitHub\addons_antasi\asi_pdf_signature\security\security.xml ==== 
@@ -210,12 +232,15 @@ odoo.define("firma_digital.firma_digital", (require) => {
                 <div attrs="{'invisible': [('estado', '!=', 'borrador')]}">
                     <div class="alert alert-info" role="alert">
                         <p>Seleccione un documento PDF para firmar digitalmente.</p>
-                        <p>El documento firmado incluirá su firma digital y su imagen de firma en la esquina inferior derecha de la última página.</p>
+                        <p>El documento firmado incluirá su firma digital y su imagen de firma en la última página del documento.</p>
                     </div>
-                    
+                    <group>
+                        <field name="signature_tag_id" widget="many2one_tag"/>
+                        <field name="signature_location" widget="radio" />
+                        </group>
                     <group>
                         <field name="pdf_documento" filename="nombre_documento" widget="binary" required="1"/>
-                        <field name="nombre_documento" invisible="1"/>
+                        <field name="nombre_documento" invisible="1"/>                    
                         <field name="contrasena_firma" password="True" required="1"/>
                     </group>
                     

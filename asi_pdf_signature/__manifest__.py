@@ -12,12 +12,12 @@
     'website': 'https://antasi.asisurl.cu',
     'depends': ['base', 'web'],
     'data': [
-        'security/security.xml',
-        'security/ir.model.access.csv',
+        'security/security.xml',        
         'data/signature_tags.xml',
         'views/res_users_views.xml',
         'wizards/firma_documento_views.xml',
         'views/firma_digital_menu.xml',
+        'security/ir.model.access.csv',
     ],
     'assets': {
         'web.assets_backend': [
