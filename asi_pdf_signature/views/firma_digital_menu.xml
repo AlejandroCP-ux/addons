@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <!-- Menú principal -->
-    <menuitem id="menu_firma_digital_root" 
-              name="Firma Digital" 
-              web_icon="asi_pdf_signature,static/description/icon.png" 
-              sequence="90"/>
-    
+    <menuitem id="menu_firma_digital_root"
+        name="Firma Digital"
+        web_icon="asi_pdf_signature,static/description/icon.png"
+        sequence="90" />
+
     <!-- Submenú para firmar documentos -->
     <menuitem id="menu_firma_documento"
-              name="Firmar Documento"
-              parent="menu_firma_digital_root"
-              action="asi_pdf_signature.action_firma_documento_wizard"
-              sequence="10"/>
+        name="Firmar Documento"
+        parent="menu_firma_digital_root"
+        action="asi_pdf_signature.action_firma_documento_wizard"
+        sequence="10" />
 </odoo>

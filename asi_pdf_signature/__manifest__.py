@@ -1,6 +1,6 @@
 {
     'name': 'ASI Firma Digital de Documentos',
-    'version': '1.9',
+    'version': '2.0',
     'summary': 'Módulo para firmar documentos PDF digitalmente',
     'description': """
         Este módulo permite:
@@ -8,8 +8,7 @@
         - Subir, firmar digitalmente y descargar documentos PDF
     """,
     'category': 'Herramientas',
-    'author': 'F3nrir',
-    'company': 'ASI S.U.R.L.',
+    'author': 'ASI S.U.R.L.',
     'website': 'https://antasi.asisurl.cu',
     'depends': ['base', 'web'],
     'data': [
@@ -17,6 +16,7 @@
         'data/signature_tags.xml',
         'views/res_users_views.xml',
         'wizards/firma_documento_views.xml',
+        'wizards/seleccionar_archivos_views.xml',
         'views/firma_digital_menu.xml',
         'security/ir.model.access.csv',
     ],

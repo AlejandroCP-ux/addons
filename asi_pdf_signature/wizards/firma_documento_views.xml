@@ -5,57 +5,174 @@
         <field name="model">firma.documento.wizard</field>
         <field name="arch" type="xml">
             <form string="Firma Digital de Documentos">
-                <field name="estado" invisible="1"/>
-                <field name="pdf_firmado" invisible="1"/>
-                
+                <field name="estado" invisible="1" />
+                <field name="documento_count" invisible="1" />
+                <field name="zip_firmados" invisible="1" />
+                <field name="nombre_zip" invisible="1" />
+                <field name="archivos_procesados" invisible="1" />
+                <field name="archivos_con_error" invisible="1" />
+
+                <!-- Estado: Configuración -->
                 <div attrs="{'invisible': [('estado', '!=', 'borrador')]}">
                     <div class="alert alert-info" role="alert">
-                        <p>Seleccione un documento PDF para firmar digitalmente.</p>
-                        <p>El documento firmado incluirá su firma digital y su imagen de firma en la última página del documento.</p>
+                        <h4><i class="fa fa-pen" /> Configuración de Firma Digital</h4>
+                        <p>Configure los parámetros para firmar <strong><field
+                                    name="documento_count" /> documento(s) PDF</strong>
+                            seleccionado(s).</p>
+                        <p>Los documentos firmados se descargarán automáticamente en un archivo ZIP.</p>
                     </div>
+
                     <group>
-                        <field name="signature_tag_id" widget="many2one_tag"/>
-                        <field name="signature_location" widget="radio" />
+                        <group>
+                            <field name="rol_firma"
+                                placeholder="ej: Aprobado por:, Contabilizado por:, etc."
+                                required="1" />
+                            <field name="posicion_firma" widget="radio" />
                         </group>
-                    <group>
-                        <field name="pdf_documento" filename="nombre_documento" widget="binary" required="1"/>
-                        <field name="nombre_documento" invisible="1"/>                    
-                        <field name="contrasena_firma" password="True" required="1"/>
+                        <group>
+                            <field name="contrasena_firma" password="True" required="1" />
+                        </group>
                     </group>
-                    
+
+                    <!-- Lista de documentos seleccionados -->
+                    <group string="Archivos Seleccionados" col="1">
+                        <field name="documento_ids" nolabel="1" widget="one2many" mode="tree,form">
+                            <tree create="true" edit="false" delete="true">
+                                <field name="nombre_documento" />
+                                <field name="tamaño_archivo" />
+                                <field name="estado_firma" />
+                                <button name="action_descargar_individual" string="Descargar"
+                                    type="object" icon="fa-download"
+                                    attrs="{'invisible': [('estado_firma', '!=', 'firmado')]}" />
+                            </tree>
+                            <form>
+                                <group>
+                                    <field name="nombre_documento" />
+                                    <field name="pdf_documento" filename="nombre_documento"
+                                        widget="binary" />
+                                    <field name="estado_firma" readonly="1" />
+                                    <field name="mensaje_error" readonly="1"
+                                        attrs="{'invisible': [('estado_firma', '!=', 'error')]}" />
+                                </group>
+                            </form>
+                        </field>
+                    </group>
+
                     <footer>
-                        <button name="action_firmar_documento" string="Firmar" type="object" class="btn-primary" 
-                                attrs="{'invisible': ['|', ('pdf_documento', '=', False), ('contrasena_firma', '=', False)]}"/>
+                        <button name="action_firmar_documentos"
+                            string="🖊️ Firmar Documentos"
+                            type="object"
+                            class="btn-primary"
+                            attrs="{'invisible': ['|', '|', '|', ('rol_firma', '=', False), ('rol_firma', '=', ''), ('contrasena_firma', '=', False), ('documento_count', '=', 0)]}" />
                     </footer>
                 </div>
-                
-                <div attrs="{'invisible': [('estado', '!=', 'firmado')]}">
-                    <div class="alert alert-success" role="alert">
-                        <p>¡El documento ha sido firmado exitosamente!</p>
-                        <p>Puede descargarlo haciendo clic en el botón "Descargar PDF Firmado".</p>
+
+                <!-- Estado: Procesando -->
+                <div attrs="{'invisible': [('estado', '!=', 'procesando')]}">
+                    <div class="alert alert-warning" role="alert">
+                        <h4><i class="fa fa-spinner fa-spin" /> Procesando Firma Digital</h4>
+                        <p>Por favor espere mientras se procesan los documentos...</p>
+                        <field name="mensaje_resultado" readonly="1" />
                     </div>
-                    
-                    <footer>
-                        <button name="action_descargar_pdf" string="Descargar PDF Firmado" type="object" class="btn-primary"/>
-                        <button string="Cerrar" class="btn-secondary" special="cancel"/>
-                    </footer>
+
+                    <div class="progress" style="margin: 20px 0;">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated"
+                            role="progressbar"
+                            t-att-style="'width: ' + str(record.archivos_procesados.raw_value * 100 / record.documento_count.raw_value) + '%'">
+                        </div>
+                    </div>
                 </div>
-                
+
+                <!-- Estado: Completado -->
+                <div attrs="{'invisible': [('estado', '!=', 'completado')]}">
+                    <div class="alert alert-success" role="alert">
+                        <h4><i class="fa fa-check-circle" /> ¡Proceso Completado!</h4>
+                        <field name="mensaje_resultado" readonly="1" nolabel="1" />
+                    </div>
+
+                    <div class="row text-center" style="margin: 20px 0;">
+                        <div class="col-6">
+                            <div class="card bg-success text-white">
+                                <div class="card-body">
+                                    <h3>
+                                        <field name="archivos_procesados" />
+                                    </h3>
+                                    <p>Archivos Firmados</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="card bg-info text-white">
+                                <div class="card-body">
+                                    <h3>
+                                        <field name="documento_count" />
+                                    </h3>
+                                    <p>Total Procesados</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Estado: Error -->
                 <div attrs="{'invisible': [('estado', '!=', 'error')]}">
                     <div class="alert alert-danger" role="alert">
-                        <p>Ha ocurrido un error durante el proceso de firma:</p>
-                        <field name="mensaje_error" readonly="1"/>
+                        <h4><i class="fa fa-exclamation-triangle" /> Error en el Proceso</h4>
+                        <field name="mensaje_resultado" readonly="1" nolabel="1" />
                     </div>
+
+                    <div class="row text-center" style="margin: 20px 0;"
+                        attrs="{'invisible': [('archivos_procesados', '=', 0)]}">
+                        <div class="col-4">
+                            <div class="card bg-success text-white">
+                                <div class="card-body">
+                                    <h3>
+                                        <field name="archivos_procesados" />
+                                    </h3>
+                                    <p>Exitosos</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="card bg-danger text-white">
+                                <div class="card-body">
+                                    <h3>
+                                        <field name="archivos_con_error" />
+                                    </h3>
+                                    <p>Con Error</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="card bg-info text-white">
+                                <div class="card-body">
+                                    <h3>
+                                        <field name="documento_count" />
+                                    </h3>
+                                    <p>Total</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <footer>
+                        <button name="action_descargar_zip"
+                            string="📦 Descargar Documentos Firmados"
+                            type="object"
+                            class="btn-primary"
+                            attrs="{'invisible': [('archivos_procesados', '=', 0)]}" />
+                        <button string="Cerrar" class="btn-secondary" special="cancel" />
+                    </footer>
                 </div>
             </form>
         </field>
     </record>
-    
+
     <record id="action_firma_documento_wizard" model="ir.actions.act_window">
-        <field name="name">Firmar Documento</field>
+        <field name="name">Firmar Documentos</field>
         <field name="res_model">firma.documento.wizard</field>
         <field name="view_mode">form</field>
-        <field name="view_id" ref="view_firma_documento_wizard_form"/>
+        <field name="view_id" ref="view_firma_documento_wizard_form" />
         <field name="target">new</field>
     </record>
 </odoo>

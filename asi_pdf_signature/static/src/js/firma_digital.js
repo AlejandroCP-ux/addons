@@ -2,7 +2,8 @@ odoo.define("firma_digital.firma_digital", (require) => {
   var core = require("web.core")
   var FormView = require("web.FormView")
   var FormController = require("web.FormController")
-  var FormRenderer = require("web.FormRenderer")
+  var FormRenderer = require("web.FormRenderer") // Declare the FormRenderer variable
+  var $ = require("jquery") // Declare the $ variable
   var _t = core._t
 
   // Extender el renderizador del formulario para añadir funcionalidades específicas
@@ -22,7 +23,14 @@ odoo.define("firma_digital.firma_digital", (require) => {
   // Extender el controlador del formulario para añadir funcionalidades específicas
   FormController.include({
     _onButtonClicked: function (event) {
-      
+      // Si se ha completado la acción de firma, verificar si debe descargarse automáticamente
+      if (this.modelName === "firma.documento.wizard" && event.data.attrs.name === "action_firmar_documentos") {
+        return this._super.apply(this, arguments).then((action) => {
+          // El resto se maneja en el wizard
+          return action
+        })
+      }
+
       // Si se ha completado la acción de firma, verificar si debe descargarse automáticamente
       if (this.modelName === "firma.documento.wizard" && event.data.attrs.name === "action_firmar_documento") {
         // El resto se maneja normalmente

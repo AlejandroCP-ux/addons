@@ -48,3 +48,70 @@
   border: 1px dashed #ccc;
   padding: 8px;
 }
+
+/* Estilos para el botón de seleccionar archivos centrado */
+.text-center {
+  text-align: center !important;
+}
+
+.btn-lg {
+  padding: 10px 30px !important;
+  font-size: 16px !important;
+  border-radius: 6px !important;
+  font-weight: 500 !important;
+}
+
+/* Estilos para las tarjetas de estado */
+.card {
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.card-body h3 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.card-body p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+/* Estilos para la barra de progreso */
+.progress {
+  height: 20px;
+  border-radius: 10px;
+  background-color: #e9ecef;
+}
+
+.progress-bar {
+  border-radius: 10px;
+}
+
+/* Estilos para alertas */
+.alert h4 {
+  margin-bottom: 10px;
+}
+
+.alert p {
+  margin-bottom: 5px;
+}
+
+.alert p:last-child {
+  margin-bottom: 0;
+}
+
+/* Estilos específicos para el área de selección de archivos */
+.o_firma_digital_file_selection {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 20px;
+  margin: 15px 0;
+}
+
+.o_firma_digital_file_selection p {
+  color: #6c757d;
+  margin-bottom: 15px;
+}
