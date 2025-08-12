@@ -8,7 +8,8 @@
         - Subir, firmar digitalmente y descargar documentos PDF
     """,
     'category': 'Herramientas',
-    'author': 'ASI S.U.R.L.',
+    'author': 'F3nrir',
+    'company': 'ASI S.U.R.L.',
     'website': 'https://antasi.asisurl.cu',
     'depends': ['base', 'web'],
     'data': [

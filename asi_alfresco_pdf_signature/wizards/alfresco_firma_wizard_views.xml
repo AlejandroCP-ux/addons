@@ -10,15 +10,14 @@
 
                 <!-- Estado: Configuración -->
                 <div attrs="{'invisible': [('estado', '!=', 'borrador')]}">
-                    <!-- 
                     <div class="alert alert-info" role="alert">
-                        <h4><i class="fa fa-pen"/> Configuración de Firma Digital</h4>
-                        <p>Configure los parámetros para firmar <strong><field name="file_count"/> archivo(s) PDF</strong>
-                    seleccionado(s) desde Alfresco.</p>
-                        <p>Los documentos firmados se subirán como nuevos archivos a Alfresco con el formato "_X_firmas"
-                    donde X es el número total de firmas digitales.</p>
+                        <h4><i class="fa fa-pen" /> Configuración de Firma Digital</h4>
+                        <p>Configure los parámetros para firmar <strong><field name="file_count" />
+                            archivo(s) PDF</strong> seleccionado(s) desde Alfresco.</p>
+                        <p>Los documentos firmados se actualizarán como nuevas versiones en Alfresco
+                            manteniendo el mismo archivo.</p>
                     </div>
-                -->
+
                     <group>
                         <group>
                             <field name="rol_firma"
@@ -31,7 +30,7 @@
                         </group>
                     </group>
 
-                    <!-- Lista de archivos seleccionados - A TODO EL ANCHO -->
+                    <!-- Lista de archivos seleccionados -->
                     <group string="📄 Archivos Seleccionados" col="1">
                         <field name="file_ids" nolabel="1" readonly="1" widget="many2many">
                             <tree create="false" edit="false" delete="false">
@@ -48,10 +47,8 @@
                             type="object"
                             class="btn-primary"
                             attrs="{'invisible': ['|', '|', '|', ('rol_firma', '=', False), ('rol_firma', '=', ''), ('contrasena_firma', '=', False), ('file_count', '=', 0)]}" />
-                        <!--<button
-                        string="Cancelar" class="btn-secondary" special="cancel"/>-->
+                        <button string="Cancelar" class="btn-secondary" special="cancel" />
                     </footer>
-
                 </div>
 
                 <!-- Estado: Procesando -->
@@ -99,6 +96,11 @@
                             </div>
                         </div>
                     </div>
+
+                    <footer>
+                        <button name="action_cerrar_wizard" string="Cerrar" type="object"
+                            class="btn-primary" />
+                    </footer>
                 </div>
 
                 <!-- Estado: Error -->
@@ -143,7 +145,8 @@
                     </div>
 
                     <footer>
-                        <button string="Cancelar" class="btn-secondary" special="cancel" />
+                        <button name="action_cerrar_wizard" string="Cerrar" type="object"
+                            class="btn-secondary" />
                     </footer>
                 </div>
             </form>
@@ -151,10 +154,9 @@
     </record>
 
     <record id="action_alfresco_firma_wizard" model="ir.actions.act_window">
-        <field name="name">Firmar Documento</field>
+        <field name="name">Firmar PDFs de Alfresco</field>
         <field name="res_model">alfresco.firma.wizard</field>
         <field name="view_mode">form</field>
         <field name="target">new</field>
     </record>
-    
 </odoo>

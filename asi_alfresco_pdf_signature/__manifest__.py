@@ -3,7 +3,9 @@
     "version": "16.0.1.0.0",
     "summary": "Módulo para firmar archivos PDF desde integración con Alfresco",
     "category": "Tools",
-    "author": "tv asi",
+    'author': 'Javier, F3nrir',
+    'company': 'ASI S.U.R.L.',
+    'website': 'https://antasi.asisurl.cu',
     "license": "AGPL-3",
     "depends": [
         "asi_alfresco_integration",

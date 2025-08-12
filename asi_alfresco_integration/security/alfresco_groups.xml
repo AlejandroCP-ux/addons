@@ -10,15 +10,15 @@
         <!-- Grupo Administrador Alfresco -->
         <record id="group_alfresco_admin" model="res.groups">
             <field name="name">Administrador Alfresco</field>
-            <field name="category_id" ref="module_category_services_alfresco"/>
-            <field name="users" eval="[(4, ref('base.user_root'))]"/>
+            <field name="category_id" ref="module_category_services_alfresco" />
+            <field name="users" eval="[(4, ref('base.user_root'))]" />
         </record>
 
         <!-- Grupo Usuario Alfresco -->
         <record id="group_alfresco_user" model="res.groups">
             <field name="name">Usuario Alfresco</field>
-            <field name="category_id" ref="module_category_services_alfresco"/>
-            <field name="implied_ids" eval="[(4, ref('group_alfresco_admin'))]"/>
+            <field name="category_id" ref="module_category_services_alfresco" />
+            <field name="implied_ids" eval="[(4, ref('group_alfresco_admin'))]" />
         </record>
     </data>
 </odoo>

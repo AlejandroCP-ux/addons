@@ -1,24 +1,24 @@
 <odoo>
     <record id="view_report_action_form_inherit" model="ir.ui.view">
         <field name="name">ir.actions.report.form.inherit.alfresco</field>
-        <field name="model">ir.actions.report</field> 
-        <field name="inherit_id" ref="base.act_report_xml_view"/>
+        <field name="model">ir.actions.report</field>
+        <field name="inherit_id" ref="base.act_report_xml_view" />
         <field name="arch" type="xml">
             <xpath expr="//field[@name='print_report_name']" position="after">
-                <field name="alfresco_archive"/>
-            </xpath>    
+                <field name="alfresco_archive" />
+            </xpath>
             <xpath expr="//page[@name='advanced']" position="after">
                 <page string="Alfresco" attrs="{'invisible': [('alfresco_archive', '=', False)]}">
                     <group>
-                        <field name="folder_id" required="1"/>
-                        <field name="related_model_name" invisible="1"/>
-                        <field name="record_domain"/>                      
+                        <field name="folder_id" required="1" />
+                        <field name="related_model_name" invisible="1" />
+                        <field name="record_domain" />
                         <field name="metadata_field_ids"
-                               widget="many2many_tags" 
-                               options="{'no_create': True}"
-                               domain="[('model', '=', model)]"
-                               placeholder="Seleccionar campos de metadata"/>
-                        <field name="last_sync_date" readonly="0"/>
+                            widget="many2many_tags"
+                            options="{'no_create': True}"
+                            domain="[('model', '=', model)]"
+                            placeholder="Seleccionar campos de metadata" />
+                        <field name="last_sync_date" readonly="0" />
                     </group>
                 </page>
             </xpath>
@@ -26,5 +26,4 @@
     </record>
 
 
-   
 </odoo>

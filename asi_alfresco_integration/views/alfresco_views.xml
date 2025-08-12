@@ -30,7 +30,7 @@
                     string="Sincronizar"
                     class="btn-success"
                     icon="fa-refresh" />
-                
+
             </tree>
         </field>
     </record>
@@ -62,7 +62,7 @@
                     string="🖊️ Firmar"
                     class="btn-warning"
                     icon="fa-pen" />-->
-                
+
             </tree>
         </field>
     </record>
@@ -120,7 +120,7 @@
                                             type="object"
                                             class="btn btn-warning btn-sm">
                                             <i class="fa fa-pen" /> Firmar </button>-->
-                                       
+
                                     </div>
                                 </div>
                             </div>
@@ -155,7 +155,7 @@
                         string="Sincronizar"
                         class="btn-success"
                         icon="fa-refresh" />
-                   
+
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
