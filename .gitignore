@@ -4,3 +4,4 @@ description for calendar_workplan_evaluation.txt
 *.pyc
 *.pyc
 *.zip
+**/__pycache__/
