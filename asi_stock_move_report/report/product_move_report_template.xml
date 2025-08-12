@@ -38,11 +38,19 @@
                         </div>
                     </div>
 
+                    <!-- Información del almacén -->
+                    <div class="row mb-4" style="margin-bottom: 10px;">
+                        <div class="col-12">
+                            <strong style="font-size: 12px;">Almacén:</strong>
+                            <span t-esc="warehouse.name if warehouse else 'Todos los almacenes'" style="font-size: 12px;"/>
+                        </div>
+                    </div>
+
                     <!-- Información del período -->
-                    <div class="row mb-4">
+                    <div class="row mb-4" style="margin-bottom: 10px;">
                         <div class="col-12">
                             <strong style="font-size: 12px;">Período:</strong>
-                            <span t-esc="date_start" t-options="{'widget': 'date'}" style="font-size: 12px;"/>
+                            <span t-esc="inicio" t-options="{'widget': 'date'}" style="font-size: 12px;"/>
                             <span style="font-size: 12px;"> al </span>
                             <span t-esc="date_end" t-options="{'widget': 'date'}" style="font-size: 12px;"/>
                         </div>
@@ -54,12 +62,12 @@
                             <tr>
                                 <th class="text-center" style="width: 10%; border: 1px solid #000; padding: 10px; font-size: 12px;">Fecha</th>
                                 <th class="text-center" style="width: 10%; border: 1px solid #000; padding: 10px; font-size: 12px;">Unidad de Medida</th>
-                                <th class="text-center" style="width: 13%; border: 1px solid #000; padding: 10px; font-size: 12px;">Cantidad a Mano</th>
+                                <th class="text-center" style="width: 13%; border: 1px solid #000; padding: 10px; font-size: 12px;">Existencia Inicial</th>
                                 <th class="text-center" style="width: 12%; border: 1px solid #000; padding: 10px; font-size: 12px;">Cantidad Movida</th>
                                 <th class="text-center" style="width: 23%; border: 1px solid #000; padding: 10px; font-size: 12px;">Tipo de Operación</th>
                                 <th class="text-center" style="width: 13%; border: 1px solid #000; padding: 10px; font-size: 12px;">EXISTENCIA FINAL</th>
                                 <th class="text-center" style="width: 19%; border: 1px solid #000; padding: 10px; font-size: 12px;">Referencia</th>
-                            </tr>4
+                            </tr>
                         </thead>
                         <tbody>
                             <t t-foreach="moves_data" t-as="move">

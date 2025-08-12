@@ -5,7 +5,8 @@
     
     'description': "Genera reportes PDF de movimientos de inventario consolidados por producto con rango de fechas.",
     
-    'author': 'ASI S.U.R.L.',
+    'author': 'F3nrir',
+    'company': 'ASI S.U.R.L.',
     'website': 'https://antasi.asisurl.cu',
     'category': 'Inventory/Inventory',
     'depends': ['stock'],

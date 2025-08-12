@@ -13,6 +13,10 @@ class ProductMoveReportWizard(models.TransientModel):
     product_id = fields.Many2one('product.product', string='Producto', required=True, 
                                 domain=[('type', '=', 'product')])
 
+    # Campo para seleccionar almacén
+    warehouse_id = fields.Many2one('stock.warehouse', string='Almacén', required=True,
+                              default=lambda self: self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1))
+
     period_type = fields.Selection([
         ('week', 'Semana'),
         ('month', 'Mes'),
@@ -168,22 +172,30 @@ class ProductMoveReportWizard(models.TransientModel):
         # Aseguramos que las fechas estén actualizadas
         self._onchange_period_fields()
         
-        # Validar que hay movimientos en el rango de fechas para el producto
+        # Obtener ubicaciones del almacén seleccionado (usando | para unir recordsets)
+        warehouse_locations = self.warehouse_id.lot_stock_id.child_ids | self.warehouse_id.lot_stock_id
+        
+        # Validar que hay movimientos en el rango de fechas para el producto y almacén
         moves_count = self.env['stock.move'].search_count([
             ('date', '>=', self.date_start),
             ('date', '<=', self.date_end),
             ('state', '=', 'done'),
             ('product_id', '=', self.product_id.id),
+            '|',
+            ('location_id', 'in', warehouse_locations.ids),
+            ('location_dest_id', 'in', warehouse_locations.ids),
         ])
         
         if moves_count == 0:
-            raise UserError(f'No se encontraron movimientos para el producto {self.product_id.name} en el período seleccionado.')
+            raise UserError(f'No se encontraron movimientos para el producto {self.product_id.name} en el período seleccionado para el almacén {self.warehouse_id.name}.')
         
         # Preparar datos para el reporte
         data = {
-            'date_start': self.date_start+timedelta(days=1),
+            'inicio': self.date_start+timedelta(days=1),
+            'date_start': self.date_start,
             'date_end': self.date_end,
             'product_id': self.product_id.id,
+            'warehouse_id': self.warehouse_id.id,
         }
         
         # Generar el reporte PDF con nombre personalizado

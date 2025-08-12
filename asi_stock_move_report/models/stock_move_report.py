@@ -14,14 +14,28 @@ class StockMoveReport(models.AbstractModel):
         
         date_start = data.get('date_start')
         date_end = data.get('date_end')
+        warehouse_id = data.get('warehouse_id')
         
-        # Obtener todos los movimientos en el rango de fechas
+        # Obtener ubicaciones del almacén seleccionado
+        warehouse = self.env['stock.warehouse'].browse(warehouse_id) if warehouse_id else None
+        warehouse_locations = self.env['stock.location']
+        
+        if warehouse:
+            warehouse_locations = warehouse.lot_stock_id.child_ids | warehouse.lot_stock_id
+        
+        # Obtener todos los movimientos en el rango de fechas y almacén
         domain = [
             ('date', '>=', date_start),
             ('date', '<=', date_end),
             ('state', '=', 'done'),
             ('product_id', '!=', False),
         ]
+        
+        # Filtrar por ubicaciones del almacén si se especifica
+        if warehouse_locations:
+            domain.append('|')
+            domain.append(('location_id', 'in', warehouse_locations.ids))
+            domain.append(('location_dest_id', 'in', warehouse_locations.ids))
         
         moves = self.env['stock.move'].search(domain)
         
@@ -30,6 +44,7 @@ class StockMoveReport(models.AbstractModel):
             'product_id': None,
             'product_code': '',
             'product_name': '',
+            'product_uom': '',
             'cantidad_movimientos': 0,
             'cantidad_a_mano': 0.0,
             'entradas': 0.0,
@@ -48,10 +63,11 @@ class StockMoveReport(models.AbstractModel):
                 product_moves[product_id]['product_id'] = product_id
                 product_moves[product_id]['product_code'] = move.product_id.default_code or ''
                 product_moves[product_id]['product_name'] = move.product_id.name or ''
+                product_moves[product_id]['product_uom'] = move.product_uom.name or ''
                 
-                # Obtener cantidad a mano al inicio del período
+                # Obtener cantidad a mano al inicio del período para el almacén específico
                 product_moves[product_id]['cantidad_a_mano'] = self._get_stock_quantity_at_date(
-                    move.product_id, date_start
+                    move.product_id, date_start, warehouse_locations
                 )
             
             # Incrementar contador de movimientos para este producto
@@ -87,8 +103,8 @@ class StockMoveReport(models.AbstractModel):
         
         # Filtrar solo productos que tuvieron movimientos
         products_with_movements = [p for p in products_data if 
-                                 p['entradas'] > 0 or p['ventas'] > 0 or 
-                                 p['otras_salidas'] > 0 or p['consumo'] > 0]
+                             p['entradas'] > 0 or p['ventas'] > 0 or 
+                             p['otras_salidas'] > 0 or p['consumo'] > 0]
         
         return {
             'doc_ids': [1],  # Solo necesitamos un documento ficticio
@@ -96,6 +112,7 @@ class StockMoveReport(models.AbstractModel):
             'docs': [self.env['stock.move.report.wizard'].browse(1)],
             'date_start': date_start,
             'date_end': date_end,
+            'warehouse': warehouse,
             'products_data': products_with_movements,
             'total_products_with_movements': len(products_with_movements),
             'total_movements': len(moves),  # Total de movimientos en el período
@@ -135,22 +152,37 @@ class StockMoveReport(models.AbstractModel):
         else:
             return 'otra_salida'
     
-    def _get_stock_quantity_at_date(self, product, date):
+    def _get_stock_quantity_at_date(self, product, date, warehouse_locations=None):
         """
-        Obtiene la cantidad en stock de un producto en una fecha específica
+        Obtiene la cantidad en stock de un producto en una fecha específica para un almacén
         """
-        # Buscar todos los movimientos del producto hasta la fecha
-        moves = self.env['stock.move'].search([
+        domain = [
             ('product_id', '=', product.id),
             ('date', '<', date),
             ('state', '=', 'done'),
-        ])
+        ]
+        
+        # Filtrar por ubicaciones del almacén si se especifica
+        if warehouse_locations:
+            domain.append('|')
+            domain.append(('location_id', 'in', warehouse_locations.ids))
+            domain.append(('location_dest_id', 'in', warehouse_locations.ids))
+        
+        moves = self.env['stock.move'].search(domain)
         
         quantity = 0.0
         for move in moves:
-            if move.location_dest_id.usage == 'internal':
-                quantity += move.product_uom_qty
-            elif move.location_id.usage == 'internal':
-                quantity -= move.product_uom_qty
+            # Solo considerar movimientos que involucren las ubicaciones del almacén
+            if warehouse_locations:
+                if move.location_dest_id in warehouse_locations:
+                    quantity += move.product_uom_qty
+                elif move.location_id in warehouse_locations:
+                    quantity -= move.product_uom_qty
+            else:
+                # Lógica original si no hay filtro de almacén
+                if move.location_dest_id.usage == 'internal':
+                    quantity += move.product_uom_qty
+                elif move.location_id.usage == 'internal':
+                    quantity -= move.product_uom_qty
         
         return quantity

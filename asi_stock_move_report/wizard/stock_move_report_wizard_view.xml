@@ -7,6 +7,11 @@
         <field name="model">stock.move.report.wizard</field>
         <field name="arch" type="xml">
             <form string="Reporte de Movimientos">
+                <!-- Selección del almacén -->
+                <group string="Almacén">
+                    <field name="warehouse_id" options="{'no_create': True, 'no_edit': True}"/>
+                </group>
+
                 <group>
                     <field name="period_type" widget="radio"/>
                 </group>

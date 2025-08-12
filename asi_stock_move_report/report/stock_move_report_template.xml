@@ -38,11 +38,19 @@
                         </div>
                     </div>
 
+                    <!-- Información del almacén -->
+                    <div class="row mb-4" style="margin-bottom: 10px;">
+                        <div class="col-12">
+                            <strong style="font-size: 12px;">Almacén:</strong>
+                            <span t-esc="warehouse.name if warehouse else 'Todos los almacenes'" style="font-size: 12px;"/>
+                        </div>
+                    </div>
+
                     <!-- Información del período -->
-                    <div class="row mb-4">
+                    <div class="row mb-4" style="margin-bottom: 10px;">
                         <div class="col-12">
                             <strong style="font-size: 12px;">Período:</strong>
-                            <span t-esc="date_start" t-options="{'widget': 'date'}" style="font-size: 12px;"/>
+                            <span t-esc="inicio" t-options="{'widget': 'date'}" style="font-size: 12px;"/>
                             <span style="font-size: 12px;"> al </span>
                             <span t-esc="date_end" t-options="{'widget': 'date'}" style="font-size: 12px;"/>
                         </div>
@@ -52,15 +60,16 @@
                     <table class="table table-sm" style="font-size: 12px; border-collapse: collapse; border: 2px solid #000; width: 100%;">
                         <thead style="background-color: #f8f9fa;">
                             <tr>
-                                <th class="text-center" style="width: 12%; border: 1px solid #000; padding: 10px; font-size: 12px;">Referencia Interna</th>
-                                <th class="text-center" style="width: 30%; border: 1px solid #000; padding: 10px; font-size: 12px;">Nombre</th>
-                                <th class="text-center" style="width: 10%; border: 1px solid #000; padding: 10px; font-size: 12px;">Cantidad de Movimientos</th>
-                                <th class="text-center" style="width: 12%; border: 1px solid #000; padding: 10px; font-size: 12px;">Cantidad a Mano</th>
+                                <th class="text-center" style="width: 10%; border: 1px solid #000; padding: 10px; font-size: 12px;">Referencia Interna</th>
+                                <th class="text-center" style="width: 26%; border: 1px solid #000; padding: 10px; font-size: 12px;">Nombre</th>
+                                <th class="text-center" style="width: 10%; border: 1px solid #000; padding: 10px; font-size: 12px;">Unidad de Medida</th>
+                                <th class="text-center" style="width: 8%; border: 1px solid #000; padding: 10px; font-size: 12px;">Cantidad de Movimientos</th>
+                                <th class="text-center" style="width: 12%; border: 1px solid #000; padding: 10px; font-size: 12px;">Existencia Inicial</th>
                                 <th class="text-center" style="width: 9%; border: 1px solid #000; padding: 10px; font-size: 12px;">Entradas</th>
                                 <th class="text-center" style="width: 9%; border: 1px solid #000; padding: 10px; font-size: 12px;">Ventas</th>
                                 <th class="text-center" style="width: 9%; border: 1px solid #000; padding: 10px; font-size: 12px;">Otras Salidas</th>
                                 <th class="text-center" style="width: 9%; border: 1px solid #000; padding: 10px; font-size: 12px;">Consumo</th>
-                                <th class="text-center" style="width: 12%; border: 1px solid #000; padding: 10px; font-size: 12px;">EXISTENCIA FINAL</th>
+                                <th class="text-center" style="width: 10%; border: 1px solid #000; padding: 10px; font-size: 12px;">EXISTENCIA FINAL</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -71,6 +80,9 @@
                                     </td>
                                     <td style="border: 1px solid #000; padding: 8px; font-size: 12px;">
                                         <span t-esc="product['product_name']"/>
+                                    </td>
+                                    <td class="text-center" style="border: 1px solid #000; padding: 8px; font-size: 12px;">
+                                        <span t-esc="product['product_uom']"/>
                                     </td>
                                     <td class="text-center" style="border: 1px solid #000; padding: 8px; font-size: 12px;">
                                         <span t-esc="product['cantidad_movimientos']"/>

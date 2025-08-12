@@ -12,6 +12,10 @@ class StockMoveReportWizard(models.TransientModel):
     # AGREGAR EL CAMPO NAME QUE ODOO USARÁ PARA EL ARCHIVO
     name = fields.Char(string='Nombre del Reporte', default='Movimientos_Inventario')
 
+    # Campo para seleccionar almacén
+    warehouse_id = fields.Many2one('stock.warehouse', string='Almacén', required=True, 
+                              default=lambda self: self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1))
+
     period_type = fields.Selection([
         ('day', 'Día'),
         ('week', 'Semana'),
@@ -176,21 +180,28 @@ class StockMoveReportWizard(models.TransientModel):
         # Aseguramos que las fechas estén actualizadas
         self._onchange_period_fields()
         
-        # Validar que hay movimientos en el rango de fechas
+        # Validar que hay movimientos en el rango de fechas para el almacén seleccionado
+        warehouse_locations = self.warehouse_id.lot_stock_id.child_ids | self.warehouse_id.lot_stock_id
+        
         moves_count = self.env['stock.move'].search_count([
             ('date', '>=', self.date_start),
             ('date', '<=', self.date_end),
             ('state', '=', 'done'),
             ('product_id', '!=', False),
+            '|',
+            ('location_id', 'in', warehouse_locations.ids),
+            ('location_dest_id', 'in', warehouse_locations.ids),
         ])
         
         if moves_count == 0:
-            raise UserError('No se encontraron movimientos de inventario en el período seleccionado.')
+            raise UserError(f'No se encontraron movimientos de inventario en el período seleccionado para el almacén {self.warehouse_id.name}.')
         
         # Preparar datos para el reporte
         data = {
-            'date_start': self.date_start+timedelta(days=1),
+            'inicio': self.date_start+timedelta(days=1),
+            'date_start': self.date_start,
             'date_end': self.date_end,
+            'warehouse_id': self.warehouse_id.id,
             'report_filename': self.report_filename,
         }
         
