@@ -9,6 +9,7 @@
                 <field name="subfolder_count" string="Subcarpetas" />
                 <field name="file_count" string="Archivos PDF" />
                 <field name="last_sync" string="Última Sync" />
+                <field name="sync_status" string="Estado" />
 
                 <!-- Botones de navegación -->
                 <button name="action_view_content"
@@ -27,9 +28,16 @@
 
                 <button name="action_sync_folder"
                     type="object"
-                    string="Sincronizar"
+                    string="🔄 Sincronizar"
                     class="btn-success"
                     icon="fa-refresh" />
+
+                <button name="action_force_sync_folder"
+                    type="object"
+                    string="🔄 Forzar Sync"
+                    class="btn-warning"
+                    icon="fa-refresh"
+                    attrs="{'invisible': [('sync_status', '!=', 'missing')]}" />
 
             </tree>
         </field>
@@ -45,23 +53,11 @@
                 <field name="folder_id" />
                 <field name="file_size_human" />
                 <field name="modified_at" />
-                <!--<button
-                name="action_preview_file"
-                    type="object"
-                    string="Preview"
-                    class="btn-primary"
-                    icon="fa-eye" />-->
                 <button name="action_download_file"
                     type="object"
                     string="Descargar"
                     class="btn-secondary"
                     icon="fa-download" />
-                <!-- BOTÓN DE FIRMA HABILITADO 
-                <button name="action_open_firma_wizard"
-                    type="object"
-                    string="🖊️ Firmar"
-                    class="btn-warning"
-                    icon="fa-pen" />-->
 
             </tree>
         </field>
@@ -106,20 +102,10 @@
                                 </div>
                                 <div class="o_kanban_record_bottom">
                                     <div class="btn-group" role="group">
-                                        <!--<button
-                                        name="action_preview_file"
-                                            type="object"
-                                            class="btn btn-primary btn-sm">
-                                            <i class="fa fa-eye" /> Preview </button>-->
                                         <button name="action_download_file"
                                             type="object"
                                             class="btn btn-secondary btn-sm">
                                             <i class="fa fa-download" /> Descargar </button>
-                                        <!-- BOTÓN DE FIRMA EN KANBAN HABILITADO 
-                                        <button name="action_open_firma_wizard"
-                                            type="object"
-                                            class="btn btn-warning btn-sm">
-                                            <i class="fa fa-pen" /> Firmar </button>-->
 
                                     </div>
                                 </div>
@@ -192,29 +178,11 @@
         <field name="arch" type="xml">
             <form string="Archivo PDF" create="false" edit="false">
                 <header>
-                    <!--<button
-                    name="action_preview_file"
-                        type="object"
-                        string="Cargar Preview"
-                        class="oe_highlight"
-                        icon="fa-eye" />-->
                     <button name="action_download_file"
                         type="object"
                         string="Descargar"
                         class="btn-secondary"
                         icon="fa-download" />
-                    <!-- BOTÓN DE FIRMA EN FORM HABILITADO 
-                    <button name="action_open_firma_wizard"
-                        type="object"
-                        string="🖊️ Firmar Documento"
-                        class="btn-warning"
-                        icon="fa-pen" />-->
-                    <button name="action_delete_from_alfresco"
-                        type="object"
-                        string="🗑️ Eliminar de Alfresco"
-                        class="btn-danger"
-                        icon="fa-trash"
-                        confirm="¿Está seguro de que desea eliminar este archivo de Alfresco? Esta acción no se puede deshacer." />
                 </header>
                 <sheet>
                     <group>
@@ -231,24 +199,6 @@
                             <field name="preview_url" widget="url" />
                         </group>
                     </group>
-
-                    <!-- Preview del PDF integrado 
-                    <div class="row" attrs="{'invisible': [('pdf_content', '=', False)]}">
-                        <div class="col-12">
-                            <h3>📄 Preview del PDF</h3>
-                            <field name="pdf_content"
-                                widget="pdf_preview"
-                                filename="pdf_filename"
-                                options="{'height': '800px', 'width': '100%'}" />
-                        </div>
-                    </div>
-
-                    <div class="alert alert-info text-center"
-                        attrs="{'invisible': [('pdf_content', '!=', False)]}">
-                        <i class="fa fa-info-circle fa-2x mb-3" />
-                        <h4>Preview no cargado</h4>
-                        <p>Haz clic en "Cargar Preview" para ver el contenido del PDF aquí mismo.</p>
-                    </div>-->
                 </sheet>
             </form>
         </field>
