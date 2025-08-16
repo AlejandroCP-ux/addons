@@ -103,7 +103,7 @@ class FirmaDocumentoWizard(models.TransientModel):
     # Campos específicos para la firma (copiados del módulo Alfresco)
     rol_firma = fields.Char(string='Rol para la Firma', 
                            help='Rol con el que se desea firmar (ej: Aprobado por:, Entregado por:, etc.)')
-    contrasena_firma = fields.Char(string='Contraseña del Certificado', required=True)
+    contrasena_firma = fields.Char(string='Contraseña del Certificado')
     posicion_firma = fields.Selection([
         ('izquierda', 'Izquierda'),
         ('centro_izquierda', 'Centro-Izquierda'),
@@ -111,6 +111,18 @@ class FirmaDocumentoWizard(models.TransientModel):
         ('derecha', 'Derecha')
     ], string='Posición de la Firma', required=True, default='derecha',
        help='Posición en la parte inferior de la página donde se colocará la firma')
+    
+    # Campos adicionales para certificado e imagen en el wizard
+    certificado_wizard = fields.Binary(string='Certificado (.p12) - Temporal', attachment=False,
+                                      help='Certificado temporal para esta sesión de firma')
+    nombre_certificado_wizard = fields.Char(string='Nombre del Certificado Temporal')
+    imagen_firma_wizard = fields.Binary(string='Imagen de Firma - Temporal', attachment=False,
+                                       help='Imagen temporal para esta sesión de firma')
+    
+    # Campos informativos sobre el estado del usuario
+    usuario_tiene_certificado = fields.Boolean(string='Usuario tiene certificado', compute='_compute_estado_usuario')
+    usuario_tiene_contrasena = fields.Boolean(string='Usuario tiene contraseña', compute='_compute_estado_usuario')
+    usuario_tiene_imagen = fields.Boolean(string='Usuario tiene imagen', compute='_compute_estado_usuario')
     
     # Campos de estado (copiados del módulo Alfresco)
     estado = fields.Selection([
@@ -133,6 +145,14 @@ class FirmaDocumentoWizard(models.TransientModel):
         for record in self:
             record.documento_count = len(record.documento_ids)
     
+    @api.depends()
+    def _compute_estado_usuario(self):
+        for record in self:
+            usuario = self.env.user
+            record.usuario_tiene_certificado = bool(usuario.certificado_firma)
+            record.usuario_tiene_contrasena = bool(usuario.contrasena_certificado)
+            record.usuario_tiene_imagen = bool(usuario.imagen_firma)
+    
     def action_seleccionar_archivos(self):
         """Acción para abrir un wizard de selección de archivos"""
         return {
@@ -150,13 +170,51 @@ class FirmaDocumentoWizard(models.TransientModel):
     def default_get(self, fields_list):
         """Valores por defecto para el asistente"""
         res = super(FirmaDocumentoWizard, self).default_get(fields_list)
-        # Verificar que el usuario tenga los requisitos para firmar
-        if not self.env.user.tiene_requisitos_firma():
-            raise UserError(_('Para firmar documentos, debe configurar su certificado digital y su imagen de firma en sus preferencias de usuario.'))
         
         # Asegurarse de que el estado inicial sea 'borrador'
         res['estado'] = 'borrador'
+        
+        # Si el usuario tiene contraseña guardada, no requerirla en el wizard
+        if self.env.user.contrasena_certificado:
+            res['contrasena_firma'] = ''  # Se llenará automáticamente al firmar
+        
         return res
+
+    def _obtener_datos_firma(self):
+        """Obtiene los datos de firma priorizando wizard sobre usuario"""
+        usuario = self.env.user
+        
+        # Priorizar certificado del wizard, sino usar el del usuario
+        certificado_data = None
+        if self.certificado_wizard:
+            certificado_data = base64.b64decode(self.certificado_wizard)
+        elif usuario.certificado_firma:
+            certificado_data = base64.b64decode(usuario.certificado_firma)
+        
+        if not certificado_data:
+            raise UserError(_('Debe proporcionar un certificado .p12 en el wizard o tenerlo configurado en sus preferencias.'))
+        
+        # Priorizar imagen del wizard, sino usar la del usuario
+        imagen_firma = None
+        if self.imagen_firma_wizard:
+            imagen_firma = self.imagen_firma_wizard
+        elif usuario.imagen_firma:
+            imagen_firma = usuario.imagen_firma
+        
+        if not imagen_firma:
+            raise UserError(_('Debe proporcionar una imagen de firma en el wizard o tenerla configurada en sus preferencias.'))
+        
+        # Priorizar contraseña del wizard, sino usar la del usuario
+        contrasena = None
+        if self.contrasena_firma and self.contrasena_firma.strip():
+            contrasena = self.contrasena_firma.strip()
+        elif usuario.contrasena_certificado:
+            contrasena = usuario.get_contrasena_descifrada()
+        
+        if not contrasena:
+            raise UserError(_('Debe proporcionar la contraseña del certificado.'))
+        
+        return certificado_data, imagen_firma, contrasena
 
     def _crear_imagen_firma_con_rol(self, imagen_firma_original, rol):
         """Crea una imagen de firma temporal con el texto del rol"""
@@ -277,18 +335,11 @@ class FirmaDocumentoWizard(models.TransientModel):
             return self._recargar_wizard()
         
         # Validar campos obligatorios
-        if not self.contrasena_firma or not self.contrasena_firma.strip():
-            raise UserError(_('Debe ingresar la contraseña del certificado.'))
-        
         if not self.documento_ids:
             raise UserError(_('Debe seleccionar al menos un documento PDF para firmar.'))
         
         if not self.rol_firma or not self.rol_firma.strip():
             raise UserError(_('Debe especificar el rol para la firma.'))
-        
-        # Validar requisitos del usuario
-        if not self.env.user.tiene_requisitos_firma():
-            raise UserError(_('Para firmar documentos, debe configurar su certificado digital y su imagen de firma en sus preferencias de usuario.'))
         
         # Cambiar estado a procesando
         self.write({
@@ -298,24 +349,25 @@ class FirmaDocumentoWizard(models.TransientModel):
             'archivos_con_error': 0
         })
         
-        usuario = self.env.user
         archivos_procesados = 0
         archivos_con_error = 0
         errores_detalle = []
         
         try:
+            # Obtener datos de firma (prioriza wizard sobre usuario)
+            certificado_data, imagen_firma, contrasena = self._obtener_datos_firma()
+            
             # Crear imagen de firma con rol
             imagen_firma_path, imagen_size = self._crear_imagen_firma_con_rol(
-                usuario.imagen_firma, 
+                imagen_firma, 
                 self.rol_firma
             )
             imagen_width, imagen_height = imagen_size
             
             # Cargar certificado
-            certificado_data = base64.b64decode(usuario.certificado_firma)
             private_key, certificate, additional_certificates = pkcs12.load_key_and_certificates(
                 certificado_data,
-                self.contrasena_firma.encode('utf-8')
+                contrasena.encode('utf-8')
             )
             
             # Procesar cada documento
