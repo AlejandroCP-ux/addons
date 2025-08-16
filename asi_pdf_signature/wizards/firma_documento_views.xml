@@ -170,14 +170,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <footer>
-                        <button name="action_descargar_zip"
-                            string="📦 Descargar Documentos Firmados"
-                            type="object"
-                            class="btn-primary" />
-                        <button string="Cerrar" class="btn-secondary" special="cancel" />
-                    </footer>
                 </div>
 
                 <!-- Estado: Error -->

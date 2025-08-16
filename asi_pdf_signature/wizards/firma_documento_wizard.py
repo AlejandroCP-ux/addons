@@ -120,9 +120,9 @@ class FirmaDocumentoWizard(models.TransientModel):
                                        help='Imagen temporal para esta sesión de firma')
     
     # Campos informativos sobre el estado del usuario
-    usuario_tiene_certificado = fields.Boolean(string='Usuario tiene certificado', compute='_compute_estado_usuario')
-    usuario_tiene_contrasena = fields.Boolean(string='Usuario tiene contraseña', compute='_compute_estado_usuario')
-    usuario_tiene_imagen = fields.Boolean(string='Usuario tiene imagen', compute='_compute_estado_usuario')
+    usuario_tiene_certificado = fields.Boolean(string='Usuario tiene certificado', compute='_compute_estado_usuario', store=False)
+    usuario_tiene_contrasena = fields.Boolean(string='Usuario tiene contraseña', compute='_compute_estado_usuario', store=False)
+    usuario_tiene_imagen = fields.Boolean(string='Usuario tiene imagen', compute='_compute_estado_usuario', store=False)
     
     # Campos de estado (copiados del módulo Alfresco)
     estado = fields.Selection([
@@ -145,13 +145,68 @@ class FirmaDocumentoWizard(models.TransientModel):
         for record in self:
             record.documento_count = len(record.documento_ids)
     
-    @api.depends()
+    @api.depends('certificado_wizard', 'nombre_certificado_wizard', 'imagen_firma_wizard')
     def _compute_estado_usuario(self):
+        """Computa el estado de configuración del usuario actual"""
         for record in self:
-            usuario = self.env.user
-            record.usuario_tiene_certificado = bool(usuario.certificado_firma)
-            record.usuario_tiene_contrasena = bool(usuario.contrasena_certificado)
-            record.usuario_tiene_imagen = bool(usuario.imagen_firma)
+            try:
+                # Valores por defecto
+                record.usuario_tiene_certificado = False
+                record.usuario_tiene_contrasena = False
+                record.usuario_tiene_imagen = False
+                
+                # Verificar que tenemos un usuario válido
+                if not self.env.user:
+                    continue
+                    
+                usuario = self.env.user
+                
+                # Verificar certificado de forma segura
+                try:
+                    if hasattr(usuario, 'certificado_firma'):
+                        cert_value = getattr(usuario, 'certificado_firma', False)
+                        if cert_value:
+                            # Intentar decodificar para verificar que es válido
+                            try:
+                                cert_decoded = base64.b64decode(cert_value)
+                                record.usuario_tiene_certificado = len(cert_decoded) > 0
+                            except:
+                                record.usuario_tiene_certificado = bool(cert_value)
+                except Exception as e:
+                    _logger.error(f"Error verificando certificado: {e}")
+                    record.usuario_tiene_certificado = False
+                
+                # Verificar contraseña de forma segura
+                try:
+                    if hasattr(usuario, 'contrasena_certificado'):
+                        pass_value = getattr(usuario, 'contrasena_certificado', False)
+                        if pass_value:
+                            record.usuario_tiene_contrasena = bool(str(pass_value).strip())
+                except Exception as e:
+                    _logger.error(f"Error verificando contraseña: {e}")
+                    record.usuario_tiene_contrasena = False
+                
+                # Verificar imagen de forma segura
+                try:
+                    if hasattr(usuario, 'imagen_firma'):
+                        img_value = getattr(usuario, 'imagen_firma', False)
+                        if img_value:
+                            # Intentar decodificar para verificar que es válida
+                            try:
+                                img_decoded = base64.b64decode(img_value)
+                                record.usuario_tiene_imagen = len(img_decoded) > 0
+                            except:
+                                record.usuario_tiene_imagen = bool(img_value)
+                except Exception as e:
+                    _logger.error(f"Error verificando imagen: {e}")
+                    record.usuario_tiene_imagen = False
+                
+            except Exception as e:
+                _logger.error(f"ERROR GENERAL en _compute_estado_usuario: {e}")
+                # Valores por defecto en caso de error
+                record.usuario_tiene_certificado = False
+                record.usuario_tiene_contrasena = False
+                record.usuario_tiene_imagen = False
     
     def action_seleccionar_archivos(self):
         """Acción para abrir un wizard de selección de archivos"""
@@ -174,10 +229,6 @@ class FirmaDocumentoWizard(models.TransientModel):
         # Asegurarse de que el estado inicial sea 'borrador'
         res['estado'] = 'borrador'
         
-        # Si el usuario tiene contraseña guardada, no requerirla en el wizard
-        if self.env.user.contrasena_certificado:
-            res['contrasena_firma'] = ''  # Se llenará automáticamente al firmar
-        
         return res
 
     def _obtener_datos_firma(self):
@@ -188,7 +239,7 @@ class FirmaDocumentoWizard(models.TransientModel):
         certificado_data = None
         if self.certificado_wizard:
             certificado_data = base64.b64decode(self.certificado_wizard)
-        elif usuario.certificado_firma:
+        elif hasattr(usuario, 'certificado_firma') and usuario.certificado_firma:
             certificado_data = base64.b64decode(usuario.certificado_firma)
         
         if not certificado_data:
@@ -198,7 +249,7 @@ class FirmaDocumentoWizard(models.TransientModel):
         imagen_firma = None
         if self.imagen_firma_wizard:
             imagen_firma = self.imagen_firma_wizard
-        elif usuario.imagen_firma:
+        elif hasattr(usuario, 'imagen_firma') and usuario.imagen_firma:
             imagen_firma = usuario.imagen_firma
         
         if not imagen_firma:
@@ -208,8 +259,12 @@ class FirmaDocumentoWizard(models.TransientModel):
         contrasena = None
         if self.contrasena_firma and self.contrasena_firma.strip():
             contrasena = self.contrasena_firma.strip()
-        elif usuario.contrasena_certificado:
-            contrasena = usuario.get_contrasena_descifrada()
+        elif hasattr(usuario, 'contrasena_certificado') and usuario.contrasena_certificado:
+            try:
+                contrasena = usuario.get_contrasena_descifrada()
+            except Exception as e:
+                _logger.error(f"Error descifrando contraseña: {e}")
+                contrasena = None
         
         if not contrasena:
             raise UserError(_('Debe proporcionar la contraseña del certificado.'))
