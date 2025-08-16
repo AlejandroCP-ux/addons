@@ -7,6 +7,10 @@
             <form string="Firma Digital de PDFs de Alfresco">
                 <field name="estado" invisible="1" />
                 <field name="file_count" invisible="1" />
+                <field name="usuario_tiene_certificado" invisible="1" />
+                <field name="usuario_tiene_contrasena" invisible="1" />
+                <field name="usuario_tiene_imagen" invisible="1" />
+                <field name="nombre_certificado_wizard" invisible="1" />
 
                 <!-- Estado: Configuración -->
                 <div attrs="{'invisible': [('estado', '!=', 'borrador')]}">
@@ -18,6 +22,38 @@
                             manteniendo el mismo archivo.</p>
                     </div>
 
+                    <!-- Estado del usuario -->
+                    <div class="alert alert-warning" role="alert" style="margin-bottom: 15px;">
+                        <h5><i class="fa fa-user" /> Estado de su Configuración:</h5>
+                        <div class="row">
+                            <div class="col-4">
+                                <span
+                                    attrs="{'invisible': [('usuario_tiene_certificado', '=', True)]}">
+                                    <i class="fa fa-times text-danger" /> Sin certificado </span>
+                                <span
+                                    attrs="{'invisible': [('usuario_tiene_certificado', '=', False)]}">
+                                    <i class="fa fa-check text-success" /> Certificado configurado </span>
+                            </div>
+                            <div class="col-4">
+                                <span
+                                    attrs="{'invisible': [('usuario_tiene_contrasena', '=', True)]}">
+                                    <i class="fa fa-times text-danger" /> Sin contraseña guardada </span>
+                                <span
+                                    attrs="{'invisible': [('usuario_tiene_contrasena', '=', False)]}">
+                                    <i class="fa fa-check text-success" /> Contraseña guardada </span>
+                            </div>
+                            <div class="col-4">
+                                <span attrs="{'invisible': [('usuario_tiene_imagen', '=', True)]}">
+                                    <i class="fa fa-times text-danger" /> Sin imagen de firma </span>
+                                <span attrs="{'invisible': [('usuario_tiene_imagen', '=', False)]}">
+                                    <i class="fa fa-check text-success" /> Imagen configurada </span>
+                            </div>
+                        </div>
+                        <p style="margin-top: 10px; margin-bottom: 0;">
+                            <strong>Nota:</strong> Los datos del wizard tienen prioridad sobre su
+                            configuración personal. </p>
+                    </div>
+
                     <group>
                         <group>
                             <field name="rol_firma"
@@ -26,7 +62,29 @@
                             <field name="posicion_firma" widget="radio" />
                         </group>
                         <group>
-                            <field name="contrasena_firma" password="True" required="1" />
+                            <field name="contrasena_firma" password="True"
+                                placeholder="Requerida si no está guardada en su perfil"
+                                attrs="{'required': [('usuario_tiene_contrasena', '=', False)]}" />
+                        </group>
+                    </group>
+
+                    <!-- Campos adicionales para certificado e imagen temporal -->
+                    <group string="Datos Temporales (Opcional - Solo para esta sesión)" col="2">
+                        <group>
+                            <field name="certificado_wizard" filename="nombre_certificado_wizard"
+                                widget="binary"
+                                attrs="{'required': [('usuario_tiene_certificado', '=', False)]}" />
+                            <div class="text-muted" style="font-size: 12px;">
+                                Solo necesario si no tiene certificado configurado en su perfil
+                            </div>
+                        </group>
+                        <group>
+                            <field name="imagen_firma_wizard" widget="image"
+                                options="{'size': [200, 100]}"
+                                attrs="{'required': [('usuario_tiene_imagen', '=', False)]}" />
+                            <div class="text-muted" style="font-size: 12px;">
+                                Solo necesario si no tiene imagen configurada en su perfil
+                            </div>
                         </group>
                     </group>
 
@@ -47,7 +105,6 @@
                             type="object"
                             class="btn-primary"
                             attrs="{'invisible': ['|', '|', '|', ('rol_firma', '=', False), ('rol_firma', '=', ''), ('contrasena_firma', '=', False), ('file_count', '=', 0)]}" />
-                        <button string="Cancelar" class="btn-secondary" special="cancel" />
                     </footer>
                 </div>
 
@@ -96,11 +153,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <footer>
-                        <button name="action_cerrar_wizard" string="Cerrar" type="object"
-                            class="btn-primary" />
-                    </footer>
                 </div>
 
                 <!-- Estado: Error -->
