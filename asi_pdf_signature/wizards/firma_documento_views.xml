@@ -5,7 +5,7 @@
         <field name="model">firma.documento.wizard</field>
         <field name="arch" type="xml">
             <form string="Firma Digital de Documentos">
-                <field name="state" invisible="1" />
+                <field name="status" invisible="1" />
                 <field name="document_count" invisible="1" />
                 <field name="zip_signed" invisible="1" />
                 <field name="zip_name" invisible="1" />
@@ -17,7 +17,7 @@
                 <field name="certificate_wizard_name" invisible="1" />
 
                 <!-- Estado: Configuración -->
-                <div attrs="{'invisible': [('state', '!=', 'borrador')]}">
+                <div attrs="{'invisible': [('status', '!=', 'borrador')]}">
                     <div class="alert alert-info" role="alert">
                         <h4><i class="fa fa-pen" /> Configuración de Firma Digital</h4>
                         <p>Configure los parámetros para firmar <strong><field
@@ -119,7 +119,7 @@
                 </div>
 
                 <!-- Estado: Procesando -->
-                <div attrs="{'invisible': [('state', '!=', 'procesando')]}">
+                <div attrs="{'invisible': [('status', '!=', 'procesando')]}">
                     <div class="alert alert-warning" role="alert">
                         <h4><i class="fa fa-spinner fa-spin" /> Procesando Firma Digital</h4>
                         <p>Por favor espere mientras se procesan los documentos...</p>
@@ -135,7 +135,7 @@
                 </div>
 
                 <!-- Estado: Completado -->
-                <div attrs="{'invisible': [('state', '!=', 'completado')]}">
+                <div attrs="{'invisible': [('status', '!=', 'completado')]}">
                     <div class="alert alert-success" role="alert">
                         <h4><i class="fa fa-check-circle" /> ¡Proceso Completado!</h4>
                         <field name="message_result" readonly="1" nolabel="1" />
@@ -166,7 +166,7 @@
                 </div>
 
                 <!-- Estado: Error -->
-                <div attrs="{'invisible': [('state', '!=', 'error')]}">
+                <div attrs="{'invisible': [('status', '!=', 'error')]}">
                     <div class="alert alert-danger" role="alert">
                         <h4><i class="fa fa-exclamation-triangle" /> Error en el Proceso</h4>
                         <field name="message_result" readonly="1" nolabel="1" />

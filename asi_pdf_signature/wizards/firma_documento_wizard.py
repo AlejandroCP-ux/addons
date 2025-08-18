@@ -101,10 +101,7 @@ class FirmaDocumentoWizard(models.TransientModel):
     document_count = fields.Integer(string='Cantidad de Documentos', compute='_compute_documento_count')
     
     # Campos específicos para la firma (copiados del módulo Alfresco)
-    
     signature_role = fields.Many2one('document.signature.tag', string='Etiqueta de la firma', help='Rol con el que se desea firmar (ej: Aprobado por:, Entregado por:, etc.)', required=True, ondelete='cascade')
-    # signature_role = fields.Char(string='Rol para la Firma', 
-    #                       help='Rol con el que se desea firmar (ej: Aprobado por:, Entregado por:, etc.)')
     signature_password = fields.Char(string='Contraseña del Certificado')
     signature_position = fields.Selection([
         ('izquierda', 'Izquierda'),
@@ -121,13 +118,13 @@ class FirmaDocumentoWizard(models.TransientModel):
     wizard_signature_image = fields.Binary(string='Imagen de Firma - Temporal', attachment=False,
                                        help='Imagen temporal para esta sesión de firma')
     
-    # Campos informativos sobre el state del user
+    # Campos informativos sobre el status del user
     has_certificate = fields.Boolean(string='Usuario tiene certificado', compute='_compute_estado_usuario', store=False)
     has_password = fields.Boolean(string='Usuario tiene contraseña', compute='_compute_estado_usuario', store=False)
     has_image = fields.Boolean(string='Usuario tiene imagen', compute='_compute_estado_usuario', store=False)
     
-    # Campos de state (copiados del módulo Alfresco)
-    state = fields.Selection([
+    # Campos de status (copiados del módulo Alfresco)
+    status = fields.Selection([
         ('borrador', 'Configuración'),
         ('procesando', 'Procesando'),
         ('completado', 'Completado'),
@@ -149,7 +146,7 @@ class FirmaDocumentoWizard(models.TransientModel):
     
     @api.depends('certificate_wizard', 'certificate_wizard_name', 'wizard_signature_image')
     def _compute_estado_usuario(self):
-        """Computa el state de configuración del user actual"""
+        """Computa el status de configuración del user actual"""
         for record in self:
             try:
                 # Valores por defecto
@@ -228,8 +225,8 @@ class FirmaDocumentoWizard(models.TransientModel):
         """Valores por defecto para el asistente"""
         res = super(FirmaDocumentoWizard, self).default_get(fields_list)
         
-        # Asegurarse de que el state inicial sea 'borrador'
-        res['state'] = 'borrador'
+        # Asegurarse de que el status inicial sea 'borrador'
+        res['status'] = 'borrador'
         
         return res
 
@@ -386,7 +383,7 @@ class FirmaDocumentoWizard(models.TransientModel):
         # Validar bibliotecas necesarias
         if not HAS_ENDESIVE or not HAS_PYPDF2:
             self.write({
-                'state': 'error',
+                'status': 'error',
                 'message_result': _('Las bibliotecas necesarias no están instaladas. Por favor, instale "endesive" y "PyPDF2".')
             })
             return self._recargar_wizard()
@@ -398,9 +395,9 @@ class FirmaDocumentoWizard(models.TransientModel):
         if not self.signature_role:
             raise UserError(_('Debe especificar el rol para la firma.'))
         
-        # Cambiar state a procesando
+        # Cambiar status a procesando
         self.write({
-            'state': 'procesando',
+            'status': 'procesando',
             'message_result': 'Iniciando proceso de firma...',
             'documents_processed': 0,
             'documents_with_error': 0
@@ -417,7 +414,7 @@ class FirmaDocumentoWizard(models.TransientModel):
             # Crear imagen de firma con rol
             imagen_firma_path, imagen_size = self._crear_imagen_firma_con_rol(
                 imagen_firma, 
-                self.signature_role
+                self.signature_role.name
             )
             imagen_width, imagen_height = imagen_size
             
@@ -476,7 +473,7 @@ class FirmaDocumentoWizard(models.TransientModel):
                 estado_final = 'error' if documents_processed == 0 else 'completado'
         
             self.write({
-                'state': estado_final,
+                'status': estado_final,
                 'message_result': mensaje,
                 'documents_processed': documents_processed,
                 'documents_with_error': documents_with_error
@@ -485,7 +482,7 @@ class FirmaDocumentoWizard(models.TransientModel):
         except Exception as e:
             _logger.error(f"Error general en proceso de firma: {e}")
             self.write({
-                'state': 'error',
+                'status': 'error',
                 'message_result': f'Error general: {str(e)}',
                 'documents_with_error': len(self.document_ids)
             })

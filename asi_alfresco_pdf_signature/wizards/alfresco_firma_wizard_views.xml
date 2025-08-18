@@ -5,15 +5,15 @@
         <field name="model">alfresco.firma.wizard</field>
         <field name="arch" type="xml">
             <form string="Firma Digital de PDFs de Alfresco">
-                <field name="estado" invisible="1" />
+                <field name="status" invisible="1" />
                 <field name="file_count" invisible="1" />
-                <field name="usuario_tiene_certificado" invisible="1" />
-                <field name="usuario_tiene_contrasena" invisible="1" />
-                <field name="usuario_tiene_imagen" invisible="1" />
-                <field name="nombre_certificado_wizard" invisible="1" />
+                <field name="has_certificate" invisible="1" />
+                <field name="has_password" invisible="1" />
+                <field name="has_image" invisible="1" />
+                <field name="certificate_wizard_name" invisible="1" />
 
                 <!-- Estado: Configuración -->
-                <div attrs="{'invisible': [('estado', '!=', 'borrador')]}">
+                <div attrs="{'invisible': [('status', '!=', 'borrador')]}">
                     <div class="alert alert-info" role="alert">
                         <h4><i class="fa fa-pen" /> Configuración de Firma Digital</h4>
                         <p>Configure los parámetros para firmar <strong><field name="file_count" />
@@ -28,24 +28,24 @@
                         <div class="row">
                             <div class="col-4">
                                 <span
-                                    attrs="{'invisible': [('usuario_tiene_certificado', '=', True)]}">
+                                    attrs="{'invisible': [('has_certificate', '=', True)]}">
                                     <i class="fa fa-times text-danger" /> Sin certificado </span>
                                 <span
-                                    attrs="{'invisible': [('usuario_tiene_certificado', '=', False)]}">
+                                    attrs="{'invisible': [('has_certificate', '=', False)]}">
                                     <i class="fa fa-check text-success" /> Certificado configurado </span>
                             </div>
                             <div class="col-4">
                                 <span
-                                    attrs="{'invisible': [('usuario_tiene_contrasena', '=', True)]}">
+                                    attrs="{'invisible': [('has_password', '=', True)]}">
                                     <i class="fa fa-times text-danger" /> Sin contraseña guardada </span>
                                 <span
-                                    attrs="{'invisible': [('usuario_tiene_contrasena', '=', False)]}">
+                                    attrs="{'invisible': [('has_password', '=', False)]}">
                                     <i class="fa fa-check text-success" /> Contraseña guardada </span>
                             </div>
                             <div class="col-4">
-                                <span attrs="{'invisible': [('usuario_tiene_imagen', '=', True)]}">
+                                <span attrs="{'invisible': [('has_image', '=', True)]}">
                                     <i class="fa fa-times text-danger" /> Sin imagen de firma </span>
-                                <span attrs="{'invisible': [('usuario_tiene_imagen', '=', False)]}">
+                                <span attrs="{'invisible': [('has_image', '=', False)]}">
                                     <i class="fa fa-check text-success" /> Imagen configurada </span>
                             </div>
                         </div>
@@ -56,35 +56,28 @@
 
                     <group>
                         <group>
-                            <field name="rol_firma"
+                            <field name="signature_role"
                                 placeholder="ej: Aprobado por:, Contabilizado por:, etc."
                                 required="1" />
-                            <field name="posicion_firma" widget="radio" />
+                            <field name="signature_position" widget="Select2" />
                         </group>
                         <group>
-                            <field name="contrasena_firma" password="True"
-                                placeholder="Requerida si no está guardada en su perfil"
-                                attrs="{'required': [('usuario_tiene_contrasena', '=', False)]}" />
+                            <field name="signature_password" password="True"
+                                attrs="{'required': [('has_password', '=', False)], 'invisible': [('has_password', '=', True)]}" />
                         </group>
                     </group>
 
                     <!-- Campos adicionales para certificado e imagen temporal -->
-                    <group string="Datos Temporales (Opcional - Solo para esta sesión)" col="2">
+                    <group string="Datos Temporales" col="2">
                         <group>
-                            <field name="certificado_wizard" filename="nombre_certificado_wizard"
+                            <field name="certificate_wizard" filename="certificate_wizard_name"
                                 widget="binary"
-                                attrs="{'required': [('usuario_tiene_certificado', '=', False)]}" />
-                            <div class="text-muted" style="font-size: 12px;">
-                                Solo necesario si no tiene certificado configurado en su perfil
-                            </div>
+                                attrs="{'required': [('has_certificate', '=', False)], 'invisible': [('has_certificate', '=', True)]}" />
                         </group>
                         <group>
-                            <field name="imagen_firma_wizard" widget="image"
+                            <field name="wizard_signature_image" widget="image"
                                 options="{'size': [200, 100]}"
-                                attrs="{'required': [('usuario_tiene_imagen', '=', False)]}" />
-                            <div class="text-muted" style="font-size: 12px;">
-                                Solo necesario si no tiene imagen configurada en su perfil
-                            </div>
+                                attrs="{'required': [('has_image', '=', False)], 'invisible': [('has_image', '=', True)]}" />
                         </group>
                     </group>
 
@@ -104,31 +97,31 @@
                             string="🖊️ Firmar Documentos"
                             type="object"
                             class="btn-primary"
-                            attrs="{'invisible': ['|', '|', '|', ('rol_firma', '=', False), ('rol_firma', '=', ''), ('contrasena_firma', '=', False), ('file_count', '=', 0)]}" />
+                            attrs="{'invisible': ['|', '|', '|', ('signature_role', '=', False), ('signature_role', '=', ''), ('signature_password', '=', False), ('file_count', '=', 0)]}" />
                     </footer>
                 </div>
 
                 <!-- Estado: Procesando -->
-                <div attrs="{'invisible': [('estado', '!=', 'procesando')]}">
+                <div attrs="{'invisible': [('status', '!=', 'procesando')]}">
                     <div class="alert alert-warning" role="alert">
                         <h4><i class="fa fa-spinner fa-spin" /> Procesando Firma Digital</h4>
                         <p>Por favor espere mientras se procesan los documentos...</p>
-                        <field name="mensaje_resultado" readonly="1" />
+                        <field name="message_result" readonly="1" />
                     </div>
 
                     <div class="progress" style="margin: 20px 0;">
                         <div class="progress-bar progress-bar-striped progress-bar-animated"
                             role="progressbar"
-                            t-att-style="'width: ' + str(record.archivos_procesados.raw_value * 100 / record.file_count.raw_value) + '%'">
+                            t-att-style="'width: ' + str(record.documents_processed.raw_value * 100 / record.file_count.raw_value) + '%'">
                         </div>
                     </div>
                 </div>
 
                 <!-- Estado: Completado -->
-                <div attrs="{'invisible': [('estado', '!=', 'completado')]}">
+                <div attrs="{'invisible': [('status', '!=', 'completado')]}">
                     <div class="alert alert-success" role="alert">
                         <h4><i class="fa fa-check-circle" /> ¡Proceso Completado!</h4>
-                        <field name="mensaje_resultado" readonly="1" nolabel="1" />
+                        <field name="message_result" readonly="1" nolabel="1" />
                     </div>
 
                     <div class="row text-center" style="margin: 20px 0;">
@@ -136,7 +129,7 @@
                             <div class="card bg-success text-white">
                                 <div class="card-body">
                                     <h3>
-                                        <field name="archivos_procesados" />
+                                        <field name="documents_processed" />
                                     </h3>
                                     <p>Archivos Firmados</p>
                                 </div>
@@ -156,19 +149,19 @@
                 </div>
 
                 <!-- Estado: Error -->
-                <div attrs="{'invisible': [('estado', '!=', 'error')]}">
+                <div attrs="{'invisible': [('status', '!=', 'error')]}">
                     <div class="alert alert-danger" role="alert">
                         <h4><i class="fa fa-exclamation-triangle" /> Error en el Proceso</h4>
-                        <field name="mensaje_resultado" readonly="1" nolabel="1" />
+                        <field name="message_result" readonly="1" nolabel="1" />
                     </div>
 
                     <div class="row text-center" style="margin: 20px 0;"
-                        attrs="{'invisible': [('archivos_procesados', '=', 0)]}">
+                        attrs="{'invisible': [('documents_processed', '=', 0)]}">
                         <div class="col-4">
                             <div class="card bg-success text-white">
                                 <div class="card-body">
                                     <h3>
-                                        <field name="archivos_procesados" />
+                                        <field name="documents_processed" />
                                     </h3>
                                     <p>Exitosos</p>
                                 </div>
@@ -178,7 +171,7 @@
                             <div class="card bg-danger text-white">
                                 <div class="card-body">
                                     <h3>
-                                        <field name="archivos_con_error" />
+                                        <field name="documents_with_error" />
                                     </h3>
                                     <p>Con Error</p>
                                 </div>

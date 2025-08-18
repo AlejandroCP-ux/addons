@@ -45,10 +45,9 @@ class AlfrescoFirmaWizard(models.TransientModel):
     file_count = fields.Integer(string='Cantidad de Archivos', compute='_compute_file_count')
     
     # Campos específicos para la firma
-    rol_firma = fields.Char(string='Rol para la Firma', 
-                           help='Rol con el que se desea firmar (ej: Aprobado por:, Entregado por:, etc.)')
-    contrasena_firma = fields.Char(string='Contraseña del Certificado')
-    posicion_firma = fields.Selection([
+    signature_role = fields.Many2one('document.signature.tag', string='Rol para la Firma', help='Rol con el que se desea firmar (ej: Aprobado por:, Entregado por:, etc.)', required=True, ondelete='cascade')
+    signature_password = fields.Char(string='Contraseña del Certificado')
+    signature_position = fields.Selection([
         ('izquierda', 'Izquierda'),
         ('centro_izquierda', 'Centro-Izquierda'),
         ('centro_derecha', 'Centro-Derecha'),
@@ -57,28 +56,28 @@ class AlfrescoFirmaWizard(models.TransientModel):
        help='Posición en la parte inferior de la página donde se colocará la firma')
     
     # Campos adicionales para certificado e imagen en el wizard
-    certificado_wizard = fields.Binary(string='Certificado (.p12) - Temporal', attachment=False,
+    certificate_wizard = fields.Binary(string='Certificado (.p12) - Temporal', attachment=False,
                                       help='Certificado temporal para esta sesión de firma')
-    nombre_certificado_wizard = fields.Char(string='Nombre del Certificado Temporal')
-    imagen_firma_wizard = fields.Binary(string='Imagen de Firma - Temporal', attachment=False,
+    certificate_wizard_name = fields.Char(string='Nombre del Certificado Temporal')
+    wizard_signature_image = fields.Binary(string='Imagen de Firma - Temporal', attachment=False,
                                        help='Imagen temporal para esta sesión de firma')
 
-    # Campos informativos sobre el estado del usuario
-    usuario_tiene_certificado = fields.Boolean(string='Usuario tiene certificado', compute='_compute_estado_usuario')
-    usuario_tiene_contrasena = fields.Boolean(string='Usuario tiene contraseña', compute='_compute_estado_usuario')
-    usuario_tiene_imagen = fields.Boolean(string='Usuario tiene imagen', compute='_compute_estado_usuario')
+    # Campos informativos sobre el status del user
+    has_certificate = fields.Boolean(string='Usuario tiene certificado', compute='_compute_estado_usuario')
+    has_password = fields.Boolean(string='Usuario tiene contraseña', compute='_compute_estado_usuario')
+    has_image = fields.Boolean(string='Usuario tiene imagen', compute='_compute_estado_usuario')
     
-    # Campos de estado
-    estado = fields.Selection([
+    # Campos de status
+    status = fields.Selection([
         ('borrador', 'Configuración'),
         ('procesando', 'Procesando'),
         ('completado', 'Completado'),
         ('error', 'Error')
     ], string='Estado', default='borrador', required=True)
     
-    mensaje_resultado = fields.Text(string='Resultado del Proceso', readonly=True)
-    archivos_procesados = fields.Integer(string='Archivos Procesados', default=0)
-    archivos_con_error = fields.Integer(string='Archivos con Error', default=0)
+    message_result = fields.Text(string='Resultado del Proceso', readonly=True)
+    documents_processed = fields.Integer(string='Archivos Procesados', default=0)
+    documents_with_error = fields.Integer(string='Archivos con Error', default=0)
 
     @api.depends('file_ids')
     def _compute_file_count(self):
@@ -88,10 +87,10 @@ class AlfrescoFirmaWizard(models.TransientModel):
     @api.depends()
     def _compute_estado_usuario(self):
         for record in self:
-            usuario = self.env.user
-            record.usuario_tiene_certificado = bool(usuario.certificado_firma)
-            record.usuario_tiene_contrasena = bool(usuario.contrasena_certificado)
-            record.usuario_tiene_imagen = bool(usuario.imagen_firma)
+            user = self.env.user
+            record.has_certificate = bool(user.certificado_firma)
+            record.has_password = bool(user.contrasena_certificado)
+            record.has_image = bool(user.imagen_firma)
 
     @api.model
     def default_get(self, fields_list):
@@ -113,35 +112,35 @@ class AlfrescoFirmaWizard(models.TransientModel):
         return res
 
     def _obtener_datos_firma(self):
-        """Obtiene los datos de firma priorizando wizard sobre usuario"""
-        usuario = self.env.user
+        """Obtiene los datos de firma priorizando wizard sobre user"""
+        user = self.env.user
         
-        # Priorizar certificado del wizard, sino usar el del usuario
+        # Priorizar certificado del wizard, sino usar el del user
         certificado_data = None
-        if self.certificado_wizard:
-            certificado_data = base64.b64decode(self.certificado_wizard)
-        elif usuario.certificado_firma:
-            certificado_data = base64.b64decode(usuario.certificado_firma)
+        if self.certificate_wizard:
+            certificado_data = base64.b64decode(self.certificate_wizard)
+        elif user.certificado_firma:
+            certificado_data = base64.b64decode(user.certificado_firma)
         
         if not certificado_data:
             raise UserError(_('Debe proporcionar un certificado .p12 en el wizard o tenerlo configurado en sus preferencias.'))
         
-        # Priorizar imagen del wizard, sino usar la del usuario
+        # Priorizar imagen del wizard, sino usar la del user
         imagen_firma = None
-        if self.imagen_firma_wizard:
-            imagen_firma = self.imagen_firma_wizard
-        elif usuario.imagen_firma:
-            imagen_firma = usuario.imagen_firma
+        if self.wizard_signature_image:
+            imagen_firma = self.wizard_signature_image
+        elif user.imagen_firma:
+            imagen_firma = user.imagen_firma
         
         if not imagen_firma:
             raise UserError(_('Debe proporcionar una imagen de firma en el wizard o tenerla configurada en sus preferencias.'))
         
-        # Priorizar contraseña del wizard, sino usar la del usuario
+        # Priorizar contraseña del wizard, sino usar la del user
         contrasena = None
-        if self.contrasena_firma and self.contrasena_firma.strip():
-            contrasena = self.contrasena_firma.strip()
-        elif usuario.contrasena_certificado:
-            contrasena = usuario.get_contrasena_descifrada()
+        if self.signature_password and self.signature_password.strip():
+            contrasena = self.signature_password.strip()
+        elif user.contrasena_certificado:
+            contrasena = user.get_contrasena_descifrada()
         
         if not contrasena:
             raise UserError(_('Debe proporcionar la contraseña del certificado.'))
@@ -258,8 +257,8 @@ class AlfrescoFirmaWizard(models.TransientModel):
         # Validar bibliotecas necesarias
         if not HAS_ENDESIVE or not HAS_PYPDF:
             self.write({
-                'estado': 'error',
-                'mensaje_resultado': _('Las bibliotecas necesarias no están instaladas. Por favor, instale "endesive" y "pypdf".')
+                'status': 'error',
+                'message_result': _('Las bibliotecas necesarias no están instaladas. Por favor, instale "endesive" y "pypdf".')
             })
             return self._recargar_wizard()
         
@@ -267,29 +266,29 @@ class AlfrescoFirmaWizard(models.TransientModel):
         if not self.file_ids:
             raise UserError(_('Debe seleccionar al menos un archivo PDF para firmar.'))
         
-        if not self.rol_firma or not self.rol_firma.strip():
+        if not self.signature_role:
             raise UserError(_('Debe especificar el rol para la firma.'))
         
-        # Cambiar estado a procesando
+        # Cambiar status a procesando
         self.write({
-            'estado': 'procesando',
-            'mensaje_resultado': 'Iniciando proceso de firma...',
-            'archivos_procesados': 0,
-            'archivos_con_error': 0
+            'status': 'procesando',
+            'message_result': 'Iniciando proceso de firma...',
+            'documents_processed': 0,
+            'documents_with_error': 0
         })
 
-        archivos_procesados = 0
-        archivos_con_error = 0
+        documents_processed = 0
+        documents_with_error = 0
         errores_detalle = []
 
         try:
-            # Obtener datos de firma (prioriza wizard sobre usuario)
+            # Obtener datos de firma (prioriza wizard sobre user)
             certificado_data, imagen_firma, contrasena = self._obtener_datos_firma()
             
             # Crear imagen de firma con rol usando los datos obtenidos
             imagen_firma_path, imagen_size = self._crear_imagen_firma_con_rol(
                 imagen_firma, 
-                self.rol_firma
+                self.signature_role.name,
             )
             imagen_width, imagen_height = imagen_size
 
@@ -308,16 +307,16 @@ class AlfrescoFirmaWizard(models.TransientModel):
                         archivo, imagen_firma_path, imagen_width, imagen_height,
                         private_key, certificate, additional_certificates
                     )
-                    archivos_procesados += 1
+                    documents_processed += 1
                     
                     # Actualizar progreso
                     self.write({
-                        'archivos_procesados': archivos_procesados,
-                        'mensaje_resultado': f'Procesando... {archivos_procesados}/{len(self.file_ids)} archivos completados'
+                        'documents_processed': documents_processed,
+                        'message_result': f'Procesando... {documents_processed}/{len(self.file_ids)} archivos completados'
                     })
                     
                 except Exception as e:
-                    archivos_con_error += 1
+                    documents_with_error += 1
                     error_msg = f"Error en {archivo.name}: {str(e)}"
                     errores_detalle.append(error_msg)
                     _logger.error(f"Error firmando archivo {archivo.name}: {e}")
@@ -329,23 +328,23 @@ class AlfrescoFirmaWizard(models.TransientModel):
                 pass
             
             # Preparar mensaje final
-            if archivos_con_error == 0:
+            if documents_with_error == 0:
                 mensaje = f'✅ Proceso completado exitosamente!\n\n'
-                mensaje += f'📄 {archivos_procesados} archivos firmados correctamente\n'
+                mensaje += f'📄 {documents_processed} archivos firmados correctamente\n'
                 mensaje += f'Los documentos han sido actualizados con una nueva versión firmada en Alfresco'
                 estado_final = 'completado'
             else:
                 mensaje = f'⚠️ Proceso completado con errores:\n\n'
-                mensaje += f'✅ {archivos_procesados} archivos firmados correctamente\n'
-                mensaje += f'❌ {archivos_con_error} archivos con errores\n\n'
+                mensaje += f'✅ {documents_processed} archivos firmados correctamente\n'
+                mensaje += f'❌ {documents_with_error} archivos con errores\n\n'
                 mensaje += 'Errores detallados:\n' + '\n'.join(errores_detalle)
                 estado_final = 'error'
             
             self.write({
-                'estado': estado_final,
-                'mensaje_resultado': mensaje,
-                'archivos_procesados': archivos_procesados,
-                'archivos_con_error': archivos_con_error
+                'status': estado_final,
+                'message_result': mensaje,
+                'documents_processed': documents_processed,
+                'documents_with_error': documents_with_error
             })
             
         except Exception as e:
@@ -399,7 +398,7 @@ class AlfrescoFirmaWizard(models.TransientModel):
             
             # Calcular coordenadas según posición seleccionada
             x, y, x1 = self._calcular_coordenadas_firma(
-                page_width, page_height, imagen_width, imagen_height, self.posicion_firma
+                page_width, page_height, imagen_width, imagen_height, self.signature_position
             )
             
             # Configurar datos para la firma
@@ -420,7 +419,7 @@ class AlfrescoFirmaWizard(models.TransientModel):
                 "contact": self.env.user.email or '',
                 "location": self.env.user.company_id.city or '',
                 "signingdate": date_str,
-                "reason": f"Firma Digital - {self.rol_firma}",
+                "reason": f"Firma Digital - {self.signature_role}",
             }
             
             # Leer PDF original
