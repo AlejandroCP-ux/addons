@@ -51,38 +51,38 @@ class DocumentoFirma(models.TransientModel):
     _description = 'Documento para Firma'
 
     wizard_id = fields.Many2one('firma.documento.wizard', string='Wizard', required=True, ondelete='cascade')
-    nombre_documento = fields.Char(string='Nombre del Documento', required=True)
-    pdf_documento = fields.Binary(string='Documento PDF', required=True)
-    pdf_firmado = fields.Binary(string='Documento Firmado', readonly=True)
-    estado_firma = fields.Selection([
+    document_name = fields.Char(string='Nombre del Documento', required=True)
+    pdf_document = fields.Binary(string='Documento PDF', required=True)
+    pdf_signed = fields.Binary(string='Documento Firmado', readonly=True)
+    signature_status = fields.Selection([
         ('pendiente', 'Pendiente'),
         ('firmado', 'Firmado'),
         ('error', 'Error')
     ], string='Estado', default='pendiente')
-    mensaje_error = fields.Text(string='Error')
-    tamaño_archivo = fields.Char(string='Tamaño', compute='_compute_tamaño_archivo')
+    error_message = fields.Text(string='Error')
+    document_size = fields.Char(string='Tamaño', compute='_compute_document_size')
 
-    @api.depends('pdf_documento')
-    def _compute_tamaño_archivo(self):
+    @api.depends('pdf_document')
+    def _compute_document_size(self):
         for record in self:
-            if record.pdf_documento:
+            if record.pdf_document:
                 try:
-                    size_bytes = len(base64.b64decode(record.pdf_documento))
+                    size_bytes = len(base64.b64decode(record.pdf_document))
                     if size_bytes < 1024:
-                        record.tamaño_archivo = f"{size_bytes} B"
+                        record.document_size = f"{size_bytes} B"
                     elif size_bytes < 1024 * 1024:
-                        record.tamaño_archivo = f"{size_bytes / 1024:.1f} KB"
+                        record.document_size = f"{size_bytes / 1024:.1f} KB"
                     else:
-                        record.tamaño_archivo = f"{size_bytes / (1024 * 1024):.1f} MB"
+                        record.document_size = f"{size_bytes / (1024 * 1024):.1f} MB"
                 except:
-                    record.tamaño_archivo = "N/A"
+                    record.document_size = "N/A"
             else:
-                record.tamaño_archivo = "N/A"
+                record.document_size = "N/A"
 
     def action_descargar_individual(self):
         """Acción para descargar este documento individual"""
         self.ensure_one()
-        if not self.pdf_firmado:
+        if not self.pdf_signed:
             raise UserError(_('El documento no ha sido firmado.'))
         
         return {
@@ -97,14 +97,16 @@ class FirmaDocumentoWizard(models.TransientModel):
     _description = 'Asistente para Firma Digital de Documentos'
 
     # Campos para múltiples documentos
-    documento_ids = fields.One2many('documento.firma', 'wizard_id', string='Documentos a Firmar')
-    documento_count = fields.Integer(string='Cantidad de Documentos', compute='_compute_documento_count')
+    document_ids = fields.One2many('documento.firma', 'wizard_id', string='Documentos a Firmar')
+    document_count = fields.Integer(string='Cantidad de Documentos', compute='_compute_documento_count')
     
     # Campos específicos para la firma (copiados del módulo Alfresco)
-    rol_firma = fields.Char(string='Rol para la Firma', 
-                           help='Rol con el que se desea firmar (ej: Aprobado por:, Entregado por:, etc.)')
-    contrasena_firma = fields.Char(string='Contraseña del Certificado')
-    posicion_firma = fields.Selection([
+    
+    signature_role = fields.Many2one('document.signature.tag', string='Etiqueta de la firma', help='Rol con el que se desea firmar (ej: Aprobado por:, Entregado por:, etc.)', required=True, ondelete='cascade')
+    # signature_role = fields.Char(string='Rol para la Firma', 
+    #                       help='Rol con el que se desea firmar (ej: Aprobado por:, Entregado por:, etc.)')
+    signature_password = fields.Char(string='Contraseña del Certificado')
+    signature_position = fields.Selection([
         ('izquierda', 'Izquierda'),
         ('centro_izquierda', 'Centro-Izquierda'),
         ('centro_derecha', 'Centro-Derecha'),
@@ -113,100 +115,100 @@ class FirmaDocumentoWizard(models.TransientModel):
        help='Posición en la parte inferior de la página donde se colocará la firma')
     
     # Campos adicionales para certificado e imagen en el wizard
-    certificado_wizard = fields.Binary(string='Certificado (.p12) - Temporal', attachment=False,
+    certificate_wizard = fields.Binary(string='Certificado (.p12) - Temporal', attachment=False,
                                       help='Certificado temporal para esta sesión de firma')
-    nombre_certificado_wizard = fields.Char(string='Nombre del Certificado Temporal')
-    imagen_firma_wizard = fields.Binary(string='Imagen de Firma - Temporal', attachment=False,
+    certificate_wizard_name = fields.Char(string='Nombre del Certificado Temporal')
+    wizard_signature_image = fields.Binary(string='Imagen de Firma - Temporal', attachment=False,
                                        help='Imagen temporal para esta sesión de firma')
     
-    # Campos informativos sobre el estado del usuario
-    usuario_tiene_certificado = fields.Boolean(string='Usuario tiene certificado', compute='_compute_estado_usuario', store=False)
-    usuario_tiene_contrasena = fields.Boolean(string='Usuario tiene contraseña', compute='_compute_estado_usuario', store=False)
-    usuario_tiene_imagen = fields.Boolean(string='Usuario tiene imagen', compute='_compute_estado_usuario', store=False)
+    # Campos informativos sobre el state del user
+    has_certificate = fields.Boolean(string='Usuario tiene certificado', compute='_compute_estado_usuario', store=False)
+    has_password = fields.Boolean(string='Usuario tiene contraseña', compute='_compute_estado_usuario', store=False)
+    has_image = fields.Boolean(string='Usuario tiene imagen', compute='_compute_estado_usuario', store=False)
     
-    # Campos de estado (copiados del módulo Alfresco)
-    estado = fields.Selection([
+    # Campos de state (copiados del módulo Alfresco)
+    state = fields.Selection([
         ('borrador', 'Configuración'),
         ('procesando', 'Procesando'),
         ('completado', 'Completado'),
         ('error', 'Error')
     ], string='Estado', default='borrador', required=True)
     
-    mensaje_resultado = fields.Text(string='Resultado del Proceso', readonly=True)
-    archivos_procesados = fields.Integer(string='Archivos Procesados', default=0)
-    archivos_con_error = fields.Integer(string='Archivos con Error', default=0)
+    message_result = fields.Text(string='Resultado del Proceso', readonly=True)
+    documents_processed = fields.Integer(string='Archivos Procesados', default=0)
+    documents_with_error = fields.Integer(string='Archivos con Error', default=0)
 
     # Campos para descarga
-    zip_firmados = fields.Binary(string='ZIP con Documentos Firmados', readonly=True)
-    nombre_zip = fields.Char(string='Nombre del ZIP', readonly=True)
+    zip_signed = fields.Binary(string='ZIP con Documentos Firmados', readonly=True)
+    zip_name = fields.Char(string='Nombre del ZIP', readonly=True)
 
-    @api.depends('documento_ids')
+    @api.depends('document_ids')
     def _compute_documento_count(self):
         for record in self:
-            record.documento_count = len(record.documento_ids)
+            record.document_count = len(record.document_ids)
     
-    @api.depends('certificado_wizard', 'nombre_certificado_wizard', 'imagen_firma_wizard')
+    @api.depends('certificate_wizard', 'certificate_wizard_name', 'wizard_signature_image')
     def _compute_estado_usuario(self):
-        """Computa el estado de configuración del usuario actual"""
+        """Computa el state de configuración del user actual"""
         for record in self:
             try:
                 # Valores por defecto
-                record.usuario_tiene_certificado = False
-                record.usuario_tiene_contrasena = False
-                record.usuario_tiene_imagen = False
+                record.has_certificate = False
+                record.has_password = False
+                record.has_image = False
                 
-                # Verificar que tenemos un usuario válido
+                # Verificar que tenemos un user válido
                 if not self.env.user:
                     continue
                     
-                usuario = self.env.user
+                user = self.env.user
                 
                 # Verificar certificado de forma segura
                 try:
-                    if hasattr(usuario, 'certificado_firma'):
-                        cert_value = getattr(usuario, 'certificado_firma', False)
+                    if hasattr(user, 'certificado_firma'):
+                        cert_value = getattr(user, 'certificado_firma', False)
                         if cert_value:
                             # Intentar decodificar para verificar que es válido
                             try:
                                 cert_decoded = base64.b64decode(cert_value)
-                                record.usuario_tiene_certificado = len(cert_decoded) > 0
+                                record.has_certificate = len(cert_decoded) > 0
                             except:
-                                record.usuario_tiene_certificado = bool(cert_value)
+                                record.has_certificate = bool(cert_value)
                 except Exception as e:
                     _logger.error(f"Error verificando certificado: {e}")
-                    record.usuario_tiene_certificado = False
+                    record.has_certificate = False
                 
                 # Verificar contraseña de forma segura
                 try:
-                    if hasattr(usuario, 'contrasena_certificado'):
-                        pass_value = getattr(usuario, 'contrasena_certificado', False)
+                    if hasattr(user, 'contrasena_certificado'):
+                        pass_value = getattr(user, 'contrasena_certificado', False)
                         if pass_value:
-                            record.usuario_tiene_contrasena = bool(str(pass_value).strip())
+                            record.has_password = bool(str(pass_value).strip())
                 except Exception as e:
                     _logger.error(f"Error verificando contraseña: {e}")
-                    record.usuario_tiene_contrasena = False
+                    record.has_password = False
                 
                 # Verificar imagen de forma segura
                 try:
-                    if hasattr(usuario, 'imagen_firma'):
-                        img_value = getattr(usuario, 'imagen_firma', False)
+                    if hasattr(user, 'imagen_firma'):
+                        img_value = getattr(user, 'imagen_firma', False)
                         if img_value:
                             # Intentar decodificar para verificar que es válida
                             try:
                                 img_decoded = base64.b64decode(img_value)
-                                record.usuario_tiene_imagen = len(img_decoded) > 0
+                                record.has_image = len(img_decoded) > 0
                             except:
-                                record.usuario_tiene_imagen = bool(img_value)
+                                record.has_image = bool(img_value)
                 except Exception as e:
                     _logger.error(f"Error verificando imagen: {e}")
-                    record.usuario_tiene_imagen = False
+                    record.has_image = False
                 
             except Exception as e:
                 _logger.error(f"ERROR GENERAL en _compute_estado_usuario: {e}")
                 # Valores por defecto en caso de error
-                record.usuario_tiene_certificado = False
-                record.usuario_tiene_contrasena = False
-                record.usuario_tiene_imagen = False
+                record.has_certificate = False
+                record.has_password = False
+                record.has_image = False
     
     def action_seleccionar_archivos(self):
         """Acción para abrir un wizard de selección de archivos"""
@@ -226,42 +228,42 @@ class FirmaDocumentoWizard(models.TransientModel):
         """Valores por defecto para el asistente"""
         res = super(FirmaDocumentoWizard, self).default_get(fields_list)
         
-        # Asegurarse de que el estado inicial sea 'borrador'
-        res['estado'] = 'borrador'
+        # Asegurarse de que el state inicial sea 'borrador'
+        res['state'] = 'borrador'
         
         return res
 
     def _obtener_datos_firma(self):
-        """Obtiene los datos de firma priorizando wizard sobre usuario"""
-        usuario = self.env.user
+        """Obtiene los datos de firma priorizando wizard sobre user"""
+        user = self.env.user
         
-        # Priorizar certificado del wizard, sino usar el del usuario
+        # Priorizar certificado del wizard, sino usar el del user
         certificado_data = None
-        if self.certificado_wizard:
-            certificado_data = base64.b64decode(self.certificado_wizard)
-        elif hasattr(usuario, 'certificado_firma') and usuario.certificado_firma:
-            certificado_data = base64.b64decode(usuario.certificado_firma)
+        if self.certificate_wizard:
+            certificado_data = base64.b64decode(self.certificate_wizard)
+        elif hasattr(user, 'certificado_firma') and user.certificado_firma:
+            certificado_data = base64.b64decode(user.certificado_firma)
         
         if not certificado_data:
             raise UserError(_('Debe proporcionar un certificado .p12 en el wizard o tenerlo configurado en sus preferencias.'))
         
-        # Priorizar imagen del wizard, sino usar la del usuario
+        # Priorizar imagen del wizard, sino usar la del user
         imagen_firma = None
-        if self.imagen_firma_wizard:
-            imagen_firma = self.imagen_firma_wizard
-        elif hasattr(usuario, 'imagen_firma') and usuario.imagen_firma:
-            imagen_firma = usuario.imagen_firma
+        if self.wizard_signature_image:
+            imagen_firma = self.wizard_signature_image
+        elif hasattr(user, 'imagen_firma') and user.imagen_firma:
+            imagen_firma = user.imagen_firma
         
         if not imagen_firma:
             raise UserError(_('Debe proporcionar una imagen de firma en el wizard o tenerla configurada en sus preferencias.'))
         
-        # Priorizar contraseña del wizard, sino usar la del usuario
+        # Priorizar contraseña del wizard, sino usar la del user
         contrasena = None
-        if self.contrasena_firma and self.contrasena_firma.strip():
-            contrasena = self.contrasena_firma.strip()
-        elif hasattr(usuario, 'contrasena_certificado') and usuario.contrasena_certificado:
+        if self.signature_password and self.signature_password.strip():
+            contrasena = self.signature_password.strip()
+        elif hasattr(user, 'contrasena_certificado') and user.contrasena_certificado:
             try:
-                contrasena = usuario.get_contrasena_descifrada()
+                contrasena = user.get_contrasena_descifrada()
             except Exception as e:
                 _logger.error(f"Error descifrando contraseña: {e}")
                 contrasena = None
@@ -384,38 +386,38 @@ class FirmaDocumentoWizard(models.TransientModel):
         # Validar bibliotecas necesarias
         if not HAS_ENDESIVE or not HAS_PYPDF2:
             self.write({
-                'estado': 'error',
-                'mensaje_resultado': _('Las bibliotecas necesarias no están instaladas. Por favor, instale "endesive" y "PyPDF2".')
+                'state': 'error',
+                'message_result': _('Las bibliotecas necesarias no están instaladas. Por favor, instale "endesive" y "PyPDF2".')
             })
             return self._recargar_wizard()
         
         # Validar campos obligatorios
-        if not self.documento_ids:
+        if not self.document_ids:
             raise UserError(_('Debe seleccionar al menos un documento PDF para firmar.'))
         
-        if not self.rol_firma or not self.rol_firma.strip():
+        if not self.signature_role:
             raise UserError(_('Debe especificar el rol para la firma.'))
         
-        # Cambiar estado a procesando
+        # Cambiar state a procesando
         self.write({
-            'estado': 'procesando',
-            'mensaje_resultado': 'Iniciando proceso de firma...',
-            'archivos_procesados': 0,
-            'archivos_con_error': 0
+            'state': 'procesando',
+            'message_result': 'Iniciando proceso de firma...',
+            'documents_processed': 0,
+            'documents_with_error': 0
         })
         
-        archivos_procesados = 0
-        archivos_con_error = 0
+        documents_processed = 0
+        documents_with_error = 0
         errores_detalle = []
         
         try:
-            # Obtener datos de firma (prioriza wizard sobre usuario)
+            # Obtener datos de firma (prioriza wizard sobre user)
             certificado_data, imagen_firma, contrasena = self._obtener_datos_firma()
             
             # Crear imagen de firma con rol
             imagen_firma_path, imagen_size = self._crear_imagen_firma_con_rol(
                 imagen_firma, 
-                self.rol_firma
+                self.signature_role
             )
             imagen_width, imagen_height = imagen_size
             
@@ -426,28 +428,28 @@ class FirmaDocumentoWizard(models.TransientModel):
             )
             
             # Procesar cada documento
-            for documento in self.documento_ids:
+            for documento in self.document_ids:
                 try:
                     self._firmar_documento_individual(
                         documento, imagen_firma_path, imagen_width, imagen_height,
                         private_key, certificate, additional_certificates
                     )
-                    documento.estado_firma = 'firmado'
-                    archivos_procesados += 1
+                    documento.signature_status = 'firmado'
+                    documents_processed += 1
                     
                     # Actualizar progreso
                     self.write({
-                        'archivos_procesados': archivos_procesados,
-                        'mensaje_resultado': f'Procesando... {archivos_procesados}/{len(self.documento_ids)} archivos completados'
+                        'documents_processed': documents_processed,
+                        'message_result': f'Procesando... {documents_processed}/{len(self.document_ids)} archivos completados'
                     })
                     
                 except Exception as e:
-                    archivos_con_error += 1
-                    documento.estado_firma = 'error'
-                    documento.mensaje_error = str(e)
-                    error_msg = f"Error en {documento.nombre_documento}: {str(e)}"
+                    documents_with_error += 1
+                    documento.signature_status = 'error'
+                    documento.error_message = str(e)
+                    error_msg = f"Error en {documento.document_name}: {str(e)}"
                     errores_detalle.append(error_msg)
-                    _logger.error(f"Error firmando documento {documento.nombre_documento}: {e}")
+                    _logger.error(f"Error firmando documento {documento.document_name}: {e}")
         
             # Limpiar archivo temporal
             try:
@@ -459,33 +461,33 @@ class FirmaDocumentoWizard(models.TransientModel):
             self._crear_zip_firmados()
         
             # Preparar mensaje final
-            if archivos_con_error == 0:
+            if documents_with_error == 0:
                 mensaje = f'✅ Proceso completado exitosamente!\n\n'
-                mensaje += f'📄 {archivos_procesados} archivos firmados correctamente\n'
+                mensaje += f'📄 {documents_processed} archivos firmados correctamente\n'
                 mensaje += f'Puede descargar el archivo ZIP con todos los documentos firmados'
                 estado_final = 'completado'
             else:
                 mensaje = f'⚠️ Proceso completado con errores:\n\n'
-                mensaje += f'✅ {archivos_procesados} archivos firmados correctamente\n'
-                mensaje += f'❌ {archivos_con_error} archivos con errores\n\n'
-                if archivos_procesados > 0:
+                mensaje += f'✅ {documents_processed} archivos firmados correctamente\n'
+                mensaje += f'❌ {documents_with_error} archivos con errores\n\n'
+                if documents_processed > 0:
                     mensaje += 'Los archivos firmados exitosamente están disponibles para descarga.\n\n'
                 mensaje += 'Errores detallados:\n' + '\n'.join(errores_detalle)
-                estado_final = 'error' if archivos_procesados == 0 else 'completado'
+                estado_final = 'error' if documents_processed == 0 else 'completado'
         
             self.write({
-                'estado': estado_final,
-                'mensaje_resultado': mensaje,
-                'archivos_procesados': archivos_procesados,
-                'archivos_con_error': archivos_con_error
+                'state': estado_final,
+                'message_result': mensaje,
+                'documents_processed': documents_processed,
+                'documents_with_error': documents_with_error
             })
         
         except Exception as e:
             _logger.error(f"Error general en proceso de firma: {e}")
             self.write({
-                'estado': 'error',
-                'mensaje_resultado': f'Error general: {str(e)}',
-                'archivos_con_error': len(self.documento_ids)
+                'state': 'error',
+                'message_result': f'Error general: {str(e)}',
+                'documents_with_error': len(self.document_ids)
             })
     
         return self._recargar_wizard()
@@ -494,7 +496,7 @@ class FirmaDocumentoWizard(models.TransientModel):
                                    private_key, certificate, additional_certificates):
         """Firma un documento individual"""
         # Decodificar el documento PDF
-        pdf_contenido = base64.b64decode(documento.pdf_documento)
+        pdf_contenido = base64.b64decode(documento.pdf_document)
         
         # Crear archivo temporal para el PDF original
         with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as temp_pdf:
@@ -519,7 +521,7 @@ class FirmaDocumentoWizard(models.TransientModel):
             
             # Calcular las coordenadas para la imagen de la firma
             x, y, x1 = self._calcular_coordenadas_firma(
-                page_width, page_height, imagen_width, imagen_height, self.posicion_firma
+                page_width, page_height, imagen_width, imagen_height, self.signature_position
             )
             
             # Datos para la firma digital
@@ -541,7 +543,7 @@ class FirmaDocumentoWizard(models.TransientModel):
                 "contact": self.env.user.email or '',
                 "location": self.env.user.company_id.city or '',
                 "signingdate": date_str,
-                "reason": f"Firma Digital - {self.rol_firma}",
+                "reason": f"Firma Digital - {self.signature_role}",
             }
             
             # Leer el PDF original
@@ -571,7 +573,7 @@ class FirmaDocumentoWizard(models.TransientModel):
                 pdf_final_contenido = f.read()
             
             # Actualizar el documento con el PDF firmado
-            documento.pdf_firmado = base64.b64encode(pdf_final_contenido)
+            documento.pdf_signed = base64.b64encode(pdf_final_contenido)
             
             # Limpiar archivos temporales
             for path in [temp_pdf_path, temp_final_path]:
@@ -590,21 +592,21 @@ class FirmaDocumentoWizard(models.TransientModel):
 
     def _crear_zip_firmados(self):
         """Crea un archivo ZIP con todos los documentos firmados exitosamente"""
-        documentos_firmados = self.documento_ids.filtered(lambda d: d.estado_firma == 'firmado' and d.pdf_firmado)
+        documents_signed = self.document_ids.filtered(lambda d: d.signature_status == 'firmado' and d.pdf_signed)
         
-        if not documentos_firmados:
+        if not documents_signed:
             return
         
         # Crear archivo ZIP temporal
         with tempfile.NamedTemporaryFile(delete=False, suffix='.zip') as temp_zip:
             with zipfile.ZipFile(temp_zip, 'w', zipfile.ZIP_DEFLATED) as zip_file:
-                for documento in documentos_firmados:
+                for documento in documents_signed:
                     # Obtener el nombre base y añadir " - firmado"
-                    nombre_base, extension = os.path.splitext(documento.nombre_documento)
+                    nombre_base, extension = os.path.splitext(documento.document_name)
                     nombre_firmado = f"{nombre_base} - firmado{extension}"
                     
                     # Añadir el PDF firmado al ZIP
-                    pdf_content = base64.b64decode(documento.pdf_firmado)
+                    pdf_content = base64.b64decode(documento.pdf_signed)
                     zip_file.writestr(nombre_firmado, pdf_content)
             
             temp_zip_path = temp_zip.name
@@ -614,12 +616,12 @@ class FirmaDocumentoWizard(models.TransientModel):
             zip_content = f.read()
         
         # Generar nombre para el ZIP
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        nombre_zip = f"documentos_firmados_{timestamp}.zip"
+        timestamp = datetime.now().strftime("%d.%m.%Y_%H.%M.%S")
+        zip_name = f"Documentos_firmados_{timestamp}.zip"
         
         self.write({
-            'zip_firmados': base64.b64encode(zip_content),
-            'nombre_zip': nombre_zip
+            'zip_signed': base64.b64encode(zip_content),
+            'zip_name': zip_name
         })
         
         # Limpiar archivo temporal
@@ -643,7 +645,7 @@ class FirmaDocumentoWizard(models.TransientModel):
     def action_descargar_zip(self):
         """Acción para descargar el ZIP con documentos firmados"""
         self.ensure_one()
-        if not self.zip_firmados:
+        if not self.zip_signed:
             raise UserError(_('No hay documentos firmados para descargar.'))
         
         return {
@@ -655,7 +657,7 @@ class FirmaDocumentoWizard(models.TransientModel):
     def action_descargar_individual(self, documento_id):
         """Acción para descargar un documento individual"""
         documento = self.env['documento.firma'].browse(documento_id)
-        if not documento.pdf_firmado:
+        if not documento.pdf_signed:
             raise UserError(_('El documento no ha sido firmado.'))
         
         return {
