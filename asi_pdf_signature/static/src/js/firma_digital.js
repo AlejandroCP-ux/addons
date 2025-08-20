@@ -1,57 +1,61 @@
 odoo.define("firma_digital.firma_digital", (require) => {
   var core = require("web.core")
-  var FormView = require("web.FormView")
-  var FormController = require("web.FormController")
-  var FormRenderer = require("web.FormRenderer") // Declare the FormRenderer variable
-  var $ = require("jquery") // Declare the $ variable
+  var AbstractAction = require("web.AbstractAction")
+  var $ = require("jquery")
   var _t = core._t
 
-  // Extender el renderizador del formulario para añadir funcionalidades específicas
-  FormRenderer.include({
-    _renderWidget: function (widget, node) {
-      var $el = this._super.apply(this, arguments)
-
-      // Añadir código personalizado para la vista del formulario de firma si es necesario
-      if (this.state.model === "firma.documento.wizard") {
-        // Código específico para la vista de firma de documentos
-      }
-
-      return $el
+  // Acción personalizada para descargar múltiples PDFs
+  var DownloadMultiplePdfsAction = AbstractAction.extend({
+    init: function (parent, action) {
+      this._super.apply(this, arguments)
+      this.document_ids = action.params.document_ids || []
+      this.message = action.params.message || "Descargando archivos..."
     },
-  })
 
-  // Extender el controlador del formulario para añadir funcionalidades específicas
-  FormController.include({
-    _onButtonClicked: function (event) {
-      // Si se ha completado la acción de firma, verificar si debe descargarse automáticamente
-      if (this.modelName === "firma.documento.wizard" && event.data.attrs.name === "action_firmar_documentos") {
-        return this._super.apply(this, arguments).then((action) => {
-          // El resto se maneja en el wizard
-          return action
-        })
-      }
+    start: function () {
+      var self = this
 
-      // Si se ha completado la acción de firma, verificar si debe descargarse automáticamente
-      if (this.modelName === "firma.documento.wizard" && event.data.attrs.name === "action_firmar_documento") {
-        // El resto se maneja normalmente
-        return this._super.apply(this, arguments).then((action) => {
-          // Verificar si debemos descargar el PDF automáticamente
-          if (action && this.renderer.state.data.estado === "firmado" && this.renderer.state.context.descargar_pdf) {
-            this._rpc({
-              model: "firma.documento.wizard",
-              method: "action_descargar_pdf",
-              args: [this.renderer.state.res_id],
-            }).then((result) => {
-              if (result && result.type === "ir.actions.act_url") {
-                window.location = result.url
-              }
-            })
+      // Mostrar notificación
+      this.do_notify(_t("Descarga iniciada"), this.message, false)
+
+      // Función para descargar un archivo individual
+      function downloadDocument(documentId, index) {
+        setTimeout(() => {
+          // Crear elemento temporal para la descarga
+          var link = document.createElement("a")
+          link.href = "/firma_digital/descargar_individual?documento_id=" + documentId
+          link.download = "" // Forzar descarga
+          link.style.display = "none"
+          document.body.appendChild(link)
+          link.click()
+          document.body.removeChild(link)
+
+          // Si es la última descarga, mostrar notificación de completado
+          if (index === self.document_ids.length - 1) {
+            setTimeout(() => {
+              self.do_notify(_t("Descarga completada"), _t("Todos los documentos han sido descargados."), false)
+            }, 1000)
           }
-          return action
-        })
+        }, index * 500) // 500ms de delay entre cada descarga
       }
+
+      // Iniciar descargas
+      this.document_ids.forEach((documentId, index) => {
+        downloadDocument(documentId, index)
+      })
+
+      // Cerrar la acción después de iniciar todas las descargas
+      setTimeout(
+        () => {
+          self.do_action({ type: "ir.actions.act_window_close" })
+        },
+        this.document_ids.length * 500 + 1000,
+      )
 
       return this._super.apply(this, arguments)
     },
   })
+
+  // Registrar la acción personalizada
+  core.action_registry.add("download_multiple_pdfs", DownloadMultiplePdfsAction)
 })

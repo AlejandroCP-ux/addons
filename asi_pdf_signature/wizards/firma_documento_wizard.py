@@ -461,7 +461,7 @@ class FirmaDocumentoWizard(models.TransientModel):
             if documents_with_error == 0:
                 mensaje = f'✅ Proceso completado exitosamente!\n\n'
                 mensaje += f'📄 {documents_processed} archivos firmados correctamente\n'
-                mensaje += f'Puede descargar el archivo ZIP con todos los documentos firmados'
+                mensaje += f'Puede descargar todos los documentos firmados usando el botón de descarga'
                 estado_final = 'completado'
             else:
                 mensaje = f'⚠️ Proceso completado con errores:\n\n'
@@ -540,7 +540,7 @@ class FirmaDocumentoWizard(models.TransientModel):
                 "contact": self.env.user.email or '',
                 "location": self.env.user.company_id.city or '',
                 "signingdate": date_str,
-                "reason": f"Firma Digital - {self.signature_role}",
+                "reason": f"Firma Digital - {self.signature_role.name}",
             }
             
             # Leer el PDF original
@@ -639,16 +639,21 @@ class FirmaDocumentoWizard(models.TransientModel):
             'flags': {'mode': 'edit'},
         }
     
-    def action_descargar_zip(self):
-        """Acción para descargar el ZIP con documentos firmados"""
+    def action_descargar_todos_pdfs(self):
+        """Acción para descargar todos los PDFs firmados individualmente"""
         self.ensure_one()
-        if not self.zip_signed:
+        
+        # Obtener documentos firmados
+        documents_signed = self.document_ids.filtered(lambda d: d.signature_status == 'firmado' and d.pdf_signed)
+        
+        if not documents_signed:
             raise UserError(_('No hay documentos firmados para descargar.'))
         
+        # Abrir página de descarga múltiple
         return {
             'type': 'ir.actions.act_url',
-            'url': f'/firma_digital/descargar_zip?wizard_id={self.id}',
-            'target': 'self',
+            'url': f'/firma_digital/descargar_multiples?wizard_id={self.id}',
+            'target': 'new',
         }
 
     def action_descargar_individual(self, documento_id):

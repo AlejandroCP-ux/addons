@@ -7,8 +7,6 @@
             <form string="Firma Digital de Documentos">
                 <field name="status" invisible="1" />
                 <field name="document_count" invisible="1" />
-                <field name="zip_signed" invisible="1" />
-                <field name="zip_name" invisible="1" />
                 <field name="documents_processed" invisible="1" />
                 <field name="documents_with_error" invisible="1" />
                 <field name="has_certificate" invisible="1" />
@@ -23,7 +21,7 @@
                         <p>Configure los parámetros para firmar <strong><field
                                     name="document_count" /> documento(s) PDF</strong>
                             seleccionado(s).</p>
-                        <p>Los documentos firmados se descargarán automáticamente en un archivo ZIP.</p>
+                        <p>Los documentos firmados se descargarán individualmente.</p>
                     </div>
 
                     <!-- Estado del usuario -->
@@ -63,7 +61,7 @@
                             <field name="signature_role"
                                 placeholder="ej: Aprobado por:, Contabilizado por:, etc."
                                 required="1" />
-                            <field name="signature_position" widget="Select2" />
+                            <field name="signature_position" widget="selection" />
                         </group>
                         <group>
                             <field name="signature_password" password="True"
@@ -146,7 +144,7 @@
                             <div class="card bg-success text-white">
                                 <div class="card-body">
                                     <h3>
-                                        <field name="documents_processed" />
+                                        <field name="documents_processed" readonly="1" />
                                     </h3>
                                     <p>Archivos Firmados</p>
                                 </div>
@@ -207,8 +205,8 @@
                     </div>
 
                     <footer>
-                        <button name="action_descargar_zip"
-                            string="📦 Descargar Documentos Firmados"
+                        <button name="action_descargar_todos_pdfs"
+                            string="📄 Descargar Documentos"
                             type="object"
                             class="btn-primary"
                             attrs="{'invisible': [('documents_processed', '=', 0)]}" />

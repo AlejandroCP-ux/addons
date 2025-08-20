@@ -1,6 +1,6 @@
 {
     'name': 'ASI Firma Digital de Documentos',
-    'version': '2.0',  # Cambiar de 1.9 a 2.0
+    'version': '2.4',
     'summary': 'Módulo para firmar documentos PDF digitalmente',
     'description': """
         Este módulo permite:
@@ -9,7 +9,8 @@
         - Almacenar contraseña del certificado de forma cifrada
     """,
     'category': 'Herramientas',
-    'author': 'ASI S.U.R.L.',
+    'author': 'F3nrir',
+    'company': 'ASI S.U.R.L.',
     'website': 'https://antasi.asisurl.cu',
     'depends': ['base', 'web'],
     'data': [
