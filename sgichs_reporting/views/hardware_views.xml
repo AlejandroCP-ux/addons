@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Herencia para añadir botón al formulario -->
+    <record id="it_asset_hardware_view_form_inherit_reporting" model="ir.ui.view">
+        <field name="name">it.asset.hardware.form.inherit.reporting</field>
+        <field name="model">it.asset.hardware</field>
+        <!-- CORRECCIÓN: Se usa el nombre de módulo correcto 'sgichs_hardware' -->
+        <field name="inherit_id" ref="sgichs_hardware.it_asset_hardware_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button
+                    name="action_generate_technical_sheet"
+                    string="Ficha Técnica PDF"
+                    type="object"
+                    class="btn-primary"
+                    icon="fa-file-pdf-o"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Herencia para añadir botón a la vista de árbol -->
+    <record id="it_asset_hardware_view_tree_inherit_reporting" model="ir.ui.view">
+        <field name="name">it.asset.hardware.tree.inherit.reporting</field>
+        <field name="model">it.asset.hardware</field>
+        <!-- CORRECCIÓN: Se usa el nombre de módulo correcto 'sgichs_hardware' -->
+        <field name="inherit_id" ref="sgichs_hardware.it_asset_hardware_view_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree" position="inside">
+                 <button
+                    name="action_generate_technical_sheet"
+                    string="Ficha"
+                    type="object"
+                    icon="fa-file-pdf-o"
+                    aria-label="Generar Ficha Técnica"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

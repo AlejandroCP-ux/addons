@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista árbol para perfiles -->
+    <record id="it_user_profile_view_tree" model="ir.ui.view">
+        <field name="name">it.user.profile.tree</field>
+        <field name="model">it.user.profile</field>
+        <field name="arch" type="xml">
+            <tree string="Perfiles de Usuario">
+                <field name="name"/>
+                <field name="description"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vista formulario para perfiles -->
+    <record id="it_user_profile_view_form" model="ir.ui.view">
+        <field name="name">it.user.profile.form</field>
+        <field name="model">it.user.profile</field>
+        <field name="arch" type="xml">
+            <form string="Perfil de Usuario">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="description"/>
+                    </group>
+                    <notebook>
+                        <page string="Usuarios Asociados">
+                            <!-- <field name="user_ids" widget="many2many_tags"/> -->
+                        </page>
+                        <!-- Eliminada la sección de Software Permitido -->
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Acción para perfiles -->
+    <record id="action_it_user_profile" model="ir.actions.act_window">
+        <field name="name">Perfiles de Usuario</field>
+        <field name="res_model">it.user.profile</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

@@ -6,6 +6,16 @@
         <field name="model">it.asset.hardware</field>
         <field name="inherit_id" ref="sgichs_hardware.it_asset_hardware_view_form"/>
         <field name="arch" type="xml">
+            <!-- Añadir botón en el header -->
+            <xpath expr="//header" position="inside">
+                <button 
+                    name="action_ping_device" 
+                    string="Verificar conexión" 
+                    type="object" 
+                    class="btn-primary"
+                    icon="fa-refresh"
+                    attrs="{'invisible': [('ip_ids', '=', False)]}"/>
+            </xpath>
             <xpath expr="//notebook" position="inside">
                 <page string="Red y Conectividad" name="network">
                     <group>

@@ -5,6 +5,7 @@ class IPAddress(models.Model):
     _name = 'it.ip.address'
     _description = 'Dirección IP'
     _order = 'address'
+    _rec_name = 'address' 
 
     address = fields.Char(string='Dirección IP', required=True, unique=True)
     description = fields.Char(string='Descripción')

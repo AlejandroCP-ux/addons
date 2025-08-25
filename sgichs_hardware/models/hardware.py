@@ -100,7 +100,7 @@ class Hardware(models.Model):
         ]))
         
         self.has_network_module = bool(modules.search_count([
-            ('name', '=', 'sgichs_network'),
+            ('name', '=', 'sgichs_red'),
             ('state', '=', 'installed')
         ]))
         

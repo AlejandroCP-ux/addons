@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="it_asset_backlog_view_form_inherit_network" model="ir.ui.view">
+        <field name="name">it.asset.backlog.form.inherit.network</field>
+        <field name="model">it.asset.backlog</field>
+        <field name="inherit_id" ref="sgichs_hardware.it_asset_backlog_view_form_inherit_hardware"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="IPs Detectadas" name="network">
+                    <field name="ip_ids" readonly="1"/>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

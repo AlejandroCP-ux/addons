@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Subtipos de Componentes -->
+<record id="subtype_motherboard" model="it.component.subtype">
+            <field name="name">PLACA MADRE</field>
+            <field name="type">internal</field>
+            <field name="description">Componente principal que une todos los demás componentes internos. Identificado por la información del BIOS.</field>
+        </record>
+
+    <record id="subtype_cpu" model="it.component.subtype">
+        <field name="name">CPU</field>
+        <field name="type">internal</field>
+        <field name="description">Unidad Central de Procesamiento. El cerebro del ordenador. Identificado por tener 'Núcleos físicos'.</field>
+    </record>
+
+    <record id="subtype_ram" model="it.component.subtype">
+        <field name="name">RAM</field>
+        <field name="type">internal</field>
+        <field name="description">Memoria de Acceso Aleatorio. Usada para el almacenamiento temporal de datos. Identificada por los campos 'Banco' o 'Slot'.</field>
+    </record>
+
+    <record id="subtype_gpu" model="it.component.subtype">
+        <field name="name">GPU</field>
+        <field name="type">internal</field>
+        <field name="description">Unidad de Procesamiento Gráfico. Responsable de renderizar imágenes para el monitor. Identificada por la versión del driver.</field>
+    </record>
+
+    <record id="subtype_ssd" model="it.component.subtype">
+        <field name="name">SSD</field>
+        <field name="type">internal</field>
+        <field name="description">Unidad de Estado Sólido. Dispositivo de almacenamiento de datos no volátil. Identificado por su tipo de interfaz y la palabra 'SSD'.</field>
+    </record>
+
+    <record id="subtype_hdd" model="it.component.subtype">
+        <field name="name">DISCO DURO</field>
+        <field name="type">internal</field>
+        <field name="description">Disco Duro Mecánico (HDD). Dispositivo de almacenamiento magnético. Identificado por su tipo de interfaz.</field>
+    </record>
+        
+    <record id="subtype_psu" model="it.component.subtype">
+        <field name="name">FUENTE DE ALIMENTACIÓN</field>
+        <field name="type">internal</field>
+        <field name="description">Power Supply Unit (PSU). Proporciona energía eléctrica a todos los componentes internos.</field>
+    </record>
+        
+    <record id="subtype_network_card" model="it.component.subtype">
+        <field name="name">TARJETA DE RED</field>
+        <field name="type">internal</field>
+        <field name="description">Permite la conexión del equipo a una red informática (Ethernet o Wi-Fi).</field>
+    </record>
+
+    <record id="subtype_keyboard" model="it.component.subtype">
+        <field name="name">TECLADO</field>
+        <field name="type">peripheral</field>
+        <field name="description">Periférico de entrada para introducir texto y comandos.</field>
+    </record>
+
+    <record id="subtype_mouse" model="it.component.subtype">
+        <field name="name">MOUSE</field>
+        <field name="type">peripheral</field>
+        <field name="description">Periférico de entrada para interactuar con la interfaz gráfica de usuario.</field>
+    </record>
+
+    <record id="subtype_monitor" model="it.component.subtype">
+        <field name="name">MONITOR</field>
+        <field name="type">peripheral</field>
+        <field name="description">Periférico de salida que muestra la información gráfica del equipo.</field>
+    </record>
+
+    <record id="subtype_printer" model="it.component.subtype">
+        <field name="name">IMPRESORA</field>
+        <field name="type">peripheral</field>
+        <field name="description">Periférico de salida para producir una copia física de documentos.</field>
+    </record>
+
+    <record id="subtype_speakers" model="it.component.subtype">
+        <field name="name">ALTAVOCES</field>
+        <field name="type">peripheral</field>
+        <field name="description">Periférico de salida para reproducir sonido.</field>
+    </record>
+
+    <record id="subtype_webcam" model="it.component.subtype">
+        <field name="name">WEBCAM</field>
+        <field name="type">peripheral</field>
+        <field name="description">Periférico de entrada que captura vídeo.</field>
+    </record>        
+
+    <!-- Activos de Hardware -->
+    <record id="hardware_pc_1" model="it.asset.hardware">
+        <field name="name">PC Oficina 101</field>
+        <field name="subtype">pc</field>
+        <field name="inventory_number">INV-PC-001</field>
+    </record>
+    
+    <record id="hardware_laptop_1" model="it.asset.hardware">
+        <field name="name">Laptop Gerencia</field>
+        <field name="subtype">laptop</field>
+        <field name="inventory_number">INV-LT-001</field>
+    </record>
+    
+    <record id="hardware_server_1" model="it.asset.hardware">
+        <field name="name">Servidor Principal</field>
+        <field name="subtype">server</field>
+        <field name="inventory_number">INV-SV-001</field>
+    </record>
+
+    <!-- Componentes de TI -->
+    <record id="component_cpu_1" model="it.component">
+        <field name="model">Intel Core i7-12700K</field>
+        <field name="subtype_id" ref="subtype_cpu"/>
+        <field name="serial_number">SN-CPU-001</field>
+        <field name="inventory_number">CMP-CPU-001</field>
+        <field name="status">operational</field>
+        <field name="hardware_id" ref="hardware_pc_1"/>
+    </record>
+    
+    <record id="component_ram_1" model="it.component">
+        <field name="model">Corsair Vengeance 32GB</field>
+        <field name="subtype_id" ref="subtype_ram"/>
+        <field name="serial_number">SN-RAM-001</field>
+        <field name="inventory_number">CMP-RAM-001</field>
+        <field name="status">operational</field>
+        <field name="hardware_id" ref="hardware_pc_1"/>
+    </record>
+    
+    <record id="component_monitor_1" model="it.component">
+        <field name="model">Dell UltraSharp U2723QE</field>
+        <field name="subtype_id" ref="subtype_monitor"/>
+        <field name="serial_number">SN-MON-001</field>
+        <field name="inventory_number">CMP-MON-001</field>
+        <field name="status">operational</field>
+        <field name="hardware_id" ref="hardware_pc_1"/>
+    </record>
+    
+    <record id="component_laptop_cpu" model="it.component">
+        <field name="model">AMD Ryzen 7 5800H</field>
+        <field name="subtype_id" ref="subtype_cpu"/>
+        <field name="serial_number">SN-CPU-002</field>
+        <field name="inventory_number">CMP-CPU-002</field>
+        <field name="status">maintenance</field>
+        <field name="hardware_id" ref="hardware_laptop_1"/>
+    </record>
+    
+    <record id="component_server_ram" model="it.component">
+        <field name="model">Samsung 128GB DDR4 ECC</field>
+        <field name="subtype_id" ref="subtype_ram"/>
+        <field name="serial_number">SN-RAM-002</field>
+        <field name="inventory_number">CMP-RAM-002</field>
+        <field name="status">operational</field>
+        <field name="hardware_id" ref="hardware_server_1"/>
+    </record>
+    
+    <!-- Componente sin asignar -->
+    <record id="component_unassigned" model="it.component">
+        <field name="model">Logitech MX Keys</field>
+        <field name="subtype_id" ref="subtype_keyboard"/>
+        <field name="serial_number">SN-KBD-001</field>
+        <field name="inventory_number">CMP-KBD-001</field>
+        <field name="status">operational</field>
+    </record>
+</odoo>

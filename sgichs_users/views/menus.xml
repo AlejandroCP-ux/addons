@@ -1,10 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Menú para la configuración de Usuarios de TI -->
+    <!-- Menú principal bajo Bienes Informaticos --> 
     <menuitem
         id="menu_it_users_config"
-        name="Usuarios de TI"
-        parent="sgichs_core2.menu_it_config"
+        name="Usuarios"
+        parent="sgichs_core2.menu_it_assets"
         action="action_it_user"
-        sequence="30"/>
+        sequence="17"/>
+
+    <!-- Menú para la configuración de Hardware -->
+    <menuitem
+        id="menu_it_user_config"
+        name="Usuarios"
+        parent="sgichs_core2.menu_it_config"
+        sequence="13"/>
+    
+    <menuitem
+        id="menu_hw_list"
+        name="Perfiles de Usuarios"
+        parent="menu_it_user_config"
+        action="action_it_user_profile"
+        sequence="10"/>
 </odoo>

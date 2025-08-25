@@ -9,7 +9,7 @@
     <!-- Menú para Activos -->
     <menuitem
         id="menu_it_assets"
-        name="Activos"
+        name="Bienes Informaticos"
         parent="menu_it_root"
         sequence="10"/>
 
@@ -23,7 +23,7 @@
         id="menu_action_it_asset_backlog"
         action="action_it_asset_backlog"
         parent="menu_it_assets"
-        sequence="20"/>
+        sequence="9"/>
 
     <!-- Menú para Operaciones -->
     <menuitem

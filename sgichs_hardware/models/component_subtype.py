@@ -21,7 +21,9 @@ class ComponentSubtype(models.Model):
         string='Cantidad de Componentes',
         compute='_compute_component_count'
     )
-
+    
+    is_internal = fields.Boolean(string='Componente Interno', default=False)
+    
     _sql_constraints = [
         ('name_type_unique', 'UNIQUE(name, type)',
          'Ya existe un subtipo con este nombre para el mismo tipo de componente.'),

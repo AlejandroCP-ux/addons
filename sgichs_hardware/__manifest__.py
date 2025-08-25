@@ -8,14 +8,16 @@
     'website': "https://www.tuweb.com",
     'category': 'IT/Infrastructure',
     'version': '16.0.1.0.0',
-    # COMENTARIO: Dependencia explícita del módulo core.
     'depends': ['sgichs_core2'],
     'data': [
         'security/ir.model.access.csv',
         'views/component_subtype_views.xml',
         'views/component_views.xml',
         'views/hardware_views.xml',
+        'views/it_asset_backlog_views.xml',
         'views/menus.xml',
+	
+	'data/demo_data_hardware.xml',
     ],
     'installable': True,
     'application': False,

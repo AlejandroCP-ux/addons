@@ -33,7 +33,6 @@
         <field name="arch" type="xml">
             <tree string="Activos de Hardware">
                 <!-- Campos computados necesarios (invisibles) -->
-                <field name="has_reporting_module" invisible="1"/>
                 
                 <field name="name"/>
                 <field name="subtype"/>
@@ -52,7 +51,6 @@
             <form string="Activo de Hardware">
                 <header>
                     <!-- Campos computados necesarios (invisibles) -->
-                    <field name="has_reporting_module" invisible="1"/>
                     <field name="has_network_module" invisible="1"/>
                     <field name="has_software_module" invisible="1"/>
                     
@@ -62,21 +60,14 @@
                            options="{'clickable': ['draft', 'active', 'retired']}"/>
                     
                     <!-- Botones condicionales -->
-                    <button 
-                        name="action_llamar_reporte_ficha_tecnica"
-                        string="Ficha Técnica PDF"
-                        type="object"
-                        class="btn-primary"
-                        icon="fa-file-pdf-o"
-                        attrs="{'invisible': [('has_reporting_module', '=', False)]}"/>
                         
-                    <button 
+                    <!-- <button 
                         name="action_manual_ping"
                         string="Verificar Conexión"
                         type="object"
                         class="btn-info"
                         icon="fa-refresh"
-                        attrs="{'invisible': [('has_network_module', '=', False)]}"/>
+                        attrs="{'invisible': [('has_network_module', '=', False)]}"/> -->
                 </header>
                 
                 <sheet>

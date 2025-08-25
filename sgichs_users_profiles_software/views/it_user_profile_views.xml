@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_it_user_profile_form" model="ir.ui.view">
+        <field name="name">view.it.user.profile.form.inherit.profiles</field>
+        <field name="model">it.user.profile</field>
+        <field name="inherit_id" ref="sgichs_users.it_user_profile_view_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//header" position="inside">
+                 <button name="%(sgichs_users_profiles_software.action_profile_remove_software_wizard)d" 
+                        string="Quitar desde Lista" 
+                        type="action"/>
+                <button name="action_check_compliance"
+                        string="Comprobar Conformidad Ahora"
+                        type="object"
+                        class="oe_highlight"/>
+            </xpath>
+
+            <xpath expr="//notebook" position="inside">
+                <page string="Software Permitido" name="software">
+                    <field name="softwares_ids" 
+                           widget="many2many_tags" 
+                           domain="[('id', 'not in', softwares_ids)]"/>
+                </page>
+                <page string="Hardware Involucrado" name="hardware">
+                    <field name="hardware_ids" readonly="1">
+                        <tree>
+                            <field name="name"/>
+                            <field name="inventory_number"/>
+                            <field name="responsible_id"/>
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

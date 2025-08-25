@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_profile_remove_software_wizard_form" model="ir.ui.view">
+        <field name="name">profile.remove.software.wizard.form</field>
+        <field name="model">profile.remove_software.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Quitar Software desde Lista">
+                <group>
+                    <p>
+                        Seleccione una lista. El software que esté tanto en la lista
+                        como en el perfil será eliminado de la lista de software permitido del perfil.
+                    </p>
+                    <field name="list_id" options="{'no_create': True, 'no_create_edit': True}"/>
+                </group>
+                <footer>
+                    <button name="action_remove_software" string="Quitar Software" type="object" class="btn-primary" data-hotkey="q"/>
+                    <button string="Cancelar" class="btn-secondary" special="cancel" data-hotkey="z"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_profile_remove_software_wizard" model="ir.actions.act_window">
+        <field name="name">Quitar desde Lista</field>
+        <field name="res_model">profile.remove_software.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

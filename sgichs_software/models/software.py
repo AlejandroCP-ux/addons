@@ -44,6 +44,8 @@ class Software(models.Model):
         default='otros'
     )
     
+    color = fields.Integer(string="Color Index", help="Color para representación visual")
+    
     #=====================#
     #      FUNCIONES      #
     #=====================#

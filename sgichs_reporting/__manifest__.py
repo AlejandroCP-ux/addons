@@ -14,9 +14,10 @@
     ],
     'data': [
         'security/ir.model.access.csv',
-        'views/report_actions.xml',  # Menús corregidos
-        'report/hardware_template.xml',
-        'templates/hardware_technical_sheet.xml',
+        'report/report_actions.xml',
+        'report/hardware_technical_sheet.xml',
+        'views/hardware_views.xml',
+        'views/custom_report_views.xml',
     ],
     'assets': {
         'web.report_assets_common': [

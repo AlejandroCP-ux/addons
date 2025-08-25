@@ -40,9 +40,20 @@ class Component(models.Model):
         ondelete='set null'
     )
 
+    is_internal = fields.Boolean(
+        string='Es Interno',
+        compute='_compute_is_internal',
+        store=False
+    )
+
     _sql_constraints = [
         ('serial_number_uniq', 'unique(serial_number)', 'El número de serie debe ser único!'),
     ]
+    
+    @api.depends('subtype_id.is_internal')
+    def _compute_is_internal(self):
+        for record in self:
+            record.is_internal = record.subtype_id.is_internal if record.subtype_id else False
 
     @api.constrains('hardware_id')
     def _check_hardware_assignment(self):

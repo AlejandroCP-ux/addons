@@ -1,2 +1,3 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_it_user,it.user.user,model_it_user,base.group_user,1,1,1,1
+access_it_user_profile,it.user.profile,model_it_user_profile,base.group_user,1,1,1,1

@@ -1,0 +1,9 @@
+{
+    "intervalo_principal_min": 60,
+    "intervalo_reintento_min": 5,
+    "odoo_config": {
+        "url": "http://localhost:8067",
+        "db": "odoo",
+        "username": "admin"
+    }
+}

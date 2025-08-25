@@ -64,6 +64,20 @@ class HWList(models.Model):
         
         return super().write(vals)
     
+    def action_view_software(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Software en Lista',
+            'res_model': 'it.asset.software',
+            'view_mode': 'tree,form',
+            'domain': [('id', 'in', self.software_ids.ids)],
+            'context': {
+                'default_hw_list_ids': [(4, self.id)],
+                'search_default_in_list': True
+            }
+        }
+    
     def _calculate_final_software_ids(self, record, software_commands):
         """Calcula cuáles serían los IDs finales de software después de aplicar los comandos"""
         current_ids = set(record.software_ids.ids)

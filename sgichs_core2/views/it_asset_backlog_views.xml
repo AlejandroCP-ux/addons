@@ -27,7 +27,7 @@
                         <field name="name"/>
                         <field name="type"/>
                         <field name="description"/>
-                        <field name="raw_data" attrs="{'invisible': [('raw_data', '=', False)]}"/>
+                        <field name="raw_data"  invisible="1"/>
                     </group>
                 </sheet>
             </form>

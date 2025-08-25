@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="it_asset_software_view_form_inherit" model="ir.ui.view">
+        <field name="name">it.asset.software.form.inherit</field>
+        <field name="model">it.asset.software</field>
+        <field name="inherit_id" ref="sgichs_software.view_software_form"/> <field name="arch" type="xml">
+            <xpath expr="//sheet/group" position="inside">
+                <notebook>
+                    <page string="Perfiles Permitidos" name="allowed_profiles">
+                        <field name="profile_ids" widget="many2many_tags" readonly="1"/>
+                    </page>
+                </notebook>
+            </xpath>
+        </field>
+    </record>
+</odoo>

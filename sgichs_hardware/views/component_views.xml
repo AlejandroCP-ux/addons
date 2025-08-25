@@ -1,42 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <!-- Vista Tree Mejorada -->
     <record id="it_component_view_tree" model="ir.ui.view">
         <field name="name">it.component.tree</field>
         <field name="model">it.component</field>
         <field name="arch" type="xml">
-            <tree string="Componentes">
-                <field name="model"/>
-                <field name="subtype_id"/>
-                <field name="type"/>
-                <field name="serial_number"/>
-                <field name="hardware_id"/>
-                <field name="status"/>
+            <tree string="Componentes" decoration-danger="status == 'failed'" decoration-warning="status == 'maintenance'" decoration-success="status == 'operational'" decoration-muted="status == 'retired'">
+                <field name="model" string="Modelo"/>
+                <field name="subtype_id" string="Subtipo"/>
+                <field name="type" string="Tipo"/>
+                <field name="serial_number" string="N° Serie"/>
+                <field name="inventory_number" string="N° Inventario"
+                    attrs="{'invisible': [('is_internal','=',True)]}"/>
+                <field name="hardware_id" string="Hardware Asignado"/>
+                <field name="status" string="Estado" widget="badge"/>
+                <!-- Campo REQUERIDO para que funcione attrs -->
+                <field name="is_internal" invisible="1"/>
             </tree>
         </field>
     </record>
 
+    <!-- Vista Form Mejorada -->
     <record id="it_component_view_form" model="ir.ui.view">
         <field name="name">it.component.form</field>
         <field name="model">it.component</field>
         <field name="arch" type="xml">
             <form string="Componente">
+                <header>
+                    <button name="action_unassign_from_hardware" type="object" string="Desasignar de Hardware" class="oe_highlight" attrs="{'invisible': [('hardware_id','=',False)]}"/>
+                </header>
                 <sheet>
                     <group>
-                        <field name="model"/>
-                        <field name="subtype_id"/>
-                        <field name="type"/>
+                        <group string="Identificación">
+                            <field name="model"/>
+                            <field name="subtype_id"/>
+                            <field name="type"/>
+                        </group>
+                        <group string="Ubicación y Estado">
+                            <field name="hardware_id"/>
+                            <field name="status" widget="radio" options="{'horizontal': true}"/>
+                        </group>
+                    </group>
+                    <group string="Datos Técnicos">
                         <field name="serial_number"/>
-                        <field name="hardware_id"/>
-                        <field name="status"/>
+                        <field name="inventory_number" 
+                            attrs="{'invisible': [('is_internal','=',True)]}"
+                            string="N° Inventario (Solo Periféricos)"/>
+                        <!-- Campo REQUERIDO para que funcione attrs -->
+                        <field name="is_internal" invisible="1"/>
                     </group>
                 </sheet>
             </form>
         </field>
-    </record>
-
-    <record id="action_it_component" model="ir.actions.act_window">
-        <field name="name">Componentes</field>
-        <field name="res_model">it.component</field>
-        <field name="view_mode">tree,form</field>
     </record>
 </odoo>

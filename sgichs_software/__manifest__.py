@@ -11,6 +11,8 @@
         'views/software_views.xml',
         'views/hw_list_views.xml',
         'views/menus.xml',
+        'views/it_asset_backlog_views.xml',
+	    'data/demo_data_software.xml',
     ],
     'installable': True,
     'application': False,

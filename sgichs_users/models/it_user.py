@@ -32,6 +32,16 @@ class ITUser(models.Model):
         'responsible_id',
         string='Hardware Asignado'
     )
+    
+    # Campo único para todos los perfiles del usuario
+    profile_ids = fields.Many2many(
+        'it.user.profile',
+        relation='it_user_profile_rel',  # Nombre único para la tabla de relación
+        column1='user_id',               # Columna para este modelo
+        column2='profile_id',             # Columna para el modelo relacionado
+        string='Perfiles Asignados',
+        help='Todos los perfiles funcionales asignados al usuario'
+    )
 
     _sql_constraints = [
         ('unique_user', 'UNIQUE(user_id)', 'Cada usuario del sistema solo puede tener una autorización de TI.')

@@ -17,18 +17,20 @@
         <field name="arch" type="xml">
             <form string="Usuario de TI">
                 <header>
-                     <field name="status" widget="statusbar" statusbar_visible="active,revoked"/>
+                    <field name="status" widget="statusbar" statusbar_visible="active,revoked"/>
                 </header>
                 <sheet>
                     <group>
                         <field name="user_id"/>
                         <field name="name"/>
+                        <!-- Único campo para todos los perfiles -->
+                        <field name="profile_ids" widget="many2many_tags"/>
                     </group>
                     <notebook>
                         <page string="Hardware Asignado">
-                            <!-- Este campo ahora funcionará correctamente -->
                             <field name="hardware_ids"/>
                         </page>
+                        <!-- Se eliminó completamente la pestaña de Software Permitido -->
                         <page string="Notas">
                             <field name="notes"/>
                         </page>

@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_profile_add_software_wizard,profile.add_software.wizard,model_profile_add_software_wizard,base.group_user,1,1,1,1
+access_profile_remove_software_wizard,profile.remove_software.wizard,model_profile_remove_software_wizard,base.group_user,1,1,1,1

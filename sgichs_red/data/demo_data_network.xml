@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Direcciones IP -->
+    <record id="ip_address_1" model="it.ip.address">
+        <field name="address">192.168.1.100</field>
+        <field name="description">PC Oficina 101</field>
+    </record>
+    
+    <record id="ip_address_2" model="it.ip.address">
+        <field name="address">192.168.1.101</field>
+        <field name="description">Laptop Gerencia</field>
+    </record>
+    
+    <record id="ip_address_3" model="it.ip.address">
+        <field name="address">192.168.1.200</field>
+        <field name="description">Servidor Principal</field>
+    </record>
+    
+    <!-- Asignación de IPs a hardware existente (CORREGIDO) -->
+    <!-- Usamos función write específica solo para campos de red -->
+    <function 
+        model="it.asset.hardware" 
+        name="write" 
+        eval="[ref('sgichs_hardware.hardware_pc_1'), {
+            'ip_ids': [(4, ref('ip_address_1'))],
+            'connection_status': 'online',
+            'last_ping_time': '2025-07-24 10:00:00'
+        }]"
+    />
+    
+    <function 
+        model="it.asset.hardware" 
+        name="write" 
+        eval="[ref('sgichs_hardware.hardware_laptop_1'), {
+            'ip_ids': [(4, ref('ip_address_2'))],
+            'connection_status': 'offline',
+            'last_ping_time': '2025-07-24 09:30:00'
+        }]"
+    />
+    
+    <function 
+        model="it.asset.hardware" 
+        name="write" 
+        eval="[ref('sgichs_hardware.hardware_server_1'), {
+            'ip_ids': [(6, 0, [ref('ip_address_3')])],
+            'connection_status': 'online',
+            'last_ping_time': '2025-07-24 10:05:00'
+        }]"
+    />
+    
+    <!-- Historial de Ping -->
+    <record id="ping_history_1" model="it.hardware.ping.history">
+        <field name="hardware_id" ref="sgichs_hardware.hardware_pc_1"/>
+        <field name="ping_time">2025-07-24 10:00:00</field>
+        <field name="status">online</field>
+        <field name="response_time_ms">45.2</field>
+    </record>
+    
+    <record id="ping_history_2" model="it.hardware.ping.history">
+        <field name="hardware_id" ref="sgichs_hardware.hardware_laptop_1"/>
+        <field name="ping_time">2025-07-24 09:30:00</field>
+        <field name="status">offline</field>
+        <field name="response_time_ms">0.0</field>
+    </record>
+    
+    <record id="ping_history_3" model="it.hardware.ping.history">
+        <field name="hardware_id" ref="sgichs_hardware.hardware_server_1"/>
+        <field name="ping_time">2025-07-24 10:05:00</field>
+        <field name="status">online</field>
+        <field name="response_time_ms">12.8</field>
+    </record>
+    
+    <!-- Servicios de Red -->
+    <record id="network_service_1" model="it.asset.network_service">
+        <field name="name">Servidor Web</field>
+        <field name="type">network_service</field>
+        <field name="ip_address">192.168.1.200</field>
+        <field name="port">80</field>
+        <field name="protocol">tcp</field>
+    </record>
+    
+    <record id="network_service_2" model="it.asset.network_service">
+        <field name="name">Servidor SSH</field>
+        <field name="type">network_service</field>
+        <field name="ip_address">192.168.1.200</field>
+        <field name="port">22</field>
+        <field name="protocol">tcp</field>
+    </record>
+</odoo>
