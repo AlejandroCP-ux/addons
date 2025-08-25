@@ -284,12 +284,13 @@ class FirmaDocumentoWizard(models.TransientModel):
             # Dimensiones originales
             ancho_original, alto_original = imagen.size
             
-            # Limitar ancho máximo a 205px manteniendo proporción
-            max_ancho = 205
+            # Limitar ancho máximo a 300px manteniendo proporción
+            max_ancho = 300
             if ancho_original > max_ancho:
                 factor_escala = max_ancho / ancho_original
                 nuevo_ancho_img = max_ancho
                 nuevo_alto_img = int(alto_original * factor_escala)
+                
                 # Compatibilidad con versiones antiguas y nuevas de Pillow
                 try:
                     # Para versiones nuevas de Pillow (>=8.0.0)
@@ -298,7 +299,7 @@ class FirmaDocumentoWizard(models.TransientModel):
                     # Para versiones antiguas de Pillow
                     imagen = imagen.resize((nuevo_ancho_img, nuevo_alto_img), Image.LANCZOS)
                 ancho_original, alto_original = nuevo_ancho_img, nuevo_alto_img
-            
+                
             # Calcular nuevo alto (agregar espacio para el texto)
             try:
                 # Intentar cargar una fuente del sistema
@@ -325,7 +326,7 @@ class FirmaDocumentoWizard(models.TransientModel):
                 margen_texto = 10
                 nuevo_alto = alto_original + alto_texto + (margen_texto * 2)
                 nuevo_ancho = max(ancho_original, ancho_texto + 20)
-                
+                                
                 # Crear imagen nueva con fondo transparente
                 nueva_imagen = Image.new('RGBA', (nuevo_ancho, nuevo_alto), (255, 255, 255, 0))
                 
@@ -356,25 +357,43 @@ class FirmaDocumentoWizard(models.TransientModel):
     def _calcular_coordenadas_firma(self, page_width, page_height, imagen_width, imagen_height, posicion):
         """Calcula las coordenadas de la firma según la posición seleccionada"""
         margen_inferior = 25
-        margen_lateral = 1
-        ancho = page_width / 4
-        
-        # Coordenada Y siempre en la parte inferior
+        margen_lateral = 13
+        separacion = 5
+        ancho = page_width / 4 - 20
         y = margen_inferior
         
+        # Calcualar nueva altura de imagen
+        escala = min(ancho, imagen_width) / max(ancho, imagen_width)
+        alto = imagen_height * escala   
+        y1 = y + alto 
+        
         # Calcular coordenada X según la posición
+        xi = margen_lateral
+        x1i = xi+ancho
+        
+        xci = x1i+xi+separacion
+        x1ci = xci+ancho
+        
+        xcd = x1ci+xi+separacion
+        x1cd = xcd+ancho
+        
+        xd = x1cd+xi+separacion
+        x1d = xd+ancho
+        
         if posicion == 'izquierda':
-            x = margen_lateral
+            x = xi
+            x1 = x1i
         elif posicion == 'centro_izquierda':
-            x = margen_lateral + ancho + 1
+            x = xci
+            x1 = x1ci
         elif posicion == 'centro_derecha':
-            x = margen_lateral + ancho * 2 + 1
+            x = xcd
+            x1 = x1cd
         else:  # derecha
-            x = margen_lateral + ancho * 3 + 1
-        
-        x1 = x + ancho
-        
-        return x, y, x1
+            x = xd
+            x1 = x1d
+                    
+        return x, y, x1, y1
 
     def action_firmar_documentos(self):
         """Acción principal para firmar todos los documentos seleccionados"""
@@ -417,7 +436,6 @@ class FirmaDocumentoWizard(models.TransientModel):
                 self.signature_role.name
             )
             imagen_width, imagen_height = imagen_size
-            
             # Cargar certificado
             private_key, certificate, additional_certificates = pkcs12.load_key_and_certificates(
                 certificado_data,
@@ -515,9 +533,9 @@ class FirmaDocumentoWizard(models.TransientModel):
                     # Si no podemos obtener las dimensiones, usar tamaño carta por defecto
                     from reportlab.lib.pagesizes import letter
                     page_width, page_height = letter
-            
+                                
             # Calcular las coordenadas para la imagen de la firma
-            x, y, x1 = self._calcular_coordenadas_firma(
+            x, y, x1, y1 = self._calcular_coordenadas_firma(
                 page_width, page_height, imagen_width, imagen_height, self.signature_position
             )
             
@@ -535,7 +553,7 @@ class FirmaDocumentoWizard(models.TransientModel):
                 "sigfield": f"Signature_{documento.id}",
                 "auto_sigfield": True,
                 "sigandcertify": True,
-                "signaturebox": (x, y, x1, y + imagen_height),
+                "signaturebox": (x, y, x1, y1),
                 "signature_img": imagen_firma_path,
                 "contact": self.env.user.email or '',
                 "location": self.env.user.company_id.city or '',

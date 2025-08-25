@@ -44,6 +44,8 @@
                         opcionalmente guarde la contraseña del certificado para mayor comodidad.</p>
                     <p>Si no guarda la contraseña aquí, se solicitará al momento de firmar cada
                         documento.</p>
+                    <p>Se recomienda que la imagen de su firma tenga un tamaño de 300x150 o superior
+                        pero siempre manteniendo la relación de 2:1.</p>
                 </div>
             </group>
         </field>

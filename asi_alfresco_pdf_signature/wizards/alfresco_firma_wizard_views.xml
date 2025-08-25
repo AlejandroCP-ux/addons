@@ -49,9 +49,13 @@
                                     <i class="fa fa-check text-success" /> Imagen configurada </span>
                             </div>
                         </div>
-                        <p style="margin-top: 10px; margin-bottom: 0;">
-                            <strong>Nota:</strong> Los datos del wizard tienen prioridad sobre su
-                            configuración personal. </p>
+                        <p style="margin-top: 10px; margin-bottom: 0;"
+                            attrs="{'invisible': [('has_image', '=', True)]}">
+                            <strong>
+                                Nota: Se recomienda que la imagen de su firma tenga un tamaño de
+                                300x150 o superior pero siempre manteniendo la relación de 2:1.
+                            </strong>
+                        </p>
                     </div>
 
                     <group>

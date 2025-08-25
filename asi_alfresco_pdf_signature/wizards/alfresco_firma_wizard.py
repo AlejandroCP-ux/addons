@@ -161,8 +161,8 @@ class AlfrescoFirmaWizard(models.TransientModel):
             # Dimensiones originales
             ancho_original, alto_original = imagen.size
             
-            # Limitar ancho máximo a 205px manteniendo proporción
-            max_ancho = 205
+            # Limitar ancho máximo a 300px manteniendo proporción
+            max_ancho = 300
             if ancho_original > max_ancho:
                 factor_escala = max_ancho / ancho_original
                 nuevo_ancho_img = max_ancho
@@ -230,25 +230,43 @@ class AlfrescoFirmaWizard(models.TransientModel):
     def _calcular_coordenadas_firma(self, page_width, page_height, imagen_width, imagen_height, posicion):
         """Calcula las coordenadas de la firma según la posición seleccionada"""
         margen_inferior = 25
-        margen_lateral = 1
-        ancho = page_width / 4
-        
-        # Coordenada Y siempre en la parte inferior
+        margen_lateral = 13
+        separacion = 5
+        ancho = page_width / 4 - 20
         y = margen_inferior
         
+        # Calcualar nueva altura de imagen
+        escala = min(ancho, imagen_width) / max(ancho, imagen_width)
+        alto = imagen_height * escala   
+        y1 = y + alto 
+        
         # Calcular coordenada X según la posición
+        xi = margen_lateral
+        x1i = xi+ancho
+        
+        xci = x1i+xi+separacion
+        x1ci = xci+ancho
+        
+        xcd = x1ci+xi+separacion
+        x1cd = xcd+ancho
+        
+        xd = x1cd+xi+separacion
+        x1d = xd+ancho
+        
         if posicion == 'izquierda':
-            x = margen_lateral
+            x = xi
+            x1 = x1i
         elif posicion == 'centro_izquierda':
-            x = margen_lateral + ancho + 1
+            x = xci
+            x1 = x1ci
         elif posicion == 'centro_derecha':
-            x = margen_lateral + ancho * 2 + 1
+            x = xcd
+            x1 = x1cd
         else:  # derecha
-            x = margen_lateral + ancho * 3 + 1
+            x = xd
+            x1 = x1d
         
-        x1 = x + ancho
-        
-        return x, y, x1
+        return x, y, x1, y1
 
     def action_firmar_documentos(self):
         """Acción principal para firmar todos los documentos seleccionados"""
@@ -397,7 +415,7 @@ class AlfrescoFirmaWizard(models.TransientModel):
                     page_width, page_height = letter
             
             # Calcular coordenadas según posición seleccionada
-            x, y, x1 = self._calcular_coordenadas_firma(
+            x, y, x1, y1 = self._calcular_coordenadas_firma(
                 page_width, page_height, imagen_width, imagen_height, self.signature_position
             )
             
@@ -414,7 +432,7 @@ class AlfrescoFirmaWizard(models.TransientModel):
                 "sigfield": f"Signature_{archivo.id}",
                 "auto_sigfield": True,
                 "sigandcertify": True,
-                "signaturebox": (x, y, x1, y + imagen_height),
+                "signaturebox": (x, y, x1, y1),
                 "signature_img": imagen_firma_path,
                 "contact": self.env.user.email or '',
                 "location": self.env.user.company_id.city or '',
