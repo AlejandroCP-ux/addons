@@ -18,6 +18,8 @@
         <field name="model">it.user.profile</field>
         <field name="arch" type="xml">
             <form string="Perfil de Usuario">
+                <header>
+                </header>
                 <sheet>
                     <group>
                         <field name="name"/>
@@ -25,7 +27,7 @@
                     </group>
                     <notebook>
                         <page string="Usuarios Asociados">
-                            <!-- <field name="user_ids" widget="many2many_tags"/> -->
+                            <field name="user_ids" widget="many2many_tags"/>
                         </page>
                         <!-- Eliminada la sección de Software Permitido -->
                     </notebook>

@@ -13,24 +13,24 @@ class RemoveSoftwareFromListWizard(models.TransientModel):
     )
     
     
-    def _create_incident(self, title, description, severity, asset_ref=None):
-        """
-        Crea un nuevo incidente de TI.
-        :param title: Título del incidente.
-        :param description: Descripción detallada.
-        :param severity: Severidad ('info', 'low', 'medium', 'high').
-        :param asset_ref: Registro de Odoo relacionado (ej: un perfil, un hardware).
-        """
-        incident_vals = {
-            'title': title,
-            'description': description,
-            'severity': severity,
-        }
-        if asset_ref:
-            # Crea la referencia como 'modelo,id'
-            incident_vals['asset_ref'] = f'{asset_ref._name},{asset_ref.id}'
+    # def _create_incident(self, title, description, severity, asset_ref=None):
+    #     """
+    #     Crea un nuevo incidente de TI.
+    #     :param title: Título del incidente.
+    #     :param description: Descripción detallada.
+    #     :param severity: Severidad ('info', 'low', 'medium', 'high').
+    #     :param asset_ref: Registro de Odoo relacionado (ej: un perfil, un hardware).
+    #     """
+    #     incident_vals = {
+    #         'title': title,
+    #         'description': description,
+    #         'severity': severity,
+    #     }
+    #     if asset_ref:
+    #         # Crea la referencia como 'modelo,id'
+    #         incident_vals['asset_ref'] = f'{asset_ref._name},{asset_ref.id}'
             
-        return self.env['it.incident'].create(incident_vals)
+    #     return self.env['it.incident'].create(incident_vals)
 
     def action_remove_software(self):
         """
@@ -67,14 +67,14 @@ class RemoveSoftwareFromListWizard(models.TransientModel):
             commands = [(3, sw_id) for sw_id in software_to_remove_ids]
             profile.write({'softwares_ids': commands})
             
-            # Creamos el incidente informativo
-            self._create_incident(
-                title=f"Software eliminado en masa del perfil: {profile.name}",
-                description=f"Se eliminaron {removed_count} softwares del perfil '{profile.name}' "
-                            f"usando la lista '{self.list_id.name}'.",
-                severity='info',
-                asset_ref=profile
-            )
+            # # Creamos el incidente informativo
+            # self._create_incident(
+            #     title=f"Software eliminado en masa del perfil: {profile.name}",
+            #     description=f"Se eliminaron {removed_count} softwares del perfil '{profile.name}' "
+            #                 f"usando la lista '{self.list_id.name}'.",
+            #     severity='info',
+            #     asset_ref=profile
+            # )
 
         # Notificación para el usuario
         return {

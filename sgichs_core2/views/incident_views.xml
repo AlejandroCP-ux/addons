@@ -9,7 +9,7 @@
                   decoration-warning="severity == 'medium'" 
                   decoration-info="severity == 'low'">
                 <field name="title" string="Título"/>
-                <field name="asset_ref" string="Activo"/>
+                <field name="asset_ref_id" string="Activo"/>
                 <field name="severity" widget="badge"
                     decoration-success="severity == 'info'"
                     decoration-info="severity == 'low'"
@@ -62,7 +62,7 @@
                             <h2 style="color: #0077B6; border-bottom: 1px solid #EEE; padding-bottom: 5px; margin-bottom: 15px;">
                                 Activo Relacionado
                             </h2>
-                            <field name="asset_ref"/>
+                            <field name="asset_ref_id"/>
                         </div>
                     </div>
                     

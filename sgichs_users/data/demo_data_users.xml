@@ -1,87 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Usuarios del sistema (res.users) -->
-    <record id="user_admin" model="res.users">
-        <field name="name">Administrador TI</field>
-        <field name="login">admin.ti@example.com</field>
-        <field name="password">admin_ti_pass</field>
-        <field name="groups_id" eval="[(6, 0, [ref('base.group_system')])]"/>
-    </record>
-    
-    <record id="user_jperez" model="res.users">
-        <field name="name">Juan Pérez</field>
-        <field name="login">juan.perez@example.com</field>
-        <field name="password">jperez_pass</field>
-        <field name="groups_id" eval="[(6, 0, [ref('base.group_user')])]"/>
-    </record>
-    
-    <record id="user_mgomez" model="res.users">
-        <field name="name">María Gómez</field>
-        <field name="login">maria.gomez@example.com</field>
-        <field name="password">mgomez_pass</field>
-        <field name="groups_id" eval="[(6, 0, [ref('base.group_user')])]"/>
-    </record>
-    
-    <record id="user_crodriguez" model="res.users">
-        <field name="name">Carlos Rodríguez</field>
-        <field name="login">carlos.rodriguez@example.com</field>
-        <field name="password">crodriguez_pass</field>
-        <field name="groups_id" eval="[(6, 0, [ref('base.group_user')])]"/>
-    </record>
+    <data noupdate="1">
+        
+        <record id="user_juan_perez" model="res.users">
+            <field name="name">Juan Pérez</field>
+            <field name="login">jperez@sgichs.demo</field>
+        </record>
+        <record id="user_maria_gomez" model="res.users">
+            <field name="name">María Gómez</field>
+            <field name="login">mgomez@sgichs.demo</field>
+        </record>
 
-    <!-- Usuarios Autorizados de TI (it.user) -->
-    <record id="it_user_admin" model="it.user">
-        <field name="user_id" ref="user_admin"/>
-        <field name="status">active</field>
-        <field name="notes">Administrador principal de TI</field>
-    </record>
-    
-    <record id="it_user_jperez" model="it.user">
-        <field name="user_id" ref="user_jperez"/>
-        <field name="status">active</field>
-        <field name="notes">Responsable de equipos de oficina</field>
-    </record>
-    
-    <record id="it_user_mgomez" model="it.user">
-        <field name="user_id" ref="user_mgomez"/>
-        <field name="status">active</field>
-        <field name="notes">Responsable de servidores</field>
-    </record>
-    
-    <record id="it_user_crodriguez" model="it.user">
-        <field name="user_id" ref="user_crodriguez"/>
-        <field name="status">revoked</field>
-        <field name="notes">Acceso revocado por cambio de departamento</field>
-    </record>
+        <record id="it_user_jperez" model="it.user">
+            <field name="user_id" ref="user_juan_perez"/>
+            <field name="status">active</field>
+        </record>
+        <record id="it_user_mgomez" model="it.user">
+            <field name="user_id" ref="user_maria_gomez"/>
+            <field name="status">active</field>
+        </record>
 
-    <!-- Asignación de responsables a hardware existente -->
-    <record id="hardware_pc_1" model="it.asset.hardware">
-        <field name="responsible_id" ref="it_user_jperez"/>
-    </record>
-    
-    <record id="hardware_laptop_1" model="it.asset.hardware">
-        <field name="responsible_id" ref="it_user_mgomez"/>
-    </record>
-    
-    <record id="hardware_server_1" model="it.asset.hardware">
-        <field name="responsible_id" ref="it_user_mgomez"/>
-    </record>
-    
-    <!-- Hardware sin responsable asignado -->
-    <!-- (El componente sin asignar permanece sin responsable) -->
+        <function model="it.asset.hardware" name="write">
+            <value eval="[ref('sgichs_hardware.hardware_pc_oficina_01')]"/>
+            <value eval="{'responsible_id': ref('it_user_jperez')}"/>
+        </function>
 
-    <!-- Usuario de TI con múltiples hardware asignados -->
-    <record id="it_user_admin_hardware" model="it.asset.hardware">
-        <field name="name">Switch Administrativo</field>
-        <field name="subtype">network</field>
-        <field name="inventory_number">INV-SW-ADM01</field>
-        <field name="responsible_id" ref="it_user_admin"/>
-    </record>
-    
-    <record id="it_user_admin_hardware_2" model="it.asset.hardware">
-        <field name="name">Firewall Principal</field>
-        <field name="subtype">network</field>
-        <field name="inventory_number">INV-FW-01</field>
-        <field name="responsible_id" ref="it_user_admin"/>
-    </record>
+        <function model="it.asset.hardware" name="write">
+            <value eval="[ref('sgichs_hardware.hardware_laptop_gerencia_01')]"/>
+            <value eval="{'responsible_id': ref('it_user_mgomez')}"/>
+        </function>
+
+    </data>
 </odoo>
