@@ -73,6 +73,16 @@
                         </group>
                     </group>
 
+                    <!-- Nuevas opciones de firma -->
+                    <group string="Opciones de Firma" col="2">
+                        <group>
+                            <field name="signature_opaque_background" />
+                        </group>
+                        <group>
+                            <field name="sign_all_pages" />
+                        </group>
+                    </group>
+
                     <!-- Campos adicionales para certificado e imagen temporal -->
                     <group string="Datos Temporales" col="2">
                         <group>

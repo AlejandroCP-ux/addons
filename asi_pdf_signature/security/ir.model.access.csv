@@ -3,5 +3,3 @@ access_firma_documento_wizard,access.firma.documento.wizard,model_firma_document
 access_documento_firma,access.documento.firma,model_documento_firma,base.group_user,1,1,1,1
 access_document_signature_tag_user,document.signature.tag.user,model_document_signature_tag,,1,0,0,0
 access_document_signature_tag_admin,document.signature.tag.admin,model_document_signature_tag,base.group_system,1,1,1,1
-access_seleccionar_archivos_wizard,access.seleccionar.archivos.wizard,model_seleccionar_archivos_wizard,base.group_user,1,1,1,1
-access_archivo_temporal,access.archivo.temporal,model_archivo_temporal,base.group_user,1,1,1,1

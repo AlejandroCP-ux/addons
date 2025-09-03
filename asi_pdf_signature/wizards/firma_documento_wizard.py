@@ -139,6 +139,18 @@ class FirmaDocumentoWizard(models.TransientModel):
     zip_signed = fields.Binary(string='ZIP con Documentos Firmados', readonly=True)
     zip_name = fields.Char(string='Nombre del ZIP', readonly=True)
 
+    signature_opaque_background = fields.Boolean(
+        string='Firma con fondo opaco',
+        default=False,
+        help='Si está marcado, la firma tendrá fondo blanco opaco en lugar de transparente'
+    )
+    
+    sign_all_pages = fields.Boolean(
+        string='Firmar todas las páginas',
+        default=False,
+        help='Si está marcado, se firmará todas las páginas del documento en lugar de solo la última'
+    )
+
     @api.depends('document_ids')
     def _compute_documento_count(self):
         for record in self:
@@ -326,9 +338,13 @@ class FirmaDocumentoWizard(models.TransientModel):
                 margen_texto = 10
                 nuevo_alto = alto_original + alto_texto + (margen_texto * 2)
                 nuevo_ancho = max(ancho_original, ancho_texto + 20)
-                                
-                # Crear imagen nueva con fondo transparente
-                nueva_imagen = Image.new('RGBA', (nuevo_ancho, nuevo_alto), (255, 255, 255, 0))
+                
+                if self.signature_opaque_background:
+                    # Crear imagen nueva con fondo blanco opaco
+                    nueva_imagen = Image.new('RGBA', (nuevo_ancho, nuevo_alto), (255, 255, 255, 255))
+                else:
+                    # Crear imagen nueva con fondo transparente (comportamiento original)
+                    nueva_imagen = Image.new('RGBA', (nuevo_ancho, nuevo_alto), (255, 255, 255, 0))
                 
                 # Pegar el texto en la parte superior
                 draw = ImageDraw.Draw(nueva_imagen)
@@ -339,9 +355,22 @@ class FirmaDocumentoWizard(models.TransientModel):
                 # Pegar la imagen original debajo del texto
                 x_imagen = (nuevo_ancho - ancho_original) // 2  # Centrar imagen
                 y_imagen = alto_texto + (margen_texto * 2)
-                nueva_imagen.paste(imagen, (x_imagen, y_imagen), imagen if imagen.mode == 'RGBA' else None)
+                
+                if self.signature_opaque_background:
+                    # Crear una copia de la imagen original con fondo blanco
+                    imagen_con_fondo = Image.new('RGBA', imagen.size, (255, 255, 255, 255))
+                    imagen_con_fondo.paste(imagen, (0, 0), imagen if imagen.mode == 'RGBA' else None)
+                    nueva_imagen.paste(imagen_con_fondo, (x_imagen, y_imagen))
+                else:
+                    # Comportamiento original con transparencia
+                    nueva_imagen.paste(imagen, (x_imagen, y_imagen), imagen if imagen.mode == 'RGBA' else None)
             else:
-                nueva_imagen = imagen
+                if self.signature_opaque_background:
+                    # Crear imagen con fondo blanco opaco
+                    nueva_imagen = Image.new('RGBA', imagen.size, (255, 255, 255, 255))
+                    nueva_imagen.paste(imagen, (0, 0), imagen if imagen.mode == 'RGBA' else None)
+                else:
+                    nueva_imagen = imagen
             
             # Guardar en archivo temporal
             temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.png')
@@ -543,45 +572,80 @@ class FirmaDocumentoWizard(models.TransientModel):
             date = datetime.now()
             date_str = date.strftime("D:%Y%m%d%H%M%S+00'00'")
             
-            # Configurar el diccionario para la firma digital
-            dct = {
-                "aligned": 0,
-                "sigflags": 3,
-                "sigflagsft": 132,
-                "sigpage": num_paginas - 1,  # Última página (índice 0)
-                "sigbutton": True,
-                "sigfield": f"Signature_{documento.id}",
-                "auto_sigfield": True,
-                "sigandcertify": True,
-                "signaturebox": (x, y, x1, y1),
-                "signature_img": imagen_firma_path,
-                "contact": self.env.user.email or '',
-                "location": self.env.user.company_id.city or '',
-                "signingdate": date_str,
-                "reason": f"Firma Digital - {self.signature_role.name}",
-            }
+            if self.sign_all_pages:
+                # Firmar todas las páginas
+                paginas_a_firmar = list(range(num_paginas))
+                _logger.info(f"Firmando todas las páginas del documento: {num_paginas} páginas")
+            else:
+                # Firmar solo la última página (comportamiento original)
+                paginas_a_firmar = [num_paginas - 1]
+                _logger.info(f"Firmando solo la última página del documento: página {num_paginas}")
             
-            # Leer el PDF original
+            datau = None
             with open(temp_pdf_path, 'rb') as f:
                 datau = f.read()
             
-            # Firmar digitalmente el PDF
-            datas = pdf.cms.sign(
-                datau,
-                dct,
-                private_key,
-                certificate,
-                additional_certificates,
-                'sha256'
-            )
-            
-            # Guardar el PDF firmado digitalmente de manera incremental
-            with tempfile.NamedTemporaryFile(delete=False, suffix='_firmado.pdf') as temp_final:
-                # Escribir el contenido original
-                temp_final.write(datau)
-                # Añadir la firma de manera incremental
-                temp_final.write(datas)
-                temp_final_path = temp_final.name
+            # Firmar cada página seleccionada
+            for i, pagina_index in enumerate(paginas_a_firmar):
+                _logger.info(f"Firmando la página {pagina_index + 1}/{num_paginas} del documento")
+                # Configurar el diccionario para la firma digital
+                dct = {
+                    "aligned": 0,
+                    "sigflags": 3,
+                    "sigflagsft": 132,
+                    "sigpage": pagina_index,  # Página actual a firmar
+                    "sigbutton": True,
+                    "sigfield": f"Signature_{documento.id}_page_{pagina_index + 1}",  # Campo único por página
+                    "auto_sigfield": True,
+                    "sigandcertify": True,
+                    "signaturebox": (x, y, x1, y1),
+                    "signature_img": imagen_firma_path,
+                    "contact": self.env.user.email or '',
+                    "location": self.env.user.company_id.city or '',
+                    "signingdate": date_str,
+                    "reason": f"Firma Digital - {self.signature_role.name} - Página {pagina_index + 1}",
+                }
+                _logger.info(f"Datos de firma para la página {pagina_index + 1}: {dct}")
+                
+                # Firmar digitalmente el PDF
+                datas = pdf.cms.sign(
+                    datau,
+                    dct,
+                    private_key,
+                    certificate,
+                    additional_certificates,
+                    'sha256'
+                )
+                
+                # Para la primera firma, crear el archivo base
+                if i == 0:
+                    # Guardar el PDF firmado digitalmente de manera incremental
+                    with tempfile.NamedTemporaryFile(delete=False, suffix='_firmado.pdf') as temp_final:
+                        # Escribir el contenido original
+                        temp_final.write(datau)
+                        # Añadir la primera firma de manera incremental
+                        temp_final.write(datas)
+                        temp_final_path = temp_final.name
+                else:
+                    # Para firmas adicionales, leer el archivo ya firmado y agregar la nueva firma
+                    with open(temp_final_path, 'rb') as f:
+                        datau_firmado = f.read()
+                    
+                    # Crear nuevo archivo temporal para la siguiente firma
+                    with tempfile.NamedTemporaryFile(delete=False, suffix=f'_firmado_p{pagina_index + 1}.pdf') as temp_next:
+                        temp_next.write(datau_firmado)
+                        temp_next.write(datas)
+                        temp_next_path = temp_next.name
+                    
+                    # Eliminar el archivo anterior y usar el nuevo
+                    try:
+                        os.unlink(temp_final_path)
+                    except:
+                        pass
+                    temp_final_path = temp_next_path
+                    
+                    # Actualizar datau para la siguiente iteración
+                    datau = datau_firmado
             
             # Leer el PDF final firmado
             with open(temp_final_path, 'rb') as f:
