@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista de formulario para flujos de firma -->
+    <record id="view_signature_workflow_form" model="ir.ui.view">
+        <field name="name">signature.workflow.form</field>
+        <field name="model">signature.workflow</field>
+        <field name="arch" type="xml">
+            <form string="Flujo de Firma Digital">
+                <header>
+                    <button name="action_send_for_signature" string="Enviar para Firma"
+                        type="object" class="btn-primary"
+                        attrs="{'invisible': [('state', '!=', 'draft')]}" />
+                    <button name="action_sign_documents" string="Firmar Documentos"
+                        type="object" class="btn-success"
+                        attrs="{'invisible': [('state', '!=', 'sent')]}" />
+                    <button name="action_send_reminder" string="Enviar Recordatorio"
+                        type="object" class="btn-warning"
+                        attrs="{'invisible': [('state', '!=', 'sent')]}" />
+                    <button name="action_download_all_signed" string="Descargar Firmados"
+                        type="object" class="btn-info"
+                        attrs="{'invisible': [('state', '!=', 'completed')]}" />
+                    <field name="state" widget="statusbar"
+                        statusbar_visible="draft,sent,signed,completed" />
+                </header>
+
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Nombre del Flujo de Firma" />
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group>
+                            <field name="creator_id" readonly="1" />
+                            <field name="target_user_id"
+                                attrs="{'readonly': [('state', '!=', 'draft')]}" />
+                            <field name="signature_role_id"
+                                attrs="{'readonly': [('state', '!=', 'draft')]}" />
+                            <field name="signature_position"
+                                attrs="{'readonly': [('state', '!=', 'draft')]}" />
+                        </group>
+                        <group>
+                            <field name="document_source"
+                                attrs="{'readonly': [('state', '!=', 'draft')]}" />
+                            <field name="document_count" />
+                            <field name="sent_date"
+                                attrs="{'invisible': [('sent_date', '=', False)]}" />
+                            <field name="signed_date"
+                                attrs="{'invisible': [('signed_date', '=', False)]}" />
+                            <field name="completed_date"
+                                attrs="{'invisible': [('completed_date', '=', False)]}" />
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Documentos" name="documents">
+                            <field name="document_ids" nolabel="1"
+                                attrs="{'readonly': [('state', '!=', 'draft')]}">
+                                <tree create="false" edit="false" delete="false">
+                                    <field name="name" />
+                                    <field name="alfresco_file_id"
+                                        attrs="{'invisible': [('parent.document_source', '!=', 'alfresco')]}" />
+                                    <field name="is_signed" widget="boolean_toggle" />
+                                    <field name="signed_date" />
+                                    <button name="action_download_document"
+                                        string="Descargar" type="object" icon="fa-download"
+                                        attrs="{'invisible': [('is_signed', '=', False)]}" />
+                                </tree>
+                            </field>
+                        </page>
+
+                        <page string="Notas" name="notes">
+                            <group>
+                                <field name="notes" nolabel="1"
+                                    placeholder="Notas e instrucciones para el usuario destinatario..."
+                                    attrs="{'readonly': [('state', '!=', 'draft')]}" />
+                                <field name="signature_notes" nolabel="1"
+                                    placeholder="Notas de la firma (completado automáticamente)"
+                                    attrs="{'invisible': [('signature_notes', '=', False)]}" />
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" />
+                    <field name="activity_ids" />
+                    <field name="message_ids" />
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Vista de lista para flujos de firma -->
+    <record id="view_signature_workflow_tree" model="ir.ui.view">
+        <field name="name">signature.workflow.tree</field>
+        <field name="model">signature.workflow</field>
+        <field name="arch" type="xml">
+            <tree string="Flujos de Firma Digital">
+                <field name="name" />
+                <field name="creator_id" />
+                <field name="target_user_id" />
+                <field name="document_count" />
+                <field name="document_source" />
+                <field name="state" widget="badge"
+                    decoration-info="state == 'draft'"
+                    decoration-warning="state == 'sent'"
+                    decoration-primary="state == 'signed'"
+                    decoration-success="state == 'completed'" />
+                <field name="sent_date" />
+                <field name="completed_date" />
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vista de búsqueda -->
+    <record id="view_signature_workflow_search" model="ir.ui.view">
+        <field name="name">signature.workflow.search</field>
+        <field name="model">signature.workflow</field>
+        <field name="arch" type="xml">
+            <search string="Buscar Flujos de Firma">
+                <field name="name" />
+                <field name="creator_id" />
+                <field name="target_user_id" />
+                <field name="signature_role_id" />
+
+                <filter string="Mis Flujos Creados" name="my_created"
+                    domain="[('creator_id', '=', uid)]" />
+                <filter string="Flujos Asignados a Mí" name="assigned_to_me"
+                    domain="[('target_user_id', '=', uid)]" />
+
+                <separator />
+                <filter string="Borradores" name="draft" domain="[('state', '=', 'draft')]" />
+                <filter string="Enviados" name="sent" domain="[('state', '=', 'sent')]" />
+                <filter string="Completados" name="completed" domain="[('state', '=', 'completed')]" />
+
+                <separator />
+                <filter string="Documentos Locales" name="local_docs"
+                    domain="[('document_source', '=', 'local')]" />
+                <filter string="Documentos Alfresco" name="alfresco_docs"
+                    domain="[('document_source', '=', 'alfresco')]" />
+
+                <group expand="0" string="Agrupar Por">
+                    <filter string="Estado" name="group_state" context="{'group_by': 'state'}" />
+                    <filter string="Creador" name="group_creator"
+                        context="{'group_by': 'creator_id'}" />
+                    <filter string="Usuario Destinatario" name="group_target"
+                        context="{'group_by': 'target_user_id'}" />
+                    <filter string="Origen de Documentos" name="group_source"
+                        context="{'group_by': 'document_source'}" />
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Acción para la vista de flujos -->
+    <record id="action_signature_workflow" model="ir.actions.act_window">
+        <field name="name">Flujos de Firma Digital</field>
+        <field name="res_model">signature.workflow</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_my_created': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                ¡Cree su primer flujo de firma digital!
+            </p>
+            <p>
+                Los flujos de firma le permiten enviar documentos a otros usuarios
+                para que los firmen digitalmente de manera organizada y controlada.
+            </p>
+        </field>
+    </record>
+</odoo>

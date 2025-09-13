@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="download_signed_documents_page" name="Descarga de Documentos Firmados">
+        <t t-call="web.layout">
+            <div class="container mt-4">
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header bg-success text-white">
+                                <h4 class="mb-0">
+                                    <i class="fa fa-check-circle"></i>
+                                    Documentos Firmados Listos
+                                </h4>
+                            </div>
+                            <div class="card-body">
+                                <h5>Flujo: <t t-esc="workflow.name"/></h5>
+                                <p class="text-muted">
+                                    Firmado por: <strong><t t-esc="workflow.target_user_id.name"/></strong><br/>
+                                    Fecha de finalización: <t t-esc="workflow.completed_date"/>
+                                </p>
+                                
+                                <hr/>
+                                
+                                <h6>Documentos disponibles para descarga:</h6>
+                                <div class="list-group">
+                                    <t t-foreach="signed_documents" t-as="document">
+                                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <i class="fa fa-file-pdf-o text-danger"></i>
+                                                <span class="ml-2"><t t-esc="document.name"/></span>
+                                                <small class="text-muted d-block">
+                                                    Firmado el <t t-esc="document.signed_date"/>
+                                                </small>
+                                            </div>
+                                            <a t-attf-href="/signature_workflow/document/#{document.id}/download" 
+                                               class="btn btn-primary btn-sm">
+                                                <i class="fa fa-download"></i>
+                                                DESCARGAR AHORA!
+                                            </a>
+                                        </div>
+                                    </t>
+                                </div>
+                                
+                                <div class="mt-4 text-center">
+                                    <a href="/web" class="btn btn-secondary">
+                                        <i class="fa fa-arrow-left"></i>
+                                        Volver al Sistema
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

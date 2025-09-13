@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_signature_workflow_wizard_form" model="ir.ui.view">
+        <field name="name">signature.workflow.wizard.form</field>
+        <field name="model">signature.workflow.wizard</field>
+        <field name="arch" type="xml">
+            <!-- Simplified single-step form without complex step logic -->
+            <form string="Iniciar Flujo de Firma Digital">
+                <field name="has_alfresco_config" invisible="1" />
+                <field name="document_count" invisible="1" />
+
+                <div class="alert alert-info" role="alert">
+                    <h4><i class="fa fa-cogs" /> Configuración del Flujo de Firma</h4>
+                    <p>Configure los parámetros básicos para el flujo de trabajo de firma digital.</p>
+                </div>
+
+                <group>
+                    <group>
+                        <field name="name" placeholder="ej: Aprobación de Contratos - Enero 2024" />
+                        <field name="target_user_id" options="{'no_create': True}" />
+                        <field name="signature_role_id" options="{'no_create': True}" />
+                    </group>
+                    <group>
+                        <field name="signature_position" />
+                        <field name="document_source" />
+                    </group>
+                </group>
+
+                <!-- Información del usuario destinatario -->
+                <div attrs="{'invisible': [('target_user_id', '=', False)]}">
+                    <field name="target_user_info" nolabel="1" />
+                </div>
+
+                <!-- Advertencia para Alfresco -->
+                <div class="alert alert-warning" role="alert"
+                    attrs="{'invisible': ['|', ('document_source', '!=', 'alfresco'), ('has_alfresco_config', '=', True)]}">
+                    <h5><i class="fa fa-exclamation-triangle" /> Configuración Requerida</h5>
+                    <p>Para usar documentos de Alfresco, debe configurar la integración en <strong>Configuración
+                        > Técnico > Parámetros del Sistema</strong>.</p>
+                </div>
+
+                <!-- Mostrar documentos seleccionados -->
+                <group string="Documentos Seleccionados" col="1"
+                    attrs="{'invisible': [('document_count', '=', 0)]}">
+                    <field name="selected_document_ids" nolabel="1" readonly="1">
+                        <tree create="false" edit="false" delete="false">
+                            <field name="name" />
+                            <field name="file_type" />
+                            <field name="file_size" />
+                        </tree>
+                    </field>
+                </group>
+
+                <!-- Mensaje si no hay documentos -->
+                <div class="alert alert-info" role="alert"
+                    attrs="{'invisible': [('document_count', '>', 0)]}">
+                    <p><i class="fa fa-info-circle" /> No hay documentos seleccionados. Haga clic en
+                        "Seleccionar Documentos" para agregar archivos PDF.</p>
+                </div>
+
+                <group string="Notas del Flujo" col="1">
+                    <field name="notes" nolabel="1"
+                        placeholder="Agregue notas o instrucciones para el usuario destinatario..." />
+                </group>
+
+                <footer>
+                    <!-- Simplified buttons without step logic -->
+                    <button name="create_workflow" string="Crear y Enviar Flujo"
+                        type="object" class="btn-primary"
+                        attrs="{'invisible': [('document_count', '=', 0)]}" />
+                    <button name="open_document_selection" string="Seleccionar Documentos"
+                        type="object" class="btn-info" />
+                    <button string="Cancelar" class="btn-secondary" special="cancel" />
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_signature_workflow_wizard" model="ir.actions.act_window">
+        <field name="name">Iniciar Flujo de Firma</field>
+        <field name="res_model">signature.workflow.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_signature_workflow_user,signature.workflow.user,model_signature_workflow,base.group_user,1,1,1,1
+access_signature_workflow_document_user,signature.workflow.document.user,model_signature_workflow_document,base.group_user,1,1,1,1
+access_signature_workflow_wizard_user,signature.workflow.wizard.user,model_signature_workflow_wizard,base.group_user,1,1,1,1
+access_pdf_selection_wizard_user,pdf.selection.wizard.user,model_pdf_selection_wizard,base.group_user,1,1,1,1
+access_pdf_selection_local_document_user,pdf.selection.local.document.user,model_pdf_selection_local_document,base.group_user,1,1,1,1
+access_signature_workflow_document_temp_user,signature.workflow.document.temp.user,model_signature_workflow_document_temp,base.group_user,1,1,1,1

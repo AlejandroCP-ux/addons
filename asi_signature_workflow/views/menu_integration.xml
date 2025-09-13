@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Integración con el menú de Firma Digital existente -->
+    
+    <!-- Submenú para Iniciar Flujo -->
+    <menuitem id="menu_iniciar_flujo"
+        name="Iniciar Flujo"
+        parent="asi_pdf_signature.menu_firma_digital_root"
+        action="asi_signature_workflow.action_signature_workflow_wizard"
+        sequence="15" />
+
+    <!-- Submenú para Gestionar Flujos -->
+    <menuitem id="menu_gestionar_flujos"
+        name="Gestionar Flujos"
+        parent="asi_pdf_signature.menu_firma_digital_root"
+        action="asi_signature_workflow.action_signature_workflow"
+        sequence="20" />
+
+    <!-- Submenú para Flujos Pendientes (solo los asignados al usuario actual) -->
+    <record id="action_signature_workflow_pending" model="ir.actions.act_window">
+        <field name="name">Flujos Pendientes de Firma</field>
+        <field name="res_model">signature.workflow</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('target_user_id', '=', uid), ('state', '=', 'sent')]</field>
+        <field name="context">{'search_default_assigned_to_me': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No tiene flujos pendientes de firma
+            </p>
+            <p>
+                Aquí aparecerán los flujos de firma que otros usuarios le hayan enviado 
+                y que estén esperando su firma digital.
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="menu_flujos_pendientes"
+        name="Flujos Pendientes"
+        parent="asi_pdf_signature.menu_firma_digital_root"
+        action="asi_signature_workflow.action_signature_workflow_pending"
+        sequence="25" />
+
+    <!-- Submenú para Mis Flujos Creados -->
+    <record id="action_signature_workflow_created" model="ir.actions.act_window">
+        <field name="name">Mis Flujos Creados</field>
+        <field name="res_model">signature.workflow</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('creator_id', '=', uid)]</field>
+        <field name="context">{'search_default_my_created': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No ha creado ningún flujo de firma aún
+            </p>
+            <p>
+                Aquí aparecerán todos los flujos de firma que usted haya creado 
+                y enviado a otros usuarios para su firma.
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="menu_mis_flujos_creados"
+        name="Mis Flujos Creados"
+        parent="asi_pdf_signature.menu_firma_digital_root"
+        action="asi_signature_workflow.action_signature_workflow_created"
+        sequence="30" />
+
+    <!-- Dashboard/Resumen de Flujos -->
+    <record id="action_signature_workflow_dashboard" model="ir.actions.act_window">
+        <field name="name">Dashboard de Flujos</field>
+        <field name="res_model">signature.workflow</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="context">{
+            'search_default_my_created': 1,
+            'search_default_assigned_to_me': 1
+        }</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                ¡Bienvenido al Dashboard de Flujos de Firma!
+            </p>
+            <p>
+                Desde aquí puede ver todos sus flujos de firma, tanto los que ha creado 
+                como los que le han sido asignados para firmar.
+            </p>
+        </field>
+    </record>
+
+    <!-- Vista Kanban para el Dashboard -->
+    <record id="view_signature_workflow_kanban" model="ir.ui.view">
+        <field name="name">signature.workflow.kanban</field>
+        <field name="model">signature.workflow</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" class="o_kanban_small_column">
+                <field name="name"/>
+                <field name="creator_id"/>
+                <field name="target_user_id"/>
+                <field name="document_count"/>
+                <field name="document_source"/>
+                <field name="state"/>
+                <field name="sent_date"/>
+                <field name="completed_date"/>
+                <field name="signature_role_id"/>
+                
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_card oe_kanban_global_click">
+                            <div class="oe_kanban_content">
+                                <div class="o_kanban_record_top">
+                                    <div class="o_kanban_record_headings">
+                                        <strong class="o_kanban_record_title">
+                                            <field name="name"/>
+                                        </strong>
+                                    </div>
+                                    <div class="o_kanban_record_top_right">
+                                        <span t-att-class="'badge badge-pill ' + (record.state.raw_value == 'completed' ? 'badge-success' : record.state.raw_value == 'sent' ? 'badge-warning' : 'badge-info')">
+                                            <field name="state"/>
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div class="o_kanban_record_body">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <strong>Creador:</strong><br/>
+                                            <field name="creator_id"/>
+                                        </div>
+                                        <div class="col-6">
+                                            <strong>Destinatario:</strong><br/>
+                                            <field name="target_user_id"/>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col-6">
+                                            <strong>Documentos:</strong> <field name="document_count"/>
+                                        </div>
+                                        <div class="col-6">
+                                            <strong>Origen:</strong> 
+                                            <span t-if="record.document_source.raw_value == 'alfresco'">📁 Alfresco</span>
+                                            <span t-if="record.document_source.raw_value == 'local'">💻 Local</span>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-2" t-if="record.signature_role_id.raw_value">
+                                        <div class="col-12">
+                                            <strong>Rol:</strong> <field name="signature_role_id"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="o_kanban_record_bottom">
+                                    <div class="oe_kanban_bottom_left">
+                                        <span t-if="record.sent_date.raw_value" class="text-muted">
+                                            Enviado: <field name="sent_date" widget="date"/>
+                                        </span>
+                                        <span t-if="record.completed_date.raw_value" class="text-success">
+                                            Completado: <field name="completed_date" widget="date"/>
+                                        </span>
+                                    </div>
+                                    <div class="oe_kanban_bottom_right">
+                                        <button t-if="record.state.raw_value == 'sent' and record.target_user_id.raw_value == uid" 
+                                                name="action_sign_documents" type="object" 
+                                                class="btn btn-sm btn-success">
+                                            🖊️ Firmar
+                                        </button>
+                                        <button t-if="record.state.raw_value == 'completed'" 
+                                                name="action_download_all_signed" type="object" 
+                                                class="btn btn-sm btn-info">
+                                            📥 Descargar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <menuitem id="menu_dashboard_flujos"
+        name="Dashboard"
+        parent="asi_pdf_signature.menu_firma_digital_root"
+        action="asi_signature_workflow.action_signature_workflow_dashboard"
+        sequence="10" />
+
+    <!-- Separador visual en el menú -->
+    <menuitem id="menu_separator_workflow"
+        name="─── Flujos de Trabajo ───"
+        parent="asi_pdf_signature.menu_firma_digital_root"
+        sequence="12" />
+</odoo>
