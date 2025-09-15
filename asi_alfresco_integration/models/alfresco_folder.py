@@ -6,6 +6,7 @@ import urllib.parse
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from dateutil import parser as date_parser
+from datetime import timedelta
 
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
@@ -53,10 +54,10 @@ class AlfrescoFolder(models.Model):
     def _get_http_session(self):
         session = requests.Session()
         retry_strategy = Retry(
-            total=3,
+            total=2,  # Reducido de 3 a 2
             status_forcelist=[500, 502, 503, 504],
             allowed_methods=["GET"],
-            backoff_factor=1
+            backoff_factor=0.5  # Reducido de 1 a 0.5
         )
         adapter = HTTPAdapter(max_retries=retry_strategy)
         session.mount("https://", adapter)
@@ -65,40 +66,147 @@ class AlfrescoFolder(models.Model):
 
     @api.model
     def sync_from_alfresco(self):
+        """Sincronización principal que maneja todo el proceso por lotes"""
+        config = self.env['ir.config_parameter'].sudo()
+        
+        # Verificar si ya hay una sincronización en progreso
+        sync_status = config.get_param('asi_alfresco_integration.sync_status', 'idle')
+        if sync_status == 'running':
+            _logger.info("[SYNC] Ya hay una sincronización en progreso, saltando...")
+            return True
+        
+        # Marcar sincronización como iniciada
+        config.set_param('asi_alfresco_integration.sync_status', 'running')
+        config.set_param('asi_alfresco_integration.sync_start_time', fields.Datetime.now().isoformat())
+        
+        try:
+            # Inicializar la sincronización por lotes
+            self._init_batch_sync()
+            return True
+        except Exception as e:
+            _logger.error("Error iniciando sincronización: %s", e, exc_info=True)
+            config.set_param('asi_alfresco_integration.sync_status', 'error')
+            raise UserError(_("Error de sincronización: %s") % str(e)) from e
+
+    @api.model
+    def _init_batch_sync(self):
+        """Inicializa la sincronización por lotes"""
         config = self.env['ir.config_parameter'].sudo()
         root_node = config.get_param('asi_alfresco_integration.alfresco_repo_id') or '-root-'
+        
+        _logger.info("[SYNC] ***************** Iniciando sincronización por lotes ********************")
+        
+        # Limpiar parámetros de lotes anteriores
+        config.set_param('asi_alfresco_integration.batch_queue', '[]')
+        config.set_param('asi_alfresco_integration.batch_processed', '0')
+        config.set_param('asi_alfresco_integration.batch_total', '0')
+        config.set_param('asi_alfresco_integration.fetched_node_ids', '[]')
+        
+        # Inicializar la cola con el nodo raíz
+        import json
+        initial_queue = [{'node_id': root_node, 'parent_id': False}]
+        config.set_param('asi_alfresco_integration.batch_queue', json.dumps(initial_queue))
+        
+        # Programar el primer lote
+        self._schedule_next_batch()
+
+    @api.model
+    def _schedule_next_batch(self):
+        """Programa la ejecución del siguiente lote"""
+        # Crear un cron job temporal para ejecutar el siguiente lote en 5 segundos
+        cron_vals = {
+            'name': 'Alfresco Sync Batch - Temporal',
+            'model_id': self.env.ref('asi_alfresco_integration.model_alfresco_folder').id,
+            'state': 'code',
+            'code': 'model._process_sync_batch()',
+            'interval_number': 1,
+            'interval_type': 'minutes',
+            'numbercall': 1,  # Solo ejecutar una vez
+            'active': True,
+            'nextcall': fields.Datetime.now() + timedelta(seconds=5),
+            'user_id': self.env.ref('base.user_root').id,
+        }
+        
+        cron = self.env['ir.cron'].sudo().create(cron_vals)
+        _logger.info("[SYNC] Programado siguiente lote con cron ID: %s", cron.id)
+
+    @api.model
+    def _process_sync_batch(self):
+        """Procesa un lote de la sincronización"""
+        from datetime import timedelta
+        import json
+        
+        config = self.env['ir.config_parameter'].sudo()
+        
+        # Verificar si la sincronización sigue activa
+        sync_status = config.get_param('asi_alfresco_integration.sync_status', 'idle')
+        if sync_status != 'running':
+            _logger.info("[SYNC] Sincronización no está activa, terminando lote")
+            return
+        
+        # Obtener configuración de Alfresco
         url = config.get_param('asi_alfresco_integration.alfresco_server_url')
         user = config.get_param('asi_alfresco_integration.alfresco_username')
         pwd = config.get_param('asi_alfresco_integration.alfresco_password')
-
-        _logger.info(f"[SYNC] ***************** Iniciando proceso de sincronizacion de carpetas ********************")
+        
         if not all([url, user, pwd]):
-            raise UserError(_('Configuración de Alfresco incompleta en parámetros del sistema'))
-
-        _logger.debug("[SYNC][Alfresco] Autenticando con: %s", user)
-
+            _logger.error("[SYNC] Configuración de Alfresco incompleta")
+            config.set_param('asi_alfresco_integration.sync_status', 'error')
+            return
+        
+        # Obtener cola de trabajo
+        try:
+            queue_json = config.get_param('asi_alfresco_integration.batch_queue', '[]')
+            queue = json.loads(queue_json)
+            fetched_ids_json = config.get_param('asi_alfresco_integration.fetched_node_ids', '[]')
+            fetched_node_ids = set(json.loads(fetched_ids_json))
+        except json.JSONDecodeError:
+            _logger.error("[SYNC] Error decodificando cola de trabajo")
+            config.set_param('asi_alfresco_integration.sync_status', 'error')
+            return
+        
+        if not queue:
+            # No hay más trabajo, finalizar sincronización
+            self._finalize_sync(fetched_node_ids)
+            return
+        
+        # Procesar un lote de carpetas (máximo 10 por lote)
+        batch_size = 10
+        current_batch = queue[:batch_size]
+        remaining_queue = queue[batch_size:]
+        
+        _logger.info("[SYNC] Procesando lote de %d carpetas. Quedan %d en cola", len(current_batch), len(remaining_queue))
+        
         auth = (user, pwd)
         session = self._get_http_session()
-
-        existing_folders = self.search([])
-        folder_map = {f.node_id: f for f in existing_folders}
-        fetched_node_ids = set()
-        queue = collections.deque([(root_node, None)])
-
+        
         try:
-            while queue:
-                node_id, parent = queue.popleft()
+            existing_folders = self.search([])
+            folder_map = {f.node_id: f for f in existing_folders}
+            
+            for item in current_batch:
+                node_id = item['node_id']
+                parent_id = item['parent_id']
+                
+                # Buscar carpeta padre si existe
+                parent = None
+                if parent_id:
+                    parent = self.browse(parent_id)
+                    if not parent.exists():
+                        parent = None
+                
+                # Obtener subcarpetas de este nodo
                 folders = self._fetch_folder_batch(session, url, auth, node_id)
-
+                
                 if folders is None:
-                    continue 
-
+                    continue
+                
                 for folder_data in folders:
                     nid = folder_data['id']
                     fetched_node_ids.add(nid)
                     raw_date = folder_data.get('modifiedAt')
                     parsed_modified = date_parser.parse(raw_date).replace(tzinfo=None) if raw_date else False
-
+                    
                     folder_rec = folder_map.get(nid)
                     if not folder_rec:
                         folder_rec = self.create({
@@ -111,7 +219,7 @@ class AlfrescoFolder(models.Model):
                         folder_map[nid] = folder_rec
                         _logger.info("[SYNC] Nueva carpeta creada: %s (node_id: %s)", folder_data['name'], nid)
                     else:
-                        # Actualizar nombre o fecha de modificación si han cambiado
+                        # Actualizar si es necesario
                         if (folder_rec.name != folder_data['name'] or
                             folder_rec.parent_id != (parent if parent else False) or
                             folder_rec.external_modified != parsed_modified):
@@ -121,24 +229,110 @@ class AlfrescoFolder(models.Model):
                                 'external_modified': parsed_modified,
                             })
                             _logger.info("[SYNC] Carpeta actualizada: %s (node_id: %s)", folder_data['name'], nid)
-
+                    
                     folder_rec.last_sync = fields.Datetime.now()
-                    # Agregar subcarpetas a la cola para procesamiento recursivo
-                    queue.append((nid, folder_rec))
-                    # Sincronizar archivos dentro de esta carpeta durante la sincronización global
-                    self._sync_folder_files_only(folder_rec, url, auth)
-
-            # CAMBIO PRINCIPAL: Solo eliminar carpetas que NO fueron encontradas en Alfresco
-            self._clean_missing_folders(fetched_node_ids, folder_map)
-            return True
+                    
+                    # Agregar subcarpetas a la cola
+                    remaining_queue.append({'node_id': nid, 'parent_id': folder_rec.id})
+                    
+                    # Sincronizar archivos de esta carpeta
+                    try:
+                        self._sync_folder_files_only(folder_rec, url, auth)
+                    except Exception as e:
+                        _logger.error("[SYNC] Error sincronizando archivos de %s: %s", folder_rec.name, e)
+            
+            # Actualizar progreso
+            processed = int(config.get_param('asi_alfresco_integration.batch_processed', '0'))
+            processed += len(current_batch)
+            config.set_param('asi_alfresco_integration.batch_processed', str(processed))
+            
+            # Guardar estado actualizado
+            config.set_param('asi_alfresco_integration.batch_queue', json.dumps(remaining_queue))
+            config.set_param('asi_alfresco_integration.fetched_node_ids', json.dumps(list(fetched_node_ids)))
+            
+            # Programar siguiente lote si hay más trabajo
+            if remaining_queue:
+                self._schedule_next_batch()
+            else:
+                # Finalizar sincronización
+                self._finalize_sync(fetched_node_ids)
+                
         except Exception as e:
-            _logger.error("Error fatal durante sincronización: %s", e, exc_info=True)
-            raise UserError(_("Error de sincronización: %s") % str(e)) from e
+            _logger.error("[SYNC] Error procesando lote: %s", e, exc_info=True)
+            config.set_param('asi_alfresco_integration.sync_status', 'error')
         finally:
             session.close()
 
+    @api.model
+    def _finalize_sync(self, fetched_node_ids):
+        """Finaliza la sincronización limpiando carpetas faltantes"""
+        import json
+        
+        config = self.env['ir.config_parameter'].sudo()
+        
+        _logger.info("[SYNC] Finalizando sincronización. Total nodos procesados: %d", len(fetched_node_ids))
+        
+        try:
+            # Limpiar carpetas faltantes
+            existing_folders = self.search([])
+            folder_map = {f.node_id: f for f in existing_folders}
+            self._clean_missing_folders(fetched_node_ids, folder_map)
+            
+            # Marcar sincronización como completada
+            config.set_param('asi_alfresco_integration.sync_status', 'completed')
+            config.set_param('asi_alfresco_integration.sync_end_time', fields.Datetime.now().isoformat())
+            
+            # Limpiar parámetros temporales
+            config.set_param('asi_alfresco_integration.batch_queue', '[]')
+            config.set_param('asi_alfresco_integration.fetched_node_ids', '[]')
+            
+            _logger.info("[SYNC] ***************** Sincronización completada exitosamente ********************")
+            
+        except Exception as e:
+            _logger.error("[SYNC] Error finalizando sincronización: %s", e, exc_info=True)
+            config.set_param('asi_alfresco_integration.sync_status', 'error')
+
+    @api.model
+    def get_sync_status(self):
+        """Obtiene el estado actual de la sincronización"""
+        config = self.env['ir.config_parameter'].sudo()
+        
+        status = config.get_param('asi_alfresco_integration.sync_status', 'idle')
+        processed = int(config.get_param('asi_alfresco_integration.batch_processed', '0'))
+        start_time = config.get_param('asi_alfresco_integration.sync_start_time')
+        
+        return {
+            'status': status,
+            'processed': processed,
+            'start_time': start_time,
+        }
+
+    @api.model
+    def stop_sync(self):
+        """Detiene la sincronización en progreso"""
+        config = self.env['ir.config_parameter'].sudo()
+        config.set_param('asi_alfresco_integration.sync_status', 'stopped')
+        
+        # Cancelar crons temporales pendientes
+        temp_crons = self.env['ir.cron'].sudo().search([
+            ('name', 'like', 'Alfresco Sync Batch - Temporal'),
+            ('active', '=', True)
+        ])
+        temp_crons.write({'active': False})
+        
+        _logger.info("[SYNC] Sincronización detenida manualmente")
+        
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'message': 'Sincronización detenida',
+                'type': 'warning',
+            }
+        }
+
     def _fetch_folder_batch(self, session, base_url, auth, node_id):
-        max_items = 100
+        max_items = 50  # Reducido de 100 a 50
         skip = 0
         all_folders = []
 
@@ -152,12 +346,12 @@ class AlfrescoFolder(models.Model):
             }
 
             try:
-                resp = session.get(url, auth=auth, params=params, timeout=30, headers={'Accept': 'application/json'})
+                resp = session.get(url, auth=auth, params=params, timeout=10, headers={'Accept': 'application/json'})  # Reducido timeout de 30 a 10
 
                 if resp.status_code == 400 and node_id == '-root-':
                     _logger.warning("Fallo acceso público a '-root-', probando endpoint privado")
                     private_url = url.replace('/public/', '/private/')
-                    resp = session.get(private_url, auth=auth, params=params, timeout=30)
+                    resp = session.get(private_url, auth=auth, params=params, timeout=10)  # Timeout reducido
                     resp.raise_for_status()
                 else:
                     resp.raise_for_status()
@@ -175,20 +369,19 @@ class AlfrescoFolder(models.Model):
                     break
 
                 skip += max_items
+                
             except requests.exceptions.RequestException as e:
                 error_detail = ""
                 if hasattr(e, 'response') and e.response is not None:
                     try:
-                        error_detail = f" | Respuesta: {e.response.text[:500]}"
+                        error_detail = f" | Respuesta: {e.response.text[:200]}"  # Reducido de 500 a 200
                     except:
                         error_detail = " | Sin detalles de respuesta"
 
-                _logger.error('[SYNC][ERROR] Nodo: %s | Excepción: %s%s | URL: %s | Params: %s | Usuario: %s',
-                              node_id, str(e), error_detail, url, params, auth[0])
+                _logger.error('[SYNC][ERROR] Nodo: %s | Excepción: %s%s', node_id, str(e), error_detail)
                 return None
             except (ValueError, KeyError) as e:
-                _logger.error('Respuesta inválida en nodo %s: %s | URL: %s | Respuesta: %s',
-                              node_id, str(e), url, resp.text[:500] if resp else 'Sin respuesta')
+                _logger.error('Respuesta inválida en nodo %s: %s', node_id, str(e))
                 return None
 
         return all_folders
@@ -458,34 +651,32 @@ class AlfrescoFolder(models.Model):
             _logger.error("Error sincronizando archivos de carpeta %s durante sync global: %s", folder_rec.name, e)
             folder_rec.sync_status = 'error'
 
-
     def _fetch_folder_files(self, base_url, auth, node_id):
-        """Obtiene archivos PDF de un nodo específico en Alfresco - CORREGIDO"""
+        """Obtiene archivos PDF de un nodo específico en Alfresco - OPTIMIZADO"""
         session = self._get_http_session()
         try:
             encoded_node_id = urllib.parse.quote(node_id, safe='')
             url = f"{base_url.rstrip('/')}/alfresco/api/-default-/public/alfresco/versions/1/nodes/{encoded_node_id}/children"
             
-            # CORREGIDO: Buscar archivos PDF sin restricción de mimeType en la query
             params = {
                 'skipCount': 0,
-                'maxItems': 1000,
-                'where': '(isFile=true)'  # Buscar todos los archivos primero
+                'maxItems': 100,  # Reducido de 1000 a 100
+                'where': '(isFile=true)'
             }
             
-            resp = session.get(url, auth=auth, params=params, timeout=30)
+            resp = session.get(url, auth=auth, params=params, timeout=8)  # Timeout reducido de 30 a 8
             
             # Si falla con público, probar privado
             if resp.status_code == 400:
                 private_url = url.replace('/public/', '/private/')
-                resp = session.get(private_url, auth=auth, params=params, timeout=30)
+                resp = session.get(private_url, auth=auth, params=params, timeout=8)
             
             resp.raise_for_status()
             
             data = resp.json()
             entries = data.get('list', {}).get('entries', [])
             
-            # Filtrar PDFs en Python ya que el filtro de Alfresco puede fallar
+            # Filtrar PDFs en Python
             pdf_files = []
             for entry in entries:
                 file_entry = entry['entry']
@@ -493,10 +684,8 @@ class AlfrescoFolder(models.Model):
                 mime_type = content.get('mimeType', '')
                 file_name = file_entry.get('name', '').lower()
                 
-                # Verificar si es PDF por MIME type o extensión
                 if mime_type == 'application/pdf' or file_name.endswith('.pdf'):
                     pdf_files.append(file_entry)
-                    _logger.info("PDF encontrado: %s (MIME: %s)", file_entry.get('name'), mime_type)
             
             _logger.info("Total PDFs encontrados en carpeta %s: %d", node_id, len(pdf_files))
             return pdf_files
@@ -725,3 +914,34 @@ class AlfrescoFolder(models.Model):
                     'type': 'danger',
                 }
             }
+
+    def action_check_sync_status(self):
+        """Acción para verificar el estado de la sincronización"""
+        status_info = self.get_sync_status()
+        
+        status_messages = {
+            'idle': 'No hay sincronización activa',
+            'running': f'Sincronización en progreso - {status_info["processed"]} carpetas procesadas',
+            'completed': 'Última sincronización completada exitosamente',
+            'error': 'Error en la última sincronización',
+            'stopped': 'Sincronización detenida manualmente'
+        }
+        
+        message = status_messages.get(status_info['status'], 'Estado desconocido')
+        
+        if status_info['start_time']:
+            message += f"\nIniciada: {status_info['start_time']}"
+        
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'message': message,
+                'type': 'info',
+            }
+        }
+
+    def action_stop_sync(self):
+        """Acción para detener la sincronización"""
+        return self.stop_sync()
+
