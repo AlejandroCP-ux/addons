@@ -16,6 +16,10 @@
                     <button name="action_send_reminder" string="Enviar Recordatorio"
                         type="object" class="btn-warning"
                         attrs="{'invisible': [('state', '!=', 'sent')]}" />
+                    <!-- Agregar botón para marcar como completado manualmente -->
+                    <button name="action_mark_as_completed" string="Marcar como Completado"
+                        type="object" class="btn-secondary"
+                        attrs="{'invisible': [('state', 'not in', ['signed'])]}" />
                     <button name="action_download_all_signed" string="Descargar Firmados"
                         type="object" class="btn-info"
                         attrs="{'invisible': [('state', '!=', 'completed')]}" />
@@ -44,6 +48,9 @@
                             <field name="document_source"
                                 attrs="{'readonly': [('state', '!=', 'draft')]}" />
                             <field name="document_count" />
+                            <!-- Mostrar carpeta de Alfresco cuando esté disponible -->
+                            <field name="alfresco_folder_id" readonly="1"
+                                attrs="{'invisible': [('alfresco_folder_id', '=', False)]}" />
                             <field name="sent_date"
                                 attrs="{'invisible': [('sent_date', '=', False)]}" />
                             <field name="signed_date"
@@ -59,8 +66,7 @@
                                 attrs="{'readonly': [('state', '!=', 'draft')]}">
                                 <tree create="false" edit="false" delete="false">
                                     <field name="name" />
-                                    <field name="alfresco_file_id"
-                                        attrs="{'invisible': [('parent.document_source', '!=', 'alfresco')]}" />
+                                    <field name="alfresco_file_id" />
                                     <field name="is_signed" widget="boolean_toggle" />
                                     <field name="signed_date" />
                                     <button name="action_download_document"

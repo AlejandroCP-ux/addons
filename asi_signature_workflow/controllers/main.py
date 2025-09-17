@@ -54,6 +54,7 @@ class SignatureWorkflowController(http.Controller):
             elif document.pdf_content:
                 return self._download_local_document(document)
             else:
+                _logger.warning(f"No se encontró ruta de descarga para documento {document_id}: alfresco_file_id={document.alfresco_file_id}, pdf_content={'Sí' if document.pdf_content else 'No'}")
                 return request.not_found()
                 
         except Exception as e:
@@ -68,6 +69,10 @@ class SignatureWorkflowController(http.Controller):
             user = config.get_param('asi_alfresco_integration.alfresco_username')
             pwd = config.get_param('asi_alfresco_integration.alfresco_password')
             
+            if not all([url, user, pwd]):
+                _logger.error("Configuración de Alfresco incompleta para descarga")
+                return request.not_found()
+            
             import requests
             
             download_url = f"{url}/alfresco/api/-default-/public/alfresco/versions/1/nodes/{alfresco_file.alfresco_node_id}/content"
@@ -81,6 +86,7 @@ class SignatureWorkflowController(http.Controller):
                 ]
                 return request.make_response(response.content, headers=headers)
             else:
+                _logger.error(f"Error descargando de Alfresco: HTTP {response.status_code}")
                 return request.not_found()
                 
         except Exception as e:
@@ -90,6 +96,10 @@ class SignatureWorkflowController(http.Controller):
     def _download_local_document(self, document):
         """Descarga un documento local"""
         try:
+            if not document.pdf_content:
+                _logger.error(f"Documento {document.id} no tiene contenido PDF")
+                return request.not_found()
+                
             pdf_content = base64.b64decode(document.pdf_content)
             
             headers = [

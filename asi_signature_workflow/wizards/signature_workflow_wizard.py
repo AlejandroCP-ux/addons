@@ -179,50 +179,114 @@ class SignatureWorkflowWizard(models.TransientModel):
         if not self.selected_document_ids:
             raise UserError(_('Debe seleccionar al menos un documento.'))
         
-        # Crear el flujo principal
-        workflow = self.env['signature.workflow'].create({
-            'name': self.name,
-            'creator_id': self.env.user.id,
-            'target_user_id': self.target_user_id.id,
-            'signature_role_id': self.signature_role_id.id,
-            'signature_position': self.signature_position,
-            'document_source': self.document_source,
-            'notes': self.notes,
-        })
-        
-        # Crear documentos del flujo
-        for temp_doc in self.selected_document_ids:
-            doc_vals = {
-                'workflow_id': workflow.id,
-                'name': temp_doc.name,
+        try:
+            # Crear el flujo principal
+            workflow = self.env['signature.workflow'].create({
+                'name': self.name,
+                'creator_id': self.env.user.id,
+                'target_user_id': self.target_user_id.id,
+                'signature_role_id': self.signature_role_id.id,
+                'signature_position': self.signature_position,
+                'document_source': self.document_source,
+                'notes': self.notes,
+            })
+            
+            # Crear documentos del flujo
+            for temp_doc in self.selected_document_ids:
+                doc_vals = {
+                    'workflow_id': workflow.id,
+                    'name': temp_doc.name,
+                }
+                
+                if self.document_source == 'alfresco':
+                    doc_vals['alfresco_file_id'] = temp_doc.alfresco_file_id.id
+                else:
+                    doc_vals.update({
+                        'pdf_content': temp_doc.pdf_content,
+                        'pdf_filename': temp_doc.pdf_filename,
+                    })
+                
+                self.env['signature.workflow.document'].create(doc_vals)
+            
+            workflow.action_send_for_signature()
+            
+            return {
+                'type': 'ir.actions.act_window',
+                'name': 'Flujo Creado Exitosamente',
+                'res_model': 'signature.workflow',
+                'res_id': workflow.id,
+                'view_mode': 'form',
+                'target': 'current',
             }
-            
-            if self.document_source == 'alfresco':
-                doc_vals['alfresco_file_id'] = temp_doc.alfresco_file_id.id
-            else:
-                doc_vals.update({
-                    'pdf_content': temp_doc.pdf_content,
-                    'pdf_filename': temp_doc.pdf_filename,
-                })
-            
-            self.env['signature.workflow.document'].create(doc_vals)
-        
-        # Enviar el flujo
-        workflow.action_send_for_signature()
-        
-        return {
-            'type': 'ir.actions.act_window',
-            'name': 'Flujo Creado Exitosamente',
-            'res_model': 'signature.workflow',
-            'res_id': workflow.id,
-            'view_mode': 'form',
-            'target': 'current',
-        }
+                
+        except UserError:
+            # Re-lanzar errores de usuario tal como están
+            raise
+        except Exception as e:
+            _logger.error(f"Error inesperado creando flujo: {e}")
+            raise UserError(_('Error inesperado al crear el flujo: %s') % str(e))
 
     def _get_default_signature_role(self):
         """Get the first available signature role as default"""
         role = self.env['document.signature.tag'].search([], limit=1)
         return role.id if role else False
+
+    def _process_alfresco_signature(self):
+        """Procesa la firma de documentos de Alfresco"""
+        alfresco_files = self.selected_document_ids.mapped('alfresco_file_id')
+        
+        # Crear wizard de firma de Alfresco con configuración fija del flujo
+        wizard = self.env['alfresco.firma.wizard'].create({
+            'file_ids': [(6, 0, alfresco_files.ids)],
+            'signature_role': self.signature_role_id.id,
+            'signature_position': self.signature_position,
+        })
+        
+        # Hacer campos de rol y posición de solo lectura para el destinatario
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Firmar Documentos del Flujo',
+            'res_model': 'alfresco.firma.wizard',
+            'res_id': wizard.id,
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'workflow_id': self.id,
+                'from_workflow': True,
+                'readonly_signature_config': True,  # Indicar que la configuración es de solo lectura
+            }
+        }
+
+    def _process_local_signature(self):
+        """Procesa la firma de documentos locales"""
+        # Crear documentos temporales para el wizard de firma local
+        document_lines = []
+        for doc in self.selected_document_ids:
+            document_lines.append((0, 0, {
+                'document_name': doc.name,
+                'pdf_document': doc.pdf_content,
+            }))
+        
+        # Crear wizard de firma local con configuración fija del flujo
+        wizard = self.env['firma.documento.wizard'].create({
+            'document_ids': document_lines,
+            'signature_role': self.signature_role_id.id,
+            'signature_position': self.signature_position,
+        })
+        
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Firmar Documentos del Flujo',
+            'res_model': 'firma.documento.wizard',
+            'res_id': wizard.id,
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'workflow_id': self.id,
+                'from_workflow': True,
+                'readonly_signature_config': True,  # Indicar que la configuración es de solo lectura
+            }
+        }
 
 class SignatureWorkflowDocumentTemp(models.TransientModel):
     _name = 'signature.workflow.document.temp'
