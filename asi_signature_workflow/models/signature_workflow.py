@@ -402,7 +402,7 @@ class SignatureWorkflow(models.Model):
         })
         
         # Enviar notificación por email
-        self._send_signature_request_notification()
+        #self._send_signature_request_notification() # Agregar esta funcion en el modelo para enviar la notificacion
         
         return {
             'type': 'ir.actions.client',
@@ -444,7 +444,48 @@ class SignatureWorkflow(models.Model):
         if self.state != 'sent':
             raise UserError(_('Este flujo no está disponible para firma.'))
         
-        return self._process_alfresco_signature()
+        if self.document_source == 'local':
+            return self._process_local_signature()
+        else:
+            return self._process_alfresco_signature()
+
+    def _process_local_signature(self):
+        """Procesa la firma de documentos locales usando el wizard local"""
+        local_documents = self.document_ids.filtered(lambda d: d.pdf_content)
+        
+        if not local_documents:
+            raise UserError(_('No hay documentos locales disponibles para firmar.'))
+        
+        _logger.info(f"Procesando firma local de {len(local_documents)} documentos")
+        
+        # Crear wizard de firma local
+        wizard = self.env['firma.documento.wizard'].create({
+            'signature_role': self.signature_role_id.id,
+            'signature_position': self.signature_position,
+            'from_workflow': True,
+            'workflow_id': self.id,
+        })
+        
+        # Agregar documentos al wizard
+        for doc in local_documents:
+            wizard.document_ids.create({
+                'wizard_id': wizard.id,
+                'document_name': doc.name,
+                'pdf_document': doc.pdf_content,  # Campo correcto es pdf_document, no document_content
+            })
+        
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Firmar Documentos del Flujo',
+            'res_model': 'firma.documento.wizard',
+            'res_id': wizard.id,
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'workflow_id': self.id,
+                'from_workflow': True,
+            }
+        }
 
     def _process_alfresco_signature(self):
         """Procesa la firma de documentos de Alfresco"""
@@ -700,81 +741,21 @@ class SignatureWorkflow(models.Model):
             raise UserError(_('Error enviando recordatorio: %s') % str(e))
 
     def action_download_all_signed(self):
-        """Descarga todos los documentos firmados del flujo"""
+        """Acción para descargar todos los documentos firmados individualmente"""
         self.ensure_one()
         
-        if self.state != 'completed':
-            raise UserError(_('El flujo debe estar completado para descargar los documentos firmados.'))
+        # Obtener documentos firmados
+        documents_signed = self.document_ids.filtered(lambda d: d.is_signed)
         
-        signed_docs = self.document_ids.filtered('is_signed')
-        if not signed_docs:
-            raise UserError(_('No hay documentos firmados disponibles para descarga.'))
+        if not documents_signed:
+            raise UserError(_('No hay documentos firmados para descargar.'))
         
-        # Si solo hay un documento, descargarlo directamente
-        if len(signed_docs) == 1:
-            return signed_docs.action_download_document()
-        
-        # Si hay múltiples documentos, redirigir a página de descarga
+        # Abrir página de descarga múltiple
         return {
             'type': 'ir.actions.act_url',
-            'url': f'/signature_workflow/download_signed/{self.id}',
+            'url': f'/signature_workflow/descargar_multiples?workflow_id={self.id}',
             'target': 'new',
         }
-
-    def _send_signature_request_notification(self):
-        """Envía notificación de solicitud de firma por email"""
-        self.ensure_one()
-    
-        try:
-            # Enviar email usando template
-            template = self.env.ref('asi_signature_workflow.mail_template_signature_request')
-            if template:
-                template.send_mail(self.id, force_send=True)
-                _logger.info(f"Notificación de solicitud de firma enviada para flujo {self.id}")
-
-            # Crear notificación interna en Odoo
-            self.env['mail.message'].create({
-                'subject': f'Solicitud de Firma: {self.name}',
-                'body': f'''
-                <p>Se ha enviado una solicitud de firma digital a <strong>{self.target_user_id.name}</strong>.</p>
-                <ul>
-                    <li><strong>Flujo:</strong> {self.name}</li>
-                    <li><strong>Destinatario:</strong> {self.target_user_id.name}</li>
-                    <li><strong>Documentos:</strong> {self.document_count} archivo(s) PDF</li>
-                    <li><strong>Rol de firma:</strong> {self.signature_role_id.name}</li>
-                </ul>
-                <p>El destinatario recibirá una notificación por correo electrónico.</p>
-                ''',
-                'message_type': 'notification',
-                'model': self._name,
-                'res_id': self.id,
-                'partner_ids': [(4, self.target_user_id.partner_id.id)],
-                'author_id': self.creator_id.partner_id.id,
-            })
-
-            # Crear actividad para el usuario destinatario
-            self.env['mail.activity'].create({
-                'activity_type_id': self.env.ref('mail.mail_activity_data_todo').id,
-                'summary': f'Solicitud de Firma Digital: {self.name}',
-                'note': f'''
-                <p>Tiene pendiente la firma de documentos digitales:</p>
-                <ul>
-                    <li><strong>Flujo:</strong> {self.name}</li>
-                    <li><strong>Enviado por:</strong> {self.creator_id.name}</li>
-                    <li><strong>Documentos:</strong> {self.document_count} archivo(s) PDF</li>
-                    <li><strong>Rol de firma:</strong> {self.signature_role_id.name}</li>
-                </ul>
-                <p>Por favor, acceda al sistema para completar la firma.</p>
-                ''',
-                'res_model_id': self.env['ir.model']._get(self._name).id,
-                'res_id': self.id,
-                'user_id': self.target_user_id.id,
-                'date_deadline': fields.Date.today() + timedelta(days=3),  # 3 días para firmar
-            })
-        
-        except Exception as e:
-            _logger.error(f"Error enviando notificación de solicitud de firma: {e}")
-            raise UserError(_('Error enviando notificación: %s') % str(e))    
 
     def _get_signed_local_wizard(self):
         """Obtiene el wizard de firma local asociado a este flujo"""
@@ -832,17 +813,28 @@ class SignatureWorkflowDocument(models.Model):
     signed_date = fields.Datetime(string='Fecha de Firma')
 
     def action_download_document(self):
-        """Descarga el documento firmado"""
+        """Descarga el documento firmado directamente desde Alfresco (última versión)"""
         self.ensure_one()
         
+        _logger.info(f"[DOWNLOAD_DOC] ===== INICIO DESCARGA DOCUMENTO {self.id} =====")
+        _logger.info(f"[DOWNLOAD_DOC] Documento: {self.name}")
+        _logger.info(f"[DOWNLOAD_DOC] Firmado: {self.is_signed}")
+        _logger.info(f"[DOWNLOAD_DOC] Alfresco file ID: {self.alfresco_file_id.id if self.alfresco_file_id else 'NINGUNO'}")
+        
         if not self.is_signed:
+            _logger.warning(f"[DOWNLOAD_DOC] Documento {self.name} no está firmado")
             raise UserError(_('El documento no está firmado aún.'))
         
-        if not self.download_url:
-            raise UserError(_('No hay URL de descarga disponible para este documento.'))
+        if not self.alfresco_file_id:
+            _logger.error(f"[DOWNLOAD_DOC] No hay archivo de Alfresco asociado")
+            raise UserError(_('No se encontró el archivo en Alfresco.'))
+        
+        # Esto garantiza que se descargue la versión más reciente (firmada)
+        download_url = f'/alfresco/file/{self.alfresco_file_id.id}/download'
+        _logger.info(f"[DOWNLOAD_DOC] Descargando directamente desde Alfresco: {download_url}")
         
         return {
             'type': 'ir.actions.act_url',
-            'url': self.download_url,
+            'url': download_url,
             'target': 'self',
         }

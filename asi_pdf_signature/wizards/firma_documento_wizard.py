@@ -680,9 +680,9 @@ class FirmaDocumentoWizard(models.TransientModel):
         with tempfile.NamedTemporaryFile(delete=False, suffix='.zip') as temp_zip:
             with zipfile.ZipFile(temp_zip, 'w', zipfile.ZIP_DEFLATED) as zip_file:
                 for documento in documents_signed:
-                    # Obtener el nombre base y añadir " - firmado"
+                    # Obtener el nombre base
                     nombre_base, extension = os.path.splitext(documento.document_name)
-                    nombre_firmado = f"{nombre_base} - firmado{extension}"
+                    nombre_firmado = f"{nombre_base}{extension}"
                     
                     # Añadir el PDF firmado al ZIP
                     pdf_content = base64.b64decode(documento.pdf_signed)

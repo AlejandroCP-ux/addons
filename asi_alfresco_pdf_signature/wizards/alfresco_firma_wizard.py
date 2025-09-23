@@ -17,7 +17,7 @@ _logger = logging.getLogger(__name__)
 # Importaciones para firma digital
 try:
     from endesive import pdf
-    from cryptography.hazmat.primitives.serialization import Encoding, PrivateFormat, NoEncryption
+    from cryptography.hazmat.primitives.serialization import Encoding, PrivateFormat, NoEncryption, pkcs12
     from cryptography.x509 import load_der_x509_certificate
     import OpenSSL.crypto as crypto
     HAS_ENDESIVE = True
@@ -45,7 +45,7 @@ class AlfrescoFirmaWizard(models.TransientModel):
     file_count = fields.Integer(string='Cantidad de Archivos', compute='_compute_file_count')
     
     # Campos específicos para la firma
-    signature_role = fields.Many2one('document.signature.tag', string='Rol para la Firma', help='Rol con el que se desea firmar (ej: Aprobado por:, Entregado por:, etc.)', required=True, ondelete='cascade')
+    signature_role = fields.Many2one('document.signature.tag', string='Rol para la Firma', help='Rol con el que se desea firmar (ej: Aprobado por:, Entregado por:, etc.)', required=True, ondelete='cascade', default=lambda self: self._get_default_signature_role())
     signature_password = fields.Char(string='Contraseña del Certificado')
     signature_position = fields.Selection([
         ('izquierda', 'Izquierda'),
@@ -79,6 +79,18 @@ class AlfrescoFirmaWizard(models.TransientModel):
     documents_processed = fields.Integer(string='Archivos Procesados', default=0)
     documents_with_error = fields.Integer(string='Archivos con Error', default=0)
 
+    signature_opaque_background = fields.Boolean(
+        string='Firma con fondo opaco',
+        default=False,
+        help='Si está marcado, la firma tendrá fondo blanco opaco en lugar de transparente'
+    )
+    
+    sign_all_pages = fields.Boolean(
+        string='Firmar todas las páginas',
+        default=False,
+        help='Si está marcado, se firmará todas las páginas del documento en lugar de solo la última'
+    )
+
     @api.depends('file_ids')
     def _compute_file_count(self):
         for record in self:
@@ -110,6 +122,11 @@ class AlfrescoFirmaWizard(models.TransientModel):
                 res['file_ids'] = [(6, 0, valid_files.ids)]
     
         return res
+
+    def _get_default_signature_role(self):
+        """Obtiene el primer rol de firma disponible como valor por defecto"""
+        signature_role = self.env['document.signature.tag'].search([], limit=1)
+        return signature_role.id if signature_role else False
 
     def _obtener_datos_firma(self):
         """Obtiene los datos de firma priorizando wizard sobre user"""
@@ -197,24 +214,44 @@ class AlfrescoFirmaWizard(models.TransientModel):
             ancho_texto = bbox[2] - bbox[0]
             alto_texto = bbox[3] - bbox[1]
             
-            # Crear nueva imagen con espacio adicional arriba
-            margen_texto = 10
-            nuevo_alto = alto_original + alto_texto + (margen_texto * 2)
-            nuevo_ancho = max(ancho_original, ancho_texto + 20)
-            
-            # Crear imagen nueva con fondo transparente
-            nueva_imagen = Image.new('RGBA', (nuevo_ancho, nuevo_alto), (255, 255, 255, 0))
-            
-            # Pegar el texto en la parte superior
-            draw = ImageDraw.Draw(nueva_imagen)
-            x_texto = (nuevo_ancho - ancho_texto) // 2  # Centrar texto
-            y_texto = margen_texto
-            draw.text((x_texto, y_texto), texto, fill=(0, 0, 0, 255), font=font)
-            
-            # Pegar la imagen original debajo del texto
-            x_imagen = (nuevo_ancho - ancho_original) // 2  # Centrar imagen
-            y_imagen = alto_texto + (margen_texto * 2)
-            nueva_imagen.paste(imagen, (x_imagen, y_imagen), imagen if imagen.mode == 'RGBA' else None)
+            if texto:
+                # Crear nueva imagen con espacio adicional arriba
+                margen_texto = 10
+                nuevo_alto = alto_original + alto_texto + (margen_texto * 2)
+                nuevo_ancho = max(ancho_original, ancho_texto + 20)
+                
+                if self.signature_opaque_background:
+                    # Crear imagen nueva con fondo blanco opaco
+                    nueva_imagen = Image.new('RGBA', (nuevo_ancho, nuevo_alto), (255, 255, 255, 255))
+                else:
+                    # Crear imagen nueva con fondo transparente (comportamiento original)
+                    nueva_imagen = Image.new('RGBA', (nuevo_ancho, nuevo_alto), (255, 255, 255, 0))
+                
+                # Pegar el texto en la parte superior
+                draw = ImageDraw.Draw(nueva_imagen)
+                x_texto = (nuevo_ancho - ancho_texto) // 2  # Centrar texto
+                y_texto = margen_texto
+                draw.text((x_texto, y_texto), texto, fill=(0, 0, 0, 255), font=font)
+                
+                # Pegar la imagen original debajo del texto
+                x_imagen = (nuevo_ancho - ancho_original) // 2  # Centrar imagen
+                y_imagen = alto_texto + (margen_texto * 2)
+                
+                if self.signature_opaque_background:
+                    # Crear una copia de la imagen original con fondo blanco
+                    imagen_con_fondo = Image.new('RGBA', imagen.size, (255, 255, 255, 255))
+                    imagen_con_fondo.paste(imagen, (0, 0), imagen if imagen.mode == 'RGBA' else None)
+                    nueva_imagen.paste(imagen_con_fondo, (x_imagen, y_imagen))
+                else:
+                    # Comportamiento original con transparencia
+                    nueva_imagen.paste(imagen, (x_imagen, y_imagen), imagen if imagen.mode == 'RGBA' else None)
+            else:
+                if self.signature_opaque_background:
+                    # Crear imagen con fondo blanco opaco
+                    nueva_imagen = Image.new('RGBA', imagen.size, (255, 255, 255, 255))
+                    nueva_imagen.paste(imagen, (0, 0), imagen if imagen.mode == 'RGBA' else None)
+                else:
+                    nueva_imagen = imagen
             
             # Guardar en archivo temporal
             temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.png')
@@ -311,12 +348,34 @@ class AlfrescoFirmaWizard(models.TransientModel):
             imagen_width, imagen_height = imagen_size
 
             # Cargar certificado usando OpenSSL como alternativa
-            p12 = crypto.load_pkcs12(certificado_data, contrasena.encode('utf-8'))
+            #p12 = crypto.load_pkcs12(certificado_data, contrasena.encode('utf-8'))
+            # aqui inicia el nuevo metodo con cryptography
+            try:
+                # cryptography carga el PKCS12
+                private_key, certificate, additional_certs = pkcs12.load_key_and_certificates(
+                    certificado_data, 
+                    contrasena.encode('utf-8')
+                )
+    
+                # Si necesitas mantener compatibilidad con código que espera un objeto p12 de pyOpenSSL,
+                # puedes crear un objeto simple con los atributos necesarios
+                class P12Wrapper:
+                    def __init__(self, private_key, certificate, additional_certs):
+                        self._private_key = private_key
+                        self.get_privatekey = lambda: private_key
+                        self.get_certificate = lambda: certificate
+                        # Adapta otros métodos según necesite tu código
+    
+                p12 = P12Wrapper(private_key, certificate, additional_certs)
+    
+            except ValueError as e:
+                raise Exception(f"Error cargando certificado PKCS#12: {str(e)}")
             
             # Convertir a formato compatible con endesive
-            private_key = p12.get_privatekey().to_cryptography_key()
-            certificate = p12.get_certificate().to_cryptography()
-            additional_certificates = [cert.to_cryptography() for cert in p12.get_ca_certificates() or []]
+            private_key = p12.get_privatekey()#.to_cryptography_key()
+            certificate = p12.get_certificate()#.to_cryptography()
+            additional_certificates = [] #[cert.to_cryptography() for cert in p12.get_ca_certificates() or []]
+            # aqui termina el nuevo metodo con cryptography
             
             # Procesar cada archivo
             for archivo in self.file_ids:
@@ -419,45 +478,58 @@ class AlfrescoFirmaWizard(models.TransientModel):
                 page_width, page_height, imagen_width, imagen_height, self.signature_position
             )
             
-            # Configurar datos para la firma
+            # Datos para la firma digital
             date = datetime.now()
             date_str = date.strftime("D:%Y%m%d%H%M%S+00'00'")
             
-            dct = {
-                "aligned": 0,
-                "sigflags": 3,
-                "sigflagsft": 132,
-                "sigpage": num_paginas - 1,
-                "sigbutton": True,
-                "sigfield": f"Signature_{archivo.id}",
-                "auto_sigfield": True,
-                "sigandcertify": True,
-                "signaturebox": (x, y, x1, y1),
-                "signature_img": imagen_firma_path,
-                "contact": self.env.user.email or '',
-                "location": self.env.user.company_id.city or '',
-                "signingdate": date_str,
-                "reason": f"Firma Digital - {self.signature_role}",
-            }
+            if self.sign_all_pages:
+                # Firmar todas las páginas
+                paginas_a_firmar = list(range(num_paginas))
+                _logger.info(f"Firmando todas las páginas del documento: {num_paginas} páginas")
+            else:
+                # Firmar solo la última página (comportamiento original)
+                paginas_a_firmar = [num_paginas - 1]
+                _logger.info(f"Firmando solo la última página del documento: página {num_paginas}")
             
-            # Leer PDF original
+            datau = None
             with open(temp_pdf_path, 'rb') as f:
                 datau = f.read()
             
-            # Firmar digitalmente
-            datas = pdf.cms.sign(
-                datau,
-                dct,
-                private_key,
-                certificate,
-                additional_certificates,
-                'sha256'
-            )
+            # Procesar cada página a firmar
+            for i, pagina_num in enumerate(paginas_a_firmar):
+                dct = {
+                    "aligned": 0,
+                    "sigflags": 3,
+                    "sigflagsft": 132,
+                    "sigpage": pagina_num,
+                    "sigbutton": True,
+                    "sigfield": f"Signature_{archivo.id}_{pagina_num}",
+                    "auto_sigfield": True,
+                    "sigandcertify": True,
+                    "signaturebox": (x, y, x1, y1),
+                    "signature_img": imagen_firma_path,
+                    "contact": self.env.user.email or '',
+                    "location": self.env.user.company_id.city or '',
+                    "signingdate": date_str,
+                    "reason": f"Firma Digital - {self.signature_role.name}",
+                }
+                
+                # Firmar digitalmente
+                datas = pdf.cms.sign(
+                    datau,
+                    dct,
+                    private_key,
+                    certificate,
+                    additional_certificates,
+                    'sha256'
+                )
+                
+                # Actualizar datau con la firma aplicada para la siguiente iteración
+                datau = datau + datas
             
             # Crear PDF firmado
             with tempfile.NamedTemporaryFile(delete=False, suffix='_firmado.pdf') as temp_final:
                 temp_final.write(datau)
-                temp_final.write(datas)
                 temp_final_path = temp_final.name
             
             # Leer PDF firmado

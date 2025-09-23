@@ -11,7 +11,7 @@ class SignatureWorkflowWizard(models.TransientModel):
 
     # Información básica del flujo
     name = fields.Char(string='Nombre del Flujo', 
-                      default=lambda self: f'Flujo de Firma - {fields.Date.today()}')
+                      default=lambda self: f'Flujo de Firma - {fields.Datetime.now().strftime("%Y-%m-%d - %H-%M")}')
     target_user_id = fields.Many2one('res.users', string='Usuario Destinatario', 
                                     default=lambda self: self.env.user.id)
     signature_role_id = fields.Many2one('document.signature.tag', string='Rol de Firma',

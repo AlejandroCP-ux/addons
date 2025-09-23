@@ -126,7 +126,7 @@
                             string="🖊️ Firmar Documentos"
                             type="object"
                             class="btn-primary"
-                            attrs="{'invisible': ['|', '|', ('signature_role', '=', False), ('signature_role', '=', ''), ('document_count', '=', 0)]}" />
+                            attrs="{'invisible': ['|', '|', '|', ('signature_role', '=', False), ('signature_role', '=', ''), '&amp;', ('signature_password', '=', False), ('has_password', '=', False), ('document_count', '=', 0)]}" />
                     </footer>
                 </div>
 

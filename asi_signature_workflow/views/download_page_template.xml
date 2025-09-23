@@ -8,45 +8,67 @@
                         <div class="card">
                             <div class="card-header bg-success text-white">
                                 <h4 class="mb-0">
-                                    <i class="fa fa-check-circle"></i>
-                                    Documentos Firmados Listos
-                                </h4>
+                                    <i class="fa fa-check-circle"></i> Documentos Firmados Listos </h4>
                             </div>
                             <div class="card-body">
-                                <h5>Flujo: <t t-esc="workflow.name"/></h5>
-                                <p class="text-muted">
-                                    Firmado por: <strong><t t-esc="workflow.target_user_id.name"/></strong><br/>
-                                    Fecha de finalización: <t t-esc="workflow.completed_date"/>
+                                <h5>Flujo: <t t-esc="workflow.name" /></h5>
+                                <p class="text-muted"> Firmado por: <strong>
+                                        <t t-esc="workflow.target_user_id.name" />
+                                    </strong><br />
+                                    Fecha de finalización: <t t-esc="workflow.completed_date" />
                                 </p>
-                                
-                                <hr/>
-                                
+
+                                <hr />
+
                                 <h6>Documentos disponibles para descarga:</h6>
                                 <div class="list-group">
                                     <t t-foreach="signed_documents" t-as="document">
-                                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div
+                                            class="list-group-item d-flex justify-content-between align-items-center">
                                             <div>
                                                 <i class="fa fa-file-pdf-o text-danger"></i>
-                                                <span class="ml-2"><t t-esc="document.name"/></span>
-                                                <small class="text-muted d-block">
-                                                    Firmado el <t t-esc="document.signed_date"/>
+                                                <span class="ml-2">
+                                                    <t t-esc="document.name" />
+                                                </span>
+                                                <small class="text-muted d-block"> Firmado el <t
+                                                        t-esc="document.signed_date" />
                                                 </small>
                                             </div>
-                                            <a t-attf-href="/signature_workflow/document/#{document.id}/download" 
-                                               class="btn btn-primary btn-sm">
-                                                <i class="fa fa-download"></i>
-                                                DESCARGAR AHORA!
-                                            </a>
+                                            <a
+                                                t-attf-href="/signature_workflow/document/#{document.id}/download"
+                                                class="btn btn-primary btn-sm auto-download-btn"
+                                                t-attf-data-filename="#{document.name}">
+                                                <i class="fa fa-download"></i> DESCARGAR AHORA! </a>
                                         </div>
                                     </t>
                                 </div>
-                                
+
                                 <div class="mt-4 text-center">
-                                    <a href="/web" class="btn btn-secondary">
-                                        <i class="fa fa-arrow-left"></i>
-                                        Volver al Sistema
-                                    </a>
+                                    <button id="download-all-btn" class="btn btn-success btn-lg">
+                                        <i class="fa fa-download"></i> DESCARGAR TODOS
+                                        AUTOMÁTICAMENTE </button>
+                                    <p class="text-muted mt-2">
+                                        Los documentos se descargarán uno por uno automáticamente
+                                    </p>
                                 </div>
+
+                                <script> document.addEventListener('DOMContentLoaded', function() {
+                                    const downloadAllBtn =
+                                    document.getElementById('download-all-btn'); const downloadBtns
+                                    = document.querySelectorAll('.auto-download-btn');
+                                    downloadAllBtn.addEventListener('click', function() { let delay
+                                    = 0; downloadBtns.forEach(function(btn, index) {
+                                    setTimeout(function() { // Create invisible link and click it
+                                    const link = document.createElement('a'); link.href = btn.href;
+                                    link.download = btn.dataset.filename || 'documento.pdf';
+                                    link.style.display = 'none'; document.body.appendChild(link);
+                                    link.click(); document.body.removeChild(link); // Update button
+                                    text to show progress btn.innerHTML = '<i class="fa fa-check"></i>
+                                    DESCARGADO'; btn.classList.remove('btn-primary');
+                                    btn.classList.add('btn-success'); }, delay); delay += 1000; // 1
+                                    second delay between downloads }); // Update main button
+                                    downloadAllBtn.innerHTML = '<i class="fa fa-check"></i> DESCARGA
+                                    INICIADA'; downloadAllBtn.disabled = true; }); }); </script>
                             </div>
                         </div>
                     </div>

@@ -27,8 +27,6 @@
                                 <field name="pdf_filename" invisible="1" />
                                 <field name="file_size" readonly="1" />
                                 <field name="is_valid_pdf" readonly="1" widget="boolean_toggle" />
-                                <button name="action_remove" type="object" icon="fa-trash"
-                                    title="Eliminar documento" class="btn-link text-danger" />
                             </tree>
                         </field>
                     </group>
@@ -43,7 +41,6 @@
                         <button name="action_confirm_selection" string="Confirmar Selección"
                             type="object" class="btn-primary"
                             attrs="{'invisible': [('local_count', '=', 0)]}" />
-                        <button string="Cancelar" class="btn-secondary" special="cancel" />
                     </footer>
                 </div>
 
@@ -128,9 +125,11 @@
                         <button name="action_confirm_selection" string="Confirmar Selección"
                             type="object" class="btn-primary"
                             attrs="{'invisible': [('selected_count', '=', 0)]}" />
-                        <button string="Cancelar" class="btn-secondary" special="cancel" />
                     </footer>
                 </div>
+                <footer>
+                    <button string="Cancelar" class="btn-secondary" special="cancel" />
+                </footer>
             </form>
         </field>
     </record>

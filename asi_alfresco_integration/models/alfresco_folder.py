@@ -944,4 +944,3 @@ class AlfrescoFolder(models.Model):
     def action_stop_sync(self):
         """Acción para detener la sincronización"""
         return self.stop_sync()
-

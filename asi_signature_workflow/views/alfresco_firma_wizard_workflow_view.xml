@@ -15,11 +15,11 @@
 
             <!-- Hacer campos de rol y posición de solo lectura cuando viene de flujo -->
             <field name="signature_role" position="attributes">
-                <attribute name="attrs">{'readonly': [('readonly_signature_config', '=', True)]}</attribute>
+                <attribute name="attrs">{'readonly': [('from_workflow', '=', True)]}</attribute>
             </field>
 
             <field name="signature_position" position="attributes">
-                <attribute name="attrs">{'readonly': [('readonly_signature_config', '=', True)]}</attribute>
+                <attribute name="attrs">{'readonly': [('from_workflow', '=', True)]}</attribute>
             </field>
 
             <!-- Agregar mensaje informativo cuando viene de flujo -->

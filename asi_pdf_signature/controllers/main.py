@@ -21,10 +21,10 @@ class FirmaDigitalController(http.Controller):
             if not firma_wizard.pdf_signed:
                 return request.not_found()
             
-            # Obtener el nombre original del documento y añadir " - firmado"
+            # Obtener el nombre original del documento
             nombre_original = firma_wizard.document_name or 'documento.pdf'
             nombre_base, extension = os.path.splitext(nombre_original)
-            nombre_firmado = f"{nombre_base} - firmado{extension}"
+            nombre_firmado = f"{nombre_base}{extension}"
             
             # Preparar la respuesta HTTP con el PDF
             pdf_content = base64.b64decode(firma_wizard.pdf_signed)
@@ -75,9 +75,9 @@ class FirmaDigitalController(http.Controller):
             if not documento.pdf_signed:
                 return request.not_found()
             
-            # Obtener el nombre y añadir " - firmado"
+            # Obtener el nombre
             nombre_base, extension = os.path.splitext(documento.document_name)
-            nombre_firmado = f"{nombre_base} - firmado{extension}"
+            nombre_firmado = f"{nombre_base}{extension}"
             
             # Preparar la respuesta HTTP con el PDF - FORZAR DESCARGA
             pdf_content = base64.b64decode(documento.pdf_signed)
@@ -261,7 +261,7 @@ class FirmaDigitalController(http.Controller):
                                         // Crear link de descarga
                                         const link = document.createElement('a');
                                         link.href = url;
-                                        link.download = downloadInfo.name.replace('.pdf', '') + ' - firmado.pdf';
+                                        link.download = downloadInfo.name;
                                         link.style.display = 'none';
                                         
                                         // Agregar al DOM y hacer click
