@@ -75,13 +75,24 @@ class PdfSelectionWizard(models.TransientModel):
     def _compute_alfresco_files(self):
         for record in self:
             if record.current_folder_id:
+                _logger.info("[v0] Loading PDF files for folder: %s (ID: %s)", 
+                           record.current_folder_id.name, record.current_folder_id.id)
+                
                 # Buscar archivos PDF en la carpeta actual
                 pdf_files = self.env['alfresco.file'].search([
                     ('folder_id', '=', record.current_folder_id.id),
                     ('name', 'ilike', '%.pdf')
                 ])
+                
+                _logger.info("[v0] Found %d PDF files in folder %s", 
+                           len(pdf_files), record.current_folder_id.name)
+                
+                for pdf_file in pdf_files:
+                    _logger.info("[v0] PDF file: %s (ID: %s)", pdf_file.name, pdf_file.id)
+                
                 record.alfresco_file_ids = pdf_files
             else:
+                _logger.info("[v0] No current folder selected, clearing PDF files")
                 record.alfresco_file_ids = False
 
     @api.model
@@ -103,6 +114,20 @@ class PdfSelectionWizard(models.TransientModel):
         folder = self.env['alfresco.folder'].browse(folder_id)
         if folder.exists():
             self.current_folder_id = folder
+        return self._reload_wizard()
+
+    def action_navigate_to_folder_wizard(self):
+        """Navigate to folder from wizard context"""
+        self.ensure_one()
+        folder_id = self.env.context.get('active_id')
+        if folder_id:
+            _logger.info("[v0] Navigating to folder ID: %s", folder_id)
+            folder = self.env['alfresco.folder'].browse(folder_id)
+            if folder.exists():
+                self.current_folder_id = folder
+                _logger.info("[v0] Successfully navigated to folder: %s", folder.name)
+            else:
+                _logger.warning("[v0] Folder ID %s does not exist", folder_id)
         return self._reload_wizard()
 
     def action_go_to_parent(self):
@@ -134,6 +159,38 @@ class PdfSelectionWizard(models.TransientModel):
         document = self.env['pdf.selection.local.document'].browse(document_id)
         if document.wizard_id.id == self.id:
             document.unlink()
+        return self._reload_wizard()
+
+    def action_select_file(self):
+        """Selecciona un archivo de Alfresco para firma"""
+        self.ensure_one()
+        file_id = self.env.context.get('active_id')
+        
+        if file_id:
+            _logger.info("[FILE_SELECTION] Selecting file ID: %s", file_id)
+            file_obj = self.env['alfresco.file'].browse(file_id)
+            
+            if file_obj.exists() and file_obj not in self.selected_alfresco_ids:
+                self.selected_alfresco_ids = [(4, file_id)]
+                _logger.info("[FILE_SELECTION] File '%s' added to selection", file_obj.name)
+            else:
+                _logger.warning("[FILE_SELECTION] File already selected or doesn't exist: %s", file_id)
+        
+        return self._reload_wizard()
+
+    def action_remove_file(self):
+        """Remueve un archivo de la selección"""
+        self.ensure_one()
+        file_id = self.env.context.get('active_id')
+        
+        if file_id:
+            _logger.info("[FILE_SELECTION] Removing file ID: %s", file_id)
+            file_obj = self.env['alfresco.file'].browse(file_id)
+            
+            if file_obj in self.selected_alfresco_ids:
+                self.selected_alfresco_ids = [(3, file_id)]
+                _logger.info("[FILE_SELECTION] File '%s' removed from selection", file_obj.name)
+        
         return self._reload_wizard()
 
     def action_confirm_selection(self):

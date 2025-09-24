@@ -56,22 +56,56 @@ class SignatureWorkflowWizard(models.TransientModel):
         """Verifica si Alfresco está configurado"""
         for record in self:
             config = self.env['ir.config_parameter'].sudo()
-            url = (config.get_param('asi_alfresco_integration.alfresco_server_url') or 
-                   config.get_param('alfresco.server_url') or
-                   config.get_param('alfresco_server_url') or
-                   config.get_param('alfresco.url'))
             
-            user = (config.get_param('asi_alfresco_integration.alfresco_username') or
-                    config.get_param('alfresco.username') or
-                    config.get_param('alfresco_username') or
-                    config.get_param('alfresco.user'))
+            _logger.info("[ALFRESCO_CONFIG] Checking Alfresco configuration...")
             
-            pwd = (config.get_param('asi_alfresco_integration.alfresco_password') or
-                   config.get_param('alfresco.password') or
-                   config.get_param('alfresco_password') or
-                   config.get_param('alfresco.pwd'))
+            url_params = [
+                'asi_alfresco_integration.alfresco_server_url',
+                'alfresco.server_url',
+                'alfresco_server_url'
+            ]
+            user_params = [
+                'asi_alfresco_integration.alfresco_username', 
+                'alfresco.username',
+                'alfresco_username'
+            ]
+            pwd_params = [
+                'asi_alfresco_integration.alfresco_password',
+                'alfresco.password', 
+                'alfresco_password'
+            ]
             
-            record.has_alfresco_config = bool(url and user and pwd)
+            url = None
+            user = None
+            pwd = None
+            
+            # Try to find URL parameter
+            for param in url_params:
+                url = config.get_param(param)
+                if url:
+                    _logger.info("[ALFRESCO_CONFIG] Found URL with param: %s = %s", param, url)
+                    break
+            
+            # Try to find username parameter
+            for param in user_params:
+                user = config.get_param(param)
+                if user:
+                    _logger.info("[ALFRESCO_CONFIG] Found username with param: %s = %s", param, user)
+                    break
+            
+            # Try to find password parameter
+            for param in pwd_params:
+                pwd = config.get_param(param)
+                if pwd:
+                    _logger.info("[ALFRESCO_CONFIG] Found password with param: %s = [HIDDEN]", param)
+                    break
+            
+            _logger.info("[ALFRESCO_CONFIG] Final values - URL: %s, User: %s, Password: %s", bool(url), bool(user), bool(pwd))
+            
+            has_config = bool(url and user and pwd)
+            _logger.info("[ALFRESCO_CONFIG] Configuration check result: %s", has_config)
+            
+            record.has_alfresco_config = has_config
 
     @api.depends('target_user_id')
     def _compute_target_user_info(self):
@@ -103,6 +137,7 @@ class SignatureWorkflowWizard(models.TransientModel):
     @api.onchange('document_source')
     def _onchange_document_source(self):
         """Validar configuración cuando se cambia el origen"""
+        self._compute_alfresco_config()
         if self.document_source == 'alfresco' and not self.has_alfresco_config:
             return {
                 'warning': {
