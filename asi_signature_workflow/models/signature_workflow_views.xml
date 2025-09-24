@@ -13,6 +13,10 @@
                     <button name="action_sign_documents" string="Firmar Documentos"
                         type="object" class="btn-success"
                         attrs="{'invisible': [('state', '!=', 'sent')]}" />
+                    <!-- agregando botón de rechazo -->
+                    <button name="action_reject_workflow" string="Rechazar Flujo"
+                        type="object" class="btn-danger"
+                        attrs="{'invisible': [('state', '!=', 'sent')]}" />
                     <button name="action_send_reminder" string="Enviar Recordatorio"
                         type="object" class="btn-warning"
                         attrs="{'invisible': [('state', '!=', 'sent')]}" />
@@ -23,8 +27,9 @@
                     <button name="action_download_all_signed" string="Descargar Firmados"
                         type="object" class="btn-info"
                         attrs="{'invisible': [('state', '!=', 'completed')]}" />
+                    <!-- agregando estado rechazado al statusbar -->
                     <field name="state" widget="statusbar"
-                        statusbar_visible="draft,sent,signed,completed" />
+                        statusbar_visible="draft,sent,signed,completed,rejected" />
                 </header>
 
                 <sheet>
@@ -57,6 +62,9 @@
                                 attrs="{'invisible': [('signed_date', '=', False)]}" />
                             <field name="completed_date"
                                 attrs="{'invisible': [('completed_date', '=', False)]}" />
+                            <!-- agregando campo de fecha de rechazo -->
+                            <field name="rejection_date"
+                                attrs="{'invisible': [('rejection_date', '=', False)]}" />
                         </group>
                     </group>
 
@@ -67,7 +75,7 @@
                                 <tree create="false" edit="false" delete="false">
                                     <field name="name" />
                                     <field name="alfresco_file_id" />
-                                    <field name="is_signed" widget="boolean_toggle" />
+                                    <field name="is_signed" widget="boolean_toggle" readonly="1" />
                                     <field name="signed_date" />
                                     <button name="action_download_document"
                                         string="Descargar" type="object" icon="fa-download"
@@ -84,6 +92,10 @@
                                 <field name="signature_notes" nolabel="1"
                                     placeholder="Notas de la firma (completado automáticamente)"
                                     attrs="{'invisible': [('signature_notes', '=', False)]}" />
+                                <!-- agregando campo de notas de rechazo -->
+                                <field name="rejection_notes" nolabel="1"
+                                    placeholder="Motivo del rechazo"
+                                    attrs="{'invisible': [('rejection_notes', '=', False)]}" />
                             </group>
                         </page>
                     </notebook>
@@ -109,11 +121,13 @@
                 <field name="target_user_id" />
                 <field name="document_count" />
                 <field name="document_source" />
+                <!-- agregando decoración para estado rechazado -->
                 <field name="state" widget="badge"
                     decoration-info="state == 'draft'"
                     decoration-warning="state == 'sent'"
                     decoration-primary="state == 'signed'"
-                    decoration-success="state == 'completed'" />
+                    decoration-success="state == 'completed'"
+                    decoration-danger="state == 'rejected'" />
                 <field name="sent_date" />
                 <field name="completed_date" />
             </tree>
@@ -140,6 +154,8 @@
                 <filter string="Borradores" name="draft" domain="[('state', '=', 'draft')]" />
                 <filter string="Enviados" name="sent" domain="[('state', '=', 'sent')]" />
                 <filter string="Completados" name="completed" domain="[('state', '=', 'completed')]" />
+                <!-- agregando filtro para rechazados -->
+                <filter string="Rechazados" name="rejected" domain="[('state', '=', 'rejected')]" />
 
                 <separator />
                 <filter string="Documentos Locales" name="local_docs"

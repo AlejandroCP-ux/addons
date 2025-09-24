@@ -1,6 +1,6 @@
 {
     'name': 'ASI Signature Workflow',
-    'version': '1.8',
+    'version': '2.0',
     'summary': 'Flujo de trabajo de firma digital entre usuarios',
     'description': """
         Módulo para crear flujos de trabajo de firma digital que permite:
@@ -19,13 +19,14 @@
         'asi_pdf_signature',
         'asi_alfresco_integration', 
         'asi_alfresco_pdf_signature',
-        'mail',  # Para notificaciones
+        'mail',
     ],
     'data': [
         'security/ir.model.access.csv',
         'data/mail_templates.xml',
         'wizards/signature_workflow_wizard_views.xml',
         'wizards/pdf_selection_wizard_views.xml',
+        'wizards/signature_workflow_reject_wizard_views.xml',
         'models/signature_workflow_views.xml',
         'views/menu_integration.xml',
         'views/alfresco_firma_wizard_workflow_view.xml',

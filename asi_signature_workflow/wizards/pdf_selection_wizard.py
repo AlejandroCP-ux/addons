@@ -105,6 +105,7 @@ class PdfSelectionWizard(models.TransientModel):
             root_folder = self.env['alfresco.folder'].search([('parent_id', '=', False)], limit=1)
             if root_folder:
                 res['current_folder_id'] = root_folder.id
+                self.current_folder_id = False
         
         return res
 

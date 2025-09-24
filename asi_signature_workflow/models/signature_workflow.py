@@ -33,7 +33,8 @@ class SignatureWorkflow(models.Model):
         ('sent', 'Enviado'),
         ('signed', 'Firmado'),
         ('completed', 'Completado'),
-        ('cancelled', 'Cancelado')
+        ('cancelled', 'Cancelado'),
+        ('rejected', 'Rechazado')
     ], string='Estado', default='draft', required=True, tracking=True)
     
     # Documentos del flujo
@@ -46,10 +47,12 @@ class SignatureWorkflow(models.Model):
     sent_date = fields.Datetime(string='Fecha de Envío')
     signed_date = fields.Datetime(string='Fecha de Firma')
     completed_date = fields.Datetime(string='Fecha de Finalización')
+    rejection_date = fields.Datetime(string='Fecha de Rechazo', readonly=True)
     
     # Notas y observaciones
     notes = fields.Text(string='Notas')
     signature_notes = fields.Text(string='Notas de Firma', readonly=True)
+    rejection_notes = fields.Text(string='Motivo del Rechazo', readonly=True)
 
     @api.depends('document_ids')
     def _compute_document_count(self):
@@ -401,8 +404,11 @@ class SignatureWorkflow(models.Model):
             'sent_date': fields.Datetime.now()
         })
         
+        # Crear actividad para el usuario objetivo cuando se envía el flujo
+        self._create_signature_activity()
+        
         # Enviar notificación por email
-        #self._send_signature_request_notification() # Agregar esta funcion en el modelo para enviar la notificacion
+        self._send_signature_request_notification()
         
         return {
             'type': 'ir.actions.client',
@@ -412,6 +418,159 @@ class SignatureWorkflow(models.Model):
                 'type': 'success',
             }
         }
+
+    def _create_signature_activity(self):
+        """Crea una actividad para el usuario objetivo cuando se envía el flujo"""
+        self.ensure_one()
+        
+        try:
+            self.env['mail.activity'].create({
+                'activity_type_id': self.env.ref('mail.mail_activity_data_todo').id,
+                'summary': f'Firma requerida: {self.name}',
+                'note': f'''
+                <p>Se requiere su firma para los siguientes documentos:</p>
+                <ul>
+                    {''.join([f'<li>{doc.name}</li>' for doc in self.document_ids])}
+                </ul>
+                <p><strong>Rol de firma:</strong> {self.signature_role_id.name}</p>
+                <p><strong>Enviado por:</strong> {self.creator_id.name}</p>
+                {f'<p><strong>Notas:</strong> {self.notes}</p>' if self.notes else ''}
+                ''',
+                'res_model_id': self.env['ir.model']._get(self._name).id,
+                'res_id': self.id,
+                'user_id': self.target_user_id.id,
+                'date_deadline': fields.Date.today() + timedelta(days=7),  # 7 días para firmar
+            })
+            _logger.info(f"Actividad de firma creada para usuario {self.target_user_id.name} en flujo {self.id}")
+        except Exception as e:
+            _logger.error(f"Error creando actividad de firma: {e}")
+
+    def _send_signature_request_notification(self):
+        """Crea notificación interna en lugar de enviar email"""
+        self.ensure_one()
+        
+        try:
+            # Crear mensaje interno en lugar de email
+            self.env['mail.message'].create({
+                'subject': f'Nueva solicitud de firma: {self.name}',
+                'body': f'''
+                <p>Se ha creado una nueva solicitud de firma que requiere su atención:</p>
+                <ul>
+                    <li><strong>Flujo:</strong> {self.name}</li>
+                    <li><strong>Creado por:</strong> {self.creator_id.name}</li>
+                    <li><strong>Documentos:</strong> {self.document_count} archivo(s)</li>
+                    <li><strong>Rol de firma:</strong> {self.signature_role_id.name}</li>
+                    <li><strong>Posición:</strong> {dict(self._fields['signature_position'].selection)[self.signature_position]}</li>
+                </ul>
+                {f'<p><strong>Notas:</strong> {self.notes}</p>' if self.notes else ''}
+                <p>Por favor, acceda al flujo para revisar y firmar los documentos.</p>
+                ''',
+                'message_type': 'notification',
+                'model': self._name,
+                'res_id': self.id,
+                'partner_ids': [(4, self.target_user_id.partner_id.id)],
+                'author_id': self.creator_id.partner_id.id,
+            })
+            _logger.info(f"Notificación interna de solicitud creada para flujo {self.id}")
+        except Exception as e:
+            _logger.error(f"Error creando notificación interna de solicitud: {e}")
+
+    def action_reject_workflow(self):
+        """Acción para que el usuario destinatario rechace el flujo"""
+        self.ensure_one()
+        
+        if self.env.user != self.target_user_id:
+            raise UserError(_('Solo el usuario destinatario puede rechazar este flujo.'))
+        
+        if self.state != 'sent':
+            raise UserError(_('Este flujo no está disponible para rechazo.'))
+        
+        # Abrir wizard de confirmación de rechazo
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Rechazar Flujo de Firma',
+            'res_model': 'signature.workflow.reject.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_workflow_id': self.id,
+            }
+        }
+
+    def _process_rejection(self, rejection_notes):
+        """Procesa el rechazo del flujo con las notas proporcionadas"""
+        self.ensure_one()
+        
+        self.write({
+            'state': 'rejected',
+            'rejection_date': fields.Datetime.now(),
+            'rejection_notes': rejection_notes
+        })
+        
+        # Marcar actividad de firma como completada
+        activities = self.env['mail.activity'].search([
+            ('res_model', '=', self._name),
+            ('res_id', '=', self.id),
+            ('user_id', '=', self.target_user_id.id),
+            ('activity_type_id', '=', self.env.ref('mail.mail_activity_data_todo').id)
+        ])
+        
+        if activities:
+            activities.action_done()
+        
+        # Crear actividad para el creador notificando el rechazo
+        self.env['mail.activity'].create({
+            'activity_type_id': self.env.ref('mail.mail_activity_data_warning').id,
+            'summary': f'Flujo rechazado: {self.name}',
+            'note': f'''
+            <p>Su flujo de firma ha sido rechazado por <strong>{self.target_user_id.name}</strong></p>
+            <p><strong>Motivo del rechazo:</strong></p>
+            <div style="background-color: #ffebee; padding: 10px; border-radius: 5px; border-left: 4px solid #f44336; margin: 10px 0;">
+                <p>{rejection_notes}</p>
+            </div>
+            <p>Puede revisar el flujo y crear uno nuevo si es necesario.</p>
+            ''',
+            'res_model_id': self.env['ir.model']._get(self._name).id,
+            'res_id': self.id,
+            'user_id': self.creator_id.id,
+            'date_deadline': fields.Date.today(),
+        })
+        
+        # Enviar notificación por email al creador
+        self._send_rejection_notification()
+        
+        _logger.info(f"Flujo {self.id} rechazado por {self.target_user_id.name}")
+
+    def _send_rejection_notification(self):
+        """Crea notificación interna de rechazo en lugar de enviar email"""
+        self.ensure_one()
+        
+        try:
+            # Crear mensaje interno en lugar de email
+            self.env['mail.message'].create({
+                'subject': f'Flujo rechazado: {self.name}',
+                'body': f'''
+                <p>Su flujo de firma ha sido rechazado:</p>
+                <ul>
+                    <li><strong>Flujo:</strong> {self.name}</li>
+                    <li><strong>Rechazado por:</strong> {self.target_user_id.name}</li>
+                    <li><strong>Fecha de rechazo:</strong> {self.rejection_date}</li>
+                </ul>
+                <div style="background-color: #ffebee; padding: 10px; border-radius: 5px; border-left: 4px solid #f44336; margin: 10px 0;">
+                    <p><strong>Motivo del rechazo:</strong></p>
+                    <p>{self.rejection_notes}</p>
+                </div>
+                <p>Puede revisar el flujo y crear uno nuevo si es necesario.</p>
+                ''',
+                'message_type': 'notification',
+                'model': self._name,
+                'res_id': self.id,
+                'partner_ids': [(4, self.creator_id.partner_id.id)],
+                'author_id': self.target_user_id.partner_id.id,
+            })
+            _logger.info(f"Notificación interna de rechazo creada para flujo {self.id}")
+        except Exception as e:
+            _logger.error(f"Error creando notificación interna de rechazo: {e}")
 
     def action_mark_as_completed(self):
         """Acción manual para marcar el flujo como completado"""
@@ -627,22 +786,13 @@ class SignatureWorkflow(models.Model):
         return urls
 
     def _send_completion_notification(self):
-        """Envía notificación de finalización al creador"""
+        """Crea notificación interna de finalización en lugar de enviar email"""
         self.ensure_one()
         
         try:
-            # Enviar email usando template
-            template = self.env.ref('asi_signature_workflow.mail_template_signature_completed', raise_if_not_found=False)
-            if template:
-                template.send_mail(self.id, force_send=True)
-                _logger.info(f"Notificación de finalización enviada para flujo {self.id}")
-            
-            # Crear notificación interna en Odoo
-            download_urls = self.get_signed_documents_download_urls()
-            urls_text = '\n'.join([f'• {doc["name"]}: {doc["url"]}' for doc in download_urls])
-            
+            # Crear mensaje interno en lugar de email
             self.env['mail.message'].create({
-                'subject': f'Documentos Firmados: {self.name}',
+                'subject': f'Documentos firmados disponibles: {self.name}',
                 'body': f'''
                 <p>Su flujo de firma digital ha sido completado exitosamente:</p>
                 <ul>
@@ -652,22 +802,13 @@ class SignatureWorkflow(models.Model):
                     <li><strong>Fecha:</strong> {self.completed_date}</li>
                     <li><strong>Carpeta Alfresco:</strong> /Sites/Flujos/{self.creator_id.login}/{self.name}/</li>
                 </ul>
-                <p><strong>URLs de descarga individual:</strong></p>
-                <div style="background-color: #f8f9fa; padding: 10px; border-radius: 5px; font-family: monospace; font-size: 12px;">
-                    {urls_text.replace(chr(10), '<br/>')}
-                </div>
-                <p style="text-align: center; margin: 20px 0;">
-                    <a href="/signature_workflow/download_signed/{self.id}" 
-                       style="background-color: #ff9800; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;">
-                        📥 DESCARGAR AHORA!
-                    </a>
-                </p>
+                <p>Los documentos firmados están disponibles para descarga individual desde el flujo.</p>
                 ''',
                 'message_type': 'notification',
                 'model': self._name,
                 'res_id': self.id,
                 'partner_ids': [(4, self.creator_id.partner_id.id)],
-                'author_id': self.env.user.partner_id.id,
+                'author_id': self.target_user_id.partner_id.id,
             })
             
             # Marcar actividad como completada si existe
@@ -686,10 +827,11 @@ class SignatureWorkflow(models.Model):
                 'activity_type_id': self.env.ref('mail.mail_activity_data_call').id,
                 'summary': f'Documentos firmados disponibles: {self.name}',
                 'note': f'''
-                <p>Los documentos del flujo han sido firmados y están listos para descarga individual.</p>
+                <p>Los documentos del flujo han sido firmados y están listos para descarga.</p>
                 <p><strong>Firmado por:</strong> {self.target_user_id.name}</p>
                 <p><strong>Documentos:</strong> {self.document_count} archivo(s)</p>
-                <p><a href="/signature_workflow/download_signed/{self.id}">Acceder a página de descarga</a></p>
+                <p><strong>Carpeta:</strong> /Sites/Flujos/{self.creator_id.login}/{self.name}/</p>
+                <p>Acceda al flujo para descargar los documentos firmados individualmente.</p>
                 ''',
                 'res_model_id': self.env['ir.model']._get(self._name).id,
                 'res_id': self.id,
@@ -697,8 +839,10 @@ class SignatureWorkflow(models.Model):
                 'date_deadline': fields.Date.today(),
             })
             
+            _logger.info(f"Notificación interna de finalización creada para flujo {self.id}")
+            
         except Exception as e:
-            _logger.error(f"Error enviando notificación de finalización: {e}")
+            _logger.error(f"Error creando notificación interna de finalización: {e}")
 
     def action_send_reminder(self):
         """Envía recordatorio al usuario destinatario"""
@@ -790,6 +934,22 @@ class SignatureWorkflow(models.Model):
         
         _logger.warning(f"No se encontró wizard de firma para el flujo {self.id}")
         return False
+
+    def unlink(self):
+        """Sobrescribe unlink para permitir eliminación solo al creador o administrador"""
+        for record in self:
+            # Verificar si el usuario es administrador
+            if self.env.user.has_group('base.group_system'):
+                continue  # Los administradores pueden eliminar cualquier flujo
+            
+            # Verificar si el usuario es el creador del flujo
+            if record.creator_id != self.env.user:
+                raise UserError(_(
+                    'Solo el creador del flujo (%s) puede eliminar este registro. '
+                    'Usuario actual: %s'
+                ) % (record.creator_id.name, self.env.user.name))
+        
+        return super(SignatureWorkflow, self).unlink()
 
 class SignatureWorkflowDocument(models.Model):
     _name = 'signature.workflow.document'
