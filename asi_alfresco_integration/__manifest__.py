@@ -1,6 +1,6 @@
 {
     "name": "Alfresco Report Integration",
-    "version": "1.0",
+    "version": "1.8",
     "summary": "Upload PDF reports to Alfresco automatically",
     "category": "Tools",
     'author': 'Javier, F3nrir',
@@ -18,6 +18,7 @@
         "views/alfresco_views.xml",       
         "data/cron_sync_alfresco.xml",
         "data/cron_export_reports.xml",
+        "data/cron_cleanup_temp_batches.xml",
     ],
    'images': ['static/description/icon.png'],
     "installable": True,

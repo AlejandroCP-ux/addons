@@ -23,6 +23,18 @@ class SignatureWorkflowWizard(models.TransientModel):
         ('derecha', 'Derecha')
     ], string='Posición de la Firma', default='derecha')
     
+    signature_opaque_background = fields.Boolean(
+        string='Firma con fondo opaco',
+        default=False,
+        help='Si está marcado, la firma tendrá fondo blanco opaco en lugar de transparente'
+    )
+    
+    sign_all_pages = fields.Boolean(
+        string='Firmar todas las páginas',
+        default=False,
+        help='Si está marcado, se firmará todas las páginas del documento en lugar de solo la última'
+    )
+    
     # Selección del origen de documentos
     document_source = fields.Selection([
         ('local', 'Documentos Locales'),
@@ -222,6 +234,8 @@ class SignatureWorkflowWizard(models.TransientModel):
                 'target_user_id': self.target_user_id.id,
                 'signature_role_id': self.signature_role_id.id,
                 'signature_position': self.signature_position,
+                'signature_opaque_background': self.signature_opaque_background,
+                'sign_all_pages': self.sign_all_pages,
                 'document_source': self.document_source,
                 'notes': self.notes,
             })
@@ -275,6 +289,8 @@ class SignatureWorkflowWizard(models.TransientModel):
             'file_ids': [(6, 0, alfresco_files.ids)],
             'signature_role': self.signature_role_id.id,
             'signature_position': self.signature_position,
+            'signature_opaque_background': self.signature_opaque_background,
+            'sign_all_pages': self.sign_all_pages,
         })
         
         # Hacer campos de rol y posición de solo lectura para el destinatario
@@ -307,6 +323,8 @@ class SignatureWorkflowWizard(models.TransientModel):
             'document_ids': document_lines,
             'signature_role': self.signature_role_id.id,
             'signature_position': self.signature_position,
+            'signature_opaque_background': self.signature_opaque_background,
+            'sign_all_pages': self.sign_all_pages,
         })
         
         return {

@@ -101,6 +101,12 @@
                             <p><i class="fa fa-info-circle" /> No hay archivos PDF en esta carpeta.</p>
                         </div>
                     </group>
+                    <div class="col-8 text-right" style="margin-bottom: 8px;"
+                        attrs="{'invisible': [('alfresco_file_ids', '=', [])]}">
+                        <button name="action_select_all_pdfs"
+                            string="Seleccionar Todos"
+                            type="object" class="btn-sm btn-info" icon="fa-check-square-o" />
+                    </div>
 
                     <!-- Archivos seleccionados -->
                     <group string="Archivos Seleccionados para Firma" col="1">
@@ -111,8 +117,6 @@
                                 <field name="name" />
                                 <field name="folder_id" />
                                 <field name="file_size_human" />
-                                <button name="action_remove_file" type="object" string="Quitar"
-                                    class="btn-sm btn-danger" icon="fa-minus" />
                             </tree>
                         </field>
 

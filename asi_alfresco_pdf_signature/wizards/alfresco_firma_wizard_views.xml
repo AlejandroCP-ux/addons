@@ -11,6 +11,9 @@
                 <field name="has_password" invisible="1" />
                 <field name="has_image" invisible="1" />
                 <field name="certificate_wizard_name" invisible="1" />
+                <field name="show_sign_button" invisible="1" />
+                <field name="has_password_error" invisible="1" />
+                <field name="files_with_error" invisible="1" />
 
                 <!-- Estado: Configuración -->
                 <div attrs="{'invisible': [('status', '!=', 'borrador')]}">
@@ -22,6 +25,12 @@
                             manteniendo el mismo archivo.</p>
                     </div>
 
+                    <div class="alert alert-danger" role="alert"
+                        attrs="{'invisible': [('has_password_error', '=', False)]}">
+                        <h5><i class="fa fa-exclamation-triangle" /> Error de Contraseña</h5>
+                        <p>La contraseña del certificado PKCS#12 es incorrecta. Por favor, ingrese
+                            la contraseña correcta.</p>
+                    </div>
                     <!-- Estado del usuario -->
                     <div class="alert alert-warning" role="alert" style="margin-bottom: 15px;">
                         <h5><i class="fa fa-user" /> Estado de su Configuración:</h5>
@@ -111,11 +120,13 @@
                             string="🖊️ Firmar Documentos"
                             type="object"
                             class="btn-primary"
-                            attrs="{'invisible': ['|', '|', '|', 
-                                    ('signature_role', '=', False), 
-                                    ('signature_role', '=', ''), 
-                                    '&amp;', ('signature_password', '=', False), ('has_password', '=', False), 
-                                    ('file_count', '=', 0)]}" />
+                            attrs="{'invisible': ['|', '|', '|', '|', ('show_sign_button', '=', False), ('signature_role', '=', False), ('signature_role', '=', ''), '&amp;', ('signature_password', '=', False), ('has_password', '=', False), ('file_count', '=', 0)]}" />
+                        <button
+                            name="action_firmar_documentos"
+                            string="🔄 Reintentar Archivos con Error"
+                            type="object"
+                            class="btn-warning"
+                            attrs="{'invisible': ['|', '|', ('status', 'not in', ['completado', 'error']), ('documents_with_error', '=', 0), ('show_sign_button', '=', False)]}" />
                     </footer>
                 </div>
 

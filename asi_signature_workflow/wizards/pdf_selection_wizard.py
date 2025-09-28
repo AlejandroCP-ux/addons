@@ -194,6 +194,28 @@ class PdfSelectionWizard(models.TransientModel):
         
         return self._reload_wizard()
 
+    def action_select_all_pdfs(self):
+        """Selecciona todos los archivos PDF de la carpeta actual"""
+        self.ensure_one()
+        
+        if not self.current_folder_id:
+            raise UserError(_('Debe estar en una carpeta para seleccionar todos los PDFs.'))
+        
+        # Obtener todos los PDFs de la carpeta actual que no estén ya seleccionados
+        available_pdfs = self.alfresco_file_ids.filtered(lambda f: f not in self.selected_alfresco_ids)
+        
+        if not available_pdfs:
+            raise UserError(_('No hay archivos PDF disponibles para seleccionar en esta carpeta.'))
+        
+        # Agregar todos los PDFs disponibles a la selección
+        for pdf_file in available_pdfs:
+            self.selected_alfresco_ids = [(4, pdf_file.id)]
+        
+        _logger.info("[FILE_SELECTION] Selected all %d PDF files from folder '%s'", 
+                    len(available_pdfs), self.current_folder_id.name)
+        
+        return self._reload_wizard()
+
     def action_confirm_selection(self):
         """Confirma la selección y regresa al wizard principal"""
         self.ensure_one()

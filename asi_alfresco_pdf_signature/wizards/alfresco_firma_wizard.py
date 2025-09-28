@@ -91,10 +91,27 @@ class AlfrescoFirmaWizard(models.TransientModel):
         help='Si está marcado, se firmará todas las páginas del documento en lugar de solo la última'
     )
 
+    show_sign_button = fields.Boolean(string='Mostrar Botón Firmar', default=True, compute='_compute_show_sign_button', store=True)
+    has_password_error = fields.Boolean(string='Error de Contraseña', default=False)
+    files_with_error = fields.Many2many('alfresco.file', 'alfresco_firma_wizard_error_rel', 'wizard_id', 'file_id', string='Archivos con Error')
+
     @api.depends('file_ids')
     def _compute_file_count(self):
         for record in self:
             record.file_count = len(record.file_ids)
+
+    @api.depends('status', 'documents_with_error', 'files_with_error')
+    def _compute_show_sign_button(self):
+        for record in self:
+            if record.status == 'completado' and record.documents_with_error == 0:
+                # Si el proceso terminó sin errores, ocultar el botón
+                record.show_sign_button = False
+            elif record.status in ['completado', 'error'] and record.documents_with_error > 0:
+                # Si hay errores, mostrar el botón para reintentar
+                record.show_sign_button = True
+            else:
+                # En otros casos (borrador, procesando), mostrar el botón
+                record.show_sign_button = True
 
     @api.depends()
     def _compute_estado_usuario(self):
@@ -324,17 +341,30 @@ class AlfrescoFirmaWizard(models.TransientModel):
         if not self.signature_role:
             raise UserError(_('Debe especificar el rol para la firma.'))
         
+        if self.status in ['completado', 'error'] and self.documents_with_error > 0:
+            # Solo procesar archivos que tuvieron error
+            archivos_a_procesar = self.files_with_error
+            # Limpiar la lista de archivos con error para el nuevo intento
+            self.files_with_error = [(5, 0, 0)]
+        else:
+            # Procesar todos los archivos
+            archivos_a_procesar = self.file_ids
+            # Limpiar la lista de archivos con error
+            self.files_with_error = [(5, 0, 0)]
+        
         # Cambiar status a procesando
         self.write({
             'status': 'procesando',
             'message_result': 'Iniciando proceso de firma...',
             'documents_processed': 0,
-            'documents_with_error': 0
+            'documents_with_error': 0,
+            'has_password_error': False
         })
 
         documents_processed = 0
         documents_with_error = 0
         errores_detalle = []
+        archivos_con_error = []
 
         try:
             # Obtener datos de firma (prioriza wizard sobre user)
@@ -347,9 +377,6 @@ class AlfrescoFirmaWizard(models.TransientModel):
             )
             imagen_width, imagen_height = imagen_size
 
-            # Cargar certificado usando OpenSSL como alternativa
-            #p12 = crypto.load_pkcs12(certificado_data, contrasena.encode('utf-8'))
-            # aqui inicia el nuevo metodo con cryptography
             try:
                 # cryptography carga el PKCS12
                 private_key, certificate, additional_certs = pkcs12.load_key_and_certificates(
@@ -369,16 +396,34 @@ class AlfrescoFirmaWizard(models.TransientModel):
                 p12 = P12Wrapper(private_key, certificate, additional_certs)
     
             except ValueError as e:
-                raise Exception(f"Error cargando certificado PKCS#12: {str(e)}")
+                error_msg = str(e)
+                if "Invalid password or PKCS12 data" in error_msg:
+                    self.write({
+                        'has_password_error': True,
+                        'signature_password': '',  # Limpiar contraseña
+                        'status': 'borrador'  # Volver al estado de configuración
+                    })
+                    # Mostrar notificación en lugar de excepción
+                    return {
+                        'type': 'ir.actions.client',
+                        'tag': 'display_notification',
+                        'params': {
+                            'title': _('Error de Contraseña'),
+                            'message': _('La contraseña del certificado PKCS#12 es incorrecta. Por favor, ingrese la contraseña correcta.'),
+                            'type': 'warning',
+                            'sticky': False,
+                        }
+                    }
+                else:
+                    raise Exception(f"Error cargando certificado PKCS#12: {error_msg}")
             
             # Convertir a formato compatible con endesive
-            private_key = p12.get_privatekey()#.to_cryptography_key()
-            certificate = p12.get_certificate()#.to_cryptography()
-            additional_certificates = [] #[cert.to_cryptography() for cert in p12.get_ca_certificates() or []]
-            # aqui termina el nuevo metodo con cryptography
+            private_key = p12.get_privatekey()
+            certificate = p12.get_certificate()
+            additional_certificates = []
             
             # Procesar cada archivo
-            for archivo in self.file_ids:
+            for archivo in archivos_a_procesar:
                 try:
                     self._firmar_archivo_individual(
                         archivo, imagen_firma_path, imagen_width, imagen_height,
@@ -389,14 +434,18 @@ class AlfrescoFirmaWizard(models.TransientModel):
                     # Actualizar progreso
                     self.write({
                         'documents_processed': documents_processed,
-                        'message_result': f'Procesando... {documents_processed}/{len(self.file_ids)} archivos completados'
+                        'message_result': f'Procesando... {documents_processed}/{len(archivos_a_procesar)} archivos completados'
                     })
                     
                 except Exception as e:
                     documents_with_error += 1
+                    archivos_con_error.append(archivo.id)  # Guardar ID del archivo con error
                     error_msg = f"Error en {archivo.name}: {str(e)}"
                     errores_detalle.append(error_msg)
                     _logger.error(f"Error firmando archivo {archivo.name}: {e}")
+            
+            if archivos_con_error:
+                self.files_with_error = [(6, 0, archivos_con_error)]
             
             # Limpiar archivo temporal
             try:

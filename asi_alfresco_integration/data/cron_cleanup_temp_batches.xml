@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1"> Cron para limpiar batches temporales inactivos <record
+            id="cron_cleanup_temp_batches" model="ir.cron">
+            <field name="name">Alfresco - Limpieza de Batches Temporales</field>
+            <field name="model_id" ref="model_alfresco_folder" />
+            <field name="state">code</field>
+            <field name="code">model.cleanup_inactive_temp_crons()</field>
+            <field name="interval_number">90</field>
+            <field name="interval_type">minutes</field>
+            <field name="numbercall">-1</field>
+            <field name="active">True</field>
+            <field name="priority">20</field>
+            <field name="user_id" ref="base.user_root" />
+        </record>
+    </data>
+</odoo>

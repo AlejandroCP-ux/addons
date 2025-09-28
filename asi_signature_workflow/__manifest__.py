@@ -23,7 +23,7 @@
     ],
     'data': [
         'security/ir.model.access.csv',
-        'data/mail_templates.xml',
+        #'data/mail_templates.xml',
         'wizards/signature_workflow_wizard_views.xml',
         'wizards/pdf_selection_wizard_views.xml',
         'wizards/signature_workflow_reject_wizard_views.xml',

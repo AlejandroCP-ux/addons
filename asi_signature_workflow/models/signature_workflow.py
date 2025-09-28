@@ -23,6 +23,18 @@ class SignatureWorkflow(models.Model):
         ('derecha', 'Derecha')
     ], string='Posición de la Firma', required=True, default='derecha')
     
+    signature_opaque_background = fields.Boolean(
+        string='Firma con fondo opaco',
+        default=False,
+        help='Si está marcado, la firma tendrá fondo blanco opaco en lugar de transparente'
+    )
+    
+    sign_all_pages = fields.Boolean(
+        string='Firmar todas las páginas',
+        default=False,
+        help='Si está marcado, se firmará todas las páginas del documento en lugar de solo la última'
+    )
+    
     document_source = fields.Selection([
         ('local', 'Documentos Locales'),
         ('alfresco', 'Documentos de Alfresco')
@@ -621,6 +633,8 @@ class SignatureWorkflow(models.Model):
         wizard = self.env['firma.documento.wizard'].create({
             'signature_role': self.signature_role_id.id,
             'signature_position': self.signature_position,
+            'signature_opaque_background': self.signature_opaque_background,
+            'sign_all_pages': self.sign_all_pages,
             'from_workflow': True,
             'workflow_id': self.id,
         })
@@ -705,6 +719,8 @@ class SignatureWorkflow(models.Model):
             'file_ids': [(6, 0, alfresco_files.ids)],
             'signature_role': self.signature_role_id.id,
             'signature_position': self.signature_position,
+            'signature_opaque_background': self.signature_opaque_background,
+            'sign_all_pages': self.sign_all_pages,
             'from_workflow': True,
             'workflow_id': self.id,
         })

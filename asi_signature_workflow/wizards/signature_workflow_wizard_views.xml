@@ -26,6 +26,15 @@
                     </group>
                 </group>
 
+                <group string="Opciones de Firma" col="2">
+                    <group>
+                        <field name="signature_opaque_background" />
+                    </group>
+                    <group>
+                        <field name="sign_all_pages" />
+                    </group>
+                </group>
+
                 <!-- Información del usuario destinatario -->
                 <div attrs="{'invisible': [('target_user_id', '=', False)]}">
                     <field name="target_user_info" nolabel="1" />

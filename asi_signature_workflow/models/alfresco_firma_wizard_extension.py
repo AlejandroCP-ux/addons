@@ -35,6 +35,12 @@ class AlfrescoFirmaWizardExtension(models.TransientModel):
                 if 'signature_position' in fields_list and workflow.signature_position:
                     res['signature_position'] = workflow.signature_position
                 
+                if 'signature_opaque_background' in fields_list:
+                    res['signature_opaque_background'] = workflow.signature_opaque_background
+                
+                if 'sign_all_pages' in fields_list:
+                    res['sign_all_pages'] = workflow.sign_all_pages
+                
                 _logger.info(f"Wizard de Alfresco configurado desde flujo {workflow.id} con rol {workflow.signature_role_id.name if workflow.signature_role_id else 'N/A'} y posición {workflow.signature_position}")
         
         return res
@@ -60,7 +66,7 @@ class AlfrescoFirmaWizardExtension(models.TransientModel):
             # Re-lanzar el error original para que el usuario lo vea
             raise
 
-    @api.onchange('signature_role', 'signature_position')
+    @api.onchange('signature_role', 'signature_position', 'signature_opaque_background', 'sign_all_pages')
     def _onchange_signature_config(self):
         """Prevenir cambios en configuración cuando viene de flujo de trabajo"""
         if self.readonly_signature_config and self.from_workflow:
@@ -69,9 +75,11 @@ class AlfrescoFirmaWizardExtension(models.TransientModel):
                     self.signature_role = self.workflow_id.signature_role_id.id
                 if self.workflow_id.signature_position:
                     self.signature_position = self.workflow_id.signature_position
+                self.signature_opaque_background = self.workflow_id.signature_opaque_background
+                self.sign_all_pages = self.workflow_id.sign_all_pages
                 return {
                     'warning': {
                         'title': _('Configuración Bloqueada'),
-                        'message': _('El rol y posición de firma están definidos por el creador del flujo de trabajo y no pueden ser modificados.')
+                        'message': _('La configuración de firma está definida por el creador del flujo de trabajo y no puede ser modificada.')
                     }
                 }
