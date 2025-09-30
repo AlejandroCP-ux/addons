@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="report_performance_summary" model="ir.actions.report">
+        <field name="name">Resumen de evaluaciones</field>
+        <field name="model">performance.evaluation.summary.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">performance_evaluation_summary.report_performance_summary_template</field>
+        <field name="attachment_use">False</field>
+        <field name="print_report_name">'Resumen de Evaluaciones %s %s' % (object.employee_id.department_id.name or '', object.performance_period_id.name or '')</field>
+    </record>
+</odoo>

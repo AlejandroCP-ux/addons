@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Form view for the wizard -->
+  <record id="view_performance_evaluation_summary_wizard_form" model="ir.ui.view">
+    <field name="name">performance.evaluation.summary.wizard.form</field>
+    <field name="model">performance.evaluation.summary.wizard</field>
+    <field name="arch" type="xml">
+      <form string="Resumen de evaluaciones">
+        <group>
+          <field name="employee_id" options="{'no_create': True}"/>
+          <field name="performance_period_id" options="{'no_create': True}"/>
+        </group>
+        <footer>
+          <button string="Imprimir" type="object" name="action_print_report" class="btn-primary"/>
+          <button string="Cerrar" class="btn-secondary" special="cancel"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+
+  <!-- Action to open the wizard as a modal (no explicit view_id needed) -->
+  <record id="action_performance_evaluation_summary_wizard" model="ir.actions.act_window">
+    <field name="name">Resumen de evaluaciones</field>
+    <field name="res_model">performance.evaluation.summary.wizard</field>
+    <field name="view_mode">form</field>
+    <field name="target">new</field>
+  </record>
+</odoo>

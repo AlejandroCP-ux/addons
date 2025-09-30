@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Menu + action to call the wizard -->
+  <menuitem id="menu_performance_evaluation_summary_open"
+            parent="performance_evaluation.employee_evaluation_program_menu_root"
+            name="Resumen de evaluaciones"
+            action="action_performance_evaluation_summary_wizard"
+            sequence="4"/>
+</odoo>

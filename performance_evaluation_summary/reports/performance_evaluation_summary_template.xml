@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <template id="report_performance_summary_template">
+    <t t-call="web.html_container">
+      <t t-foreach="docs" t-as="o">
+        <t t-call="web.external_layout">
+          <div class="page">
+            <h2>Resumen de evaluaciones</h2>
+            <table class="table table-sm">
+              <tr>
+                <th style="text-align:left;">Período</th>
+                <td><span t-field="o.performance_period_id.name"/></td>
+              </tr>
+              <tr>
+                <th style="text-align:left;">Departamento</th>
+                <td colspan="3"><span t-field="o.employee_id.department_id.name"/></td>
+              </tr>
+              <tr>
+                <th style="text-align:left;">Empleado Jefe</th>
+                <td><span t-field="o.employee_id.name"/></td>
+              </tr>
+            </table>
+
+            <br/>
+            <h3>Subordinados y evaluación</h3>
+            <table class="table table-condensed" style="width:100%; border-collapse: collapse;" border="0">
+              <thead>
+                <tr style="background-color:#f0f0f0;">
+                  <th style="padding:5px;">#</th>
+                  <th style="padding:5px;">Empleado</th>
+                  <th style="padding:5px;">Cargo</th>
+                  <th style="padding:5px;">Evaluación</th>
+                  <th style="padding:5px;">Observaciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <t t-set="subs" t-value="o._get_subordinates()"/>
+                <t t-if="subs and len(subs) &gt; 0">
+                  <t t-foreach="enumerate(subs)" t-as="pair" t-key="pair[1].id">
+                    <tr>
+                      <td style="padding:5px;"><t t-esc="pair[0] + 1"/></td>
+                      <td style="padding:5px;"><span t-field="pair[1].name"/></td>
+                      <td style="padding:5px;"><span t-field="pair[1].job_id.name"/></td>
+                      <td style="padding:5px; text-align: right;">
+                        <t t-set="ev" t-value="o.env['performance.evaluation.program'].search([('employee_id','=',pair[1].id), ('performance_period_id','=',o.performance_period_id.id)], limit=1, order='date_of_evaluation desc')"/>
+                        <t t-if="ev">
+                          <span t-esc="ev.overall_score or ev.overall_personal_score or '-'"/>
+                        </t>
+                        <t t-else="">-</t>
+                      </td>
+                      <td style="padding:5px;">
+                        <t t-if="ev and ev.extra_remarks">
+                          <span t-field="ev.extra_remarks"/>
+                        </t>
+                        <t t-else="">-</t>
+                      </td>
+                    </tr>
+                  </t>
+                </t>
+                <t t-else="">
+                  <tr><td colspan="5" style="padding:5px;">No se encontraron subordinados para este empleado.</td></tr>
+                </t>
+              </tbody>
+            </table>
+          </div>
+        </t>
+      </t>
+    </t>
+  </template>
+</odoo>
