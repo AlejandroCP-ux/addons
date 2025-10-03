@@ -21,9 +21,12 @@ class PerformanceEvaluationSummaryWizard(models.TransientModel):
 
     def _get_subordinates(self):
         self.ensure_one()
-        # Direct subordinates: employees whose parent_id is the selected employee
-        subs = self.env['hr.employee'].search([('parent_id', '=', self.employee_id.id)], order='id')
-        return subs
+        evals = self.env['performance.evaluation.program'].search([
+            ('performance_period_id', '=', self.performance_period_id.id),
+            ('employee_id.parent_id', '=', self.employee_id.id),
+        ])
+        return evals.mapped('employee_id').with_context(active_test=False)
+
 
     def _gather_evaluations(self):
         self.ensure_one()
