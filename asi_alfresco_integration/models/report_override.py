@@ -253,7 +253,7 @@ class Report(models.Model):
         query = {
             "query": {
                 "language": "afts",
-                "query": f'cm:name:"{filename}" AND ANCESTOR:"workspace://SpacesStore/{folder_node_id}"'
+                "query": f'=cm:name:"{filename}" AND ANCESTOR:"workspace://SpacesStore/{folder_node_id}"'
             },
             "include": ["properties"],
             "paging": {"maxItems": 1, "skipCount": 0}
