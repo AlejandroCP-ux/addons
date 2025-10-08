@@ -4,39 +4,82 @@
         <field name="name">signature.workflow.wizard.form</field>
         <field name="model">signature.workflow.wizard</field>
         <field name="arch" type="xml">
-            <!-- Simplified single-step form without complex step logic -->
             <form string="Iniciar Flujo de Firma Digital">
                 <field name="has_alfresco_config" invisible="1" />
                 <field name="document_count" invisible="1" />
 
                 <div class="alert alert-info" role="alert">
                     <h4><i class="fa fa-cogs" /> Configuración del Flujo de Firma</h4>
-                    <p>Configure los parámetros básicos para el flujo de trabajo de firma digital.</p>
+                    <p>Configure los parámetros básicos para el flujo de trabajo de firma digital
+                        con hasta 4 destinatarios.</p>
                 </div>
 
                 <group>
                     <group>
                         <field name="name" placeholder="ej: Aprobación de Contratos - Enero 2024" />
-                        <field name="target_user_id" options="{'no_create': True}" />
-                        <field name="signature_role_id" options="{'no_create': True}" />
-                    </group>
-                    <group>
-                        <field name="signature_position" />
                         <field name="document_source" />
                     </group>
-                </group>
-
-                <group string="Opciones de Firma" col="2">
                     <group>
                         <field name="signature_opaque_background" />
-                    </group>
-                    <group>
                         <field name="sign_all_pages" />
                     </group>
                 </group>
 
-                <!-- Información del usuario destinatario -->
-                <div attrs="{'invisible': [('target_user_id', '=', False)]}">
+                <!-- Destinatario 1 (siempre visible) -->
+                <group string="Destinatario 1" col="2">
+                    <group>
+                        <field name="target_user_id_1" options="{'no_create': True}" required="1" />
+                        <field name="signature_role_id_1" options="{'no_create': True}" required="1" />
+                    </group>
+                    <group>
+                        <field name="signature_position_1" required="1" />
+                    </group>
+                </group>
+
+                <!-- Destinatario 2 (visible solo si destinatario 1 está completo) -->
+                <group string="Destinatario 2 (Opcional)" col="2"
+                    attrs="{'invisible': ['|', '|', ('target_user_id_1', '=', False), ('signature_role_id_1', '=', False), ('signature_position_1', '=', False)]}">
+                    <group>
+                        <field name="target_user_id_2" options="{'no_create': True}" />
+                        <field name="signature_role_id_2" options="{'no_create': True}"
+                            attrs="{'required': [('target_user_id_2', '!=', False)]}" />
+                    </group>
+                    <group>
+                        <field name="signature_position_2"
+                            attrs="{'required': [('target_user_id_2', '!=', False)]}" />
+                    </group>
+                </group>
+
+                <!-- Destinatario 3 (visible solo si destinatario 2 está completo) -->
+                <group string="Destinatario 3 (Opcional)" col="2"
+                    attrs="{'invisible': ['|', '|', ('target_user_id_2', '=', False), ('signature_role_id_2', '=', False), ('signature_position_2', '=', False)]}">
+                    <group>
+                        <field name="target_user_id_3" options="{'no_create': True}" />
+                        <field name="signature_role_id_3" options="{'no_create': True}"
+                            attrs="{'required': [('target_user_id_3', '!=', False)]}" />
+                    </group>
+                    <group>
+                        <field name="signature_position_3"
+                            attrs="{'required': [('target_user_id_3', '!=', False)]}" />
+                    </group>
+                </group>
+
+                <!-- Destinatario 4 (visible solo si destinatario 3 está completo) -->
+                <group string="Destinatario 4 (Opcional)" col="2"
+                    attrs="{'invisible': ['|', '|', ('target_user_id_3', '=', False), ('signature_role_id_3', '=', False), ('signature_position_3', '=', False)]}">
+                    <group>
+                        <field name="target_user_id_4" options="{'no_create': True}" />
+                        <field name="signature_role_id_4" options="{'no_create': True}"
+                            attrs="{'required': [('target_user_id_4', '!=', False)]}" />
+                    </group>
+                    <group>
+                        <field name="signature_position_4"
+                            attrs="{'required': [('target_user_id_4', '!=', False)]}" />
+                    </group>
+                </group>
+
+                <!-- Información de los usuarios destinatarios -->
+                <div attrs="{'invisible': [('target_user_id_1', '=', False)]}">
                     <field name="target_user_info" nolabel="1" />
                 </div>
 
@@ -69,11 +112,10 @@
 
                 <group string="Notas del Flujo" col="1">
                     <field name="notes" nolabel="1"
-                        placeholder="Agregue notas o instrucciones para el usuario destinatario..." />
+                        placeholder="Agregue notas o instrucciones para los usuarios destinatarios..." />
                 </group>
 
                 <footer>
-                    <!-- Simplified buttons without step logic -->
                     <button name="create_workflow" string="Crear y Enviar Flujo"
                         type="object" class="btn-primary"
                         attrs="{'invisible': [('document_count', '=', 0)]}" />

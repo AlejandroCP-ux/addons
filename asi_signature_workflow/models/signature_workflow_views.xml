@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Vista de formulario para flujos de firma -->
-    <record id="view_signature_workflow_form" model="ir.ui.view">
+    <!--Vista de formulario para flujos de
+    firma-->
+    <record id="view_signature_workflow_form"
+        model="ir.ui.view">
         <field name="name">signature.workflow.form</field>
         <field name="model">signature.workflow</field>
         <field name="arch" type="xml">
@@ -13,21 +15,18 @@
                     <button name="action_sign_documents" string="Firmar Documentos"
                         type="object" class="btn-success"
                         attrs="{'invisible': [('state', '!=', 'sent')]}" />
-                    <!-- agregando botón de rechazo -->
                     <button name="action_reject_workflow" string="Rechazar Flujo"
                         type="object" class="btn-danger"
                         attrs="{'invisible': [('state', '!=', 'sent')]}" />
                     <button name="action_send_reminder" string="Enviar Recordatorio"
                         type="object" class="btn-warning"
                         attrs="{'invisible': [('state', '!=', 'sent')]}" />
-                    <!-- Agregar botón para marcar como completado manualmente -->
                     <button name="action_mark_as_completed" string="Marcar como Completado"
                         type="object" class="btn-secondary"
                         attrs="{'invisible': [('state', 'not in', ['signed'])]}" />
                     <button name="action_download_all_signed" string="Descargar Firmados"
                         type="object" class="btn-info"
                         attrs="{'invisible': [('state', '!=', 'completed')]}" />
-                    <!-- agregando estado rechazado al statusbar -->
                     <field name="state" widget="statusbar"
                         statusbar_visible="draft,sent,signed,completed,rejected" />
                 </header>
@@ -42,29 +41,72 @@
                     <group>
                         <group>
                             <field name="creator_id" readonly="1" />
-                            <field name="target_user_id"
-                                attrs="{'readonly': [('state', '!=', 'draft')]}" />
-                            <field name="signature_role_id"
-                                attrs="{'readonly': [('state', '!=', 'draft')]}" />
-                            <field name="signature_position"
-                                attrs="{'readonly': [('state', '!=', 'draft')]}" />
-                        </group>
-                        <group>
                             <field name="document_source"
                                 attrs="{'readonly': [('state', '!=', 'draft')]}" />
                             <field name="document_count" />
-                            <!-- Mostrar carpeta de Alfresco cuando esté disponible -->
                             <field name="alfresco_folder_id" readonly="1"
                                 attrs="{'invisible': [('alfresco_folder_id', '=', False)]}" />
+                        </group>
+                        <group>
                             <field name="sent_date"
                                 attrs="{'invisible': [('sent_date', '=', False)]}" />
                             <field name="signed_date"
                                 attrs="{'invisible': [('signed_date', '=', False)]}" />
                             <field name="completed_date"
                                 attrs="{'invisible': [('completed_date', '=', False)]}" />
-                            <!-- agregando campo de fecha de rechazo -->
                             <field name="rejection_date"
                                 attrs="{'invisible': [('rejection_date', '=', False)]}" />
+                        </group>
+                    </group>
+                    <!--Nueva
+                    sección para mostrar destinatarios de forma clara-->
+                    <group string="Destinatarios del Flujo">
+                        <group string="Destinatario 1"
+                            attrs="{'invisible': [('target_user_id_1', '=', False)]}">
+                            <field name="target_user_id_1" readonly="1" />
+                            <field name="signature_role_id_1" readonly="1" />
+                            <field name="signature_position_1" readonly="1" />
+                            <field name="signed_by_user_1" widget="boolean_toggle" readonly="1" />
+                            <field name="signed_date_1" readonly="1"
+                                attrs="{'invisible': [('signed_date_1', '=', False)]}" />
+                        </group>
+                        <group string="Destinatario 2"
+                            attrs="{'invisible': [('target_user_id_2', '=', False)]}">
+                            <field name="target_user_id_2" readonly="1" />
+                            <field name="signature_role_id_2" readonly="1" />
+                            <field name="signature_position_2" readonly="1" />
+                            <field name="signed_by_user_2" widget="boolean_toggle" readonly="1" />
+                            <field name="signed_date_2" readonly="1"
+                                attrs="{'invisible': [('signed_date_2', '=', False)]}" />
+                        </group>
+                        <group string="Destinatario 3"
+                            attrs="{'invisible': [('target_user_id_3', '=', False)]}">
+                            <field name="target_user_id_3" readonly="1" />
+                            <field name="signature_role_id_3" readonly="1" />
+                            <field name="signature_position_3" readonly="1" />
+                            <field name="signed_by_user_3" widget="boolean_toggle" readonly="1" />
+                            <field name="signed_date_3" readonly="1"
+                                attrs="{'invisible': [('signed_date_3', '=', False)]}" />
+                        </group>
+                        <group string="Destinatario 4"
+                            attrs="{'invisible': [('target_user_id_4', '=', False)]}">
+                            <field name="target_user_id_4" readonly="1" />
+                            <field name="signature_role_id_4" readonly="1" />
+                            <field name="signature_position_4" readonly="1" />
+                            <field name="signed_by_user_4" widget="boolean_toggle" readonly="1" />
+                            <field name="signed_date_4" readonly="1"
+                                attrs="{'invisible': [('signed_date_4', '=', False)]}" />
+                        </group>
+                    </group>
+                    <!--Campos
+                    de opciones de firma-->
+                    <group
+                        string="Opciones de Firma">
+                        <group>
+                            <field name="signature_opaque_background" readonly="1" />
+                        </group>
+                        <group>
+                            <field name="sign_all_pages" readonly="1" />
                         </group>
                     </group>
 
@@ -92,13 +134,20 @@
                                 <field name="signature_notes" nolabel="1"
                                     placeholder="Notas de la firma (completado automáticamente)"
                                     attrs="{'invisible': [('signature_notes', '=', False)]}" />
-                                <!-- agregando campo de notas de rechazo -->
                                 <field name="rejection_notes" nolabel="1"
                                     placeholder="Motivo del rechazo"
                                     attrs="{'invisible': [('rejection_notes', '=', False)]}" />
                             </group>
                         </page>
                     </notebook>
+                    <!--Ocultar
+                    campos deprecados-->
+                    <group
+                        invisible="1">
+                        <field name="target_user_id" />
+                        <field name="signature_role_id" />
+                        <field name="signature_position" />
+                    </group>
                 </sheet>
 
                 <div class="oe_chatter">
@@ -109,19 +158,22 @@
             </form>
         </field>
     </record>
-
-    <!-- Vista de lista para flujos de firma -->
-    <record id="view_signature_workflow_tree" model="ir.ui.view">
+    <!--Vista
+    de lista para flujos de firma-->
+    <record
+        id="view_signature_workflow_tree" model="ir.ui.view">
         <field name="name">signature.workflow.tree</field>
         <field name="model">signature.workflow</field>
         <field name="arch" type="xml">
             <tree string="Flujos de Firma Digital">
                 <field name="name" />
                 <field name="creator_id" />
-                <field name="target_user_id" />
+                <!--Mostrar
+                primer destinatario en la lista-->
+                <field name="target_user_id_1" string="Destinatario(s)" />
                 <field name="document_count" />
-                <field name="document_source" />
-                <!-- agregando decoración para estado rechazado -->
+                <field
+                    name="document_source" />
                 <field name="state" widget="badge"
                     decoration-info="state == 'draft'"
                     decoration-warning="state == 'sent'"
@@ -129,55 +181,76 @@
                     decoration-success="state == 'completed'"
                     decoration-danger="state == 'rejected'" />
                 <field name="sent_date" />
-                <field name="completed_date" />
+                <field
+                    name="completed_date" />
             </tree>
         </field>
     </record>
-
-    <!-- Vista de búsqueda -->
-    <record id="view_signature_workflow_search" model="ir.ui.view">
+    <!--Vista
+    de búsqueda-->
+    <record
+        id="view_signature_workflow_search" model="ir.ui.view">
         <field name="name">signature.workflow.search</field>
         <field name="model">signature.workflow</field>
         <field name="arch" type="xml">
             <search string="Buscar Flujos de Firma">
                 <field name="name" />
                 <field name="creator_id" />
-                <field name="target_user_id" />
-                <field name="signature_role_id" />
+                <!--Buscar
+                por cualquier destinatario-->
+                <field
+                    name="target_user_id_1" string="Destinatario" />
+                <field name="target_user_id_2"
+                    string="Destinatario" />
+                <field name="target_user_id_3" string="Destinatario" />
+                <field
+                    name="target_user_id_4" string="Destinatario" />
+                <field
+                    name="signature_role_id_1" string="Rol de Firma" />
 
-                <filter string="Mis Flujos Creados" name="my_created"
+                <filter
+                    string="Mis Flujos Creados" name="my_created"
                     domain="[('creator_id', '=', uid)]" />
-                <filter string="Flujos Asignados a Mí" name="assigned_to_me"
-                    domain="[('target_user_id', '=', uid)]" />
+                <!--Filtro
+                mejorado para flujos asignados-->
+                <filter
+                    string="Flujos Asignados a Mí" name="assigned_to_me"
+                    domain="['|', '|', '|', ('target_user_id_1', '=', uid), ('target_user_id_2', '=', uid), ('target_user_id_3', '=', uid), ('target_user_id_4', '=', uid)]" />
 
                 <separator />
-                <filter string="Borradores" name="draft" domain="[('state', '=', 'draft')]" />
-                <filter string="Enviados" name="sent" domain="[('state', '=', 'sent')]" />
-                <filter string="Completados" name="completed" domain="[('state', '=', 'completed')]" />
-                <!-- agregando filtro para rechazados -->
-                <filter string="Rechazados" name="rejected" domain="[('state', '=', 'rejected')]" />
+                <filter
+                    string="Borradores" name="draft" domain="[('state', '=', 'draft')]" />
+                <filter
+                    string="Enviados" name="sent" domain="[('state', '=', 'sent')]" />
+                <filter
+                    string="Completados" name="completed" domain="[('state', '=', 'completed')]" />
+                <filter
+                    string="Rechazados" name="rejected" domain="[('state', '=', 'rejected')]" />
 
                 <separator />
-                <filter string="Documentos Locales" name="local_docs"
+                <filter
+                    string="Documentos Locales" name="local_docs"
                     domain="[('document_source', '=', 'local')]" />
-                <filter string="Documentos Alfresco" name="alfresco_docs"
+                <filter
+                    string="Documentos Alfresco" name="alfresco_docs"
                     domain="[('document_source', '=', 'alfresco')]" />
 
-                <group expand="0" string="Agrupar Por">
+                <group expand="0"
+                    string="Agrupar Por">
                     <filter string="Estado" name="group_state" context="{'group_by': 'state'}" />
                     <filter string="Creador" name="group_creator"
                         context="{'group_by': 'creator_id'}" />
-                    <filter string="Usuario Destinatario" name="group_target"
-                        context="{'group_by': 'target_user_id'}" />
                     <filter string="Origen de Documentos" name="group_source"
                         context="{'group_by': 'document_source'}" />
                 </group>
             </search>
         </field>
     </record>
-
-    <!-- Acción para la vista de flujos -->
-    <record id="action_signature_workflow" model="ir.actions.act_window">
+    <!--Acción
+    para la vista de flujos-->
+    <record
+        id="action_signature_workflow"
+        model="ir.actions.act_window">
         <field name="name">Flujos de Firma Digital</field>
         <field name="res_model">signature.workflow</field>
         <field name="view_mode">tree,form</field>
