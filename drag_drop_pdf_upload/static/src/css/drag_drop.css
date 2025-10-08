@@ -1,0 +1,14 @@
+.o_drag_drop_zone {
+  border: 2px dashed #00a09d;
+  border-radius: 8px;
+  padding: 30px;
+  text-align: center;
+  background-color: #f8f9fa;
+  margin-bottom: 20px;
+  color: #6c757d;
+}
+
+.o_drag_drop_zone.dragover {
+  background-color: #e0f7f6;
+  border-color: #007d7a;
+}

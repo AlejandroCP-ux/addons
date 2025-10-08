@@ -1,0 +1,14 @@
+<odoo>
+  <record id="view_firma_documento_wizard_form_dragdrop" model="ir.ui.view">
+    <field name="name">firma.documento.wizard.form.dragdrop</field>
+    <field name="model">firma.documento.wizard</field>
+    <field name="inherit_id" ref="asi_pdf_signature.view_firma_documento_wizard_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//group[@name='archivos_seleccionados']" position="before">
+        <div class="o_drag_drop_zone">
+          <p>📂 Arrastra aquí tus archivos PDF para subirlos</p>
+        </div>
+      </xpath>
+    </field>
+  </record>
+</odoo>
