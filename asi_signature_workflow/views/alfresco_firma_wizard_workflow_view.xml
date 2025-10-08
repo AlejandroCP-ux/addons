@@ -22,6 +22,18 @@
                 <attribute name="attrs">{'readonly': [('from_workflow', '=', True)]}</attribute>
             </field>
 
+            <field name="signature_opaque_background" position="attributes">
+                <attribute name="attrs">{'readonly': [('from_workflow', '=', True)]}</attribute>
+            </field>
+
+            <field name="sign_all_pages" position="attributes">
+                <attribute name="attrs">{'readonly': [('from_workflow', '=', True)]}</attribute>
+            </field>
+
+            <field name="file_ids" position="attributes">
+                <attribute name="attrs">{'readonly': [('from_workflow', '=', True)]}</attribute>
+            </field>
+
             <!-- Agregar mensaje informativo cuando viene de flujo -->
             <div class="alert alert-info" position="after">
                 <div class="alert alert-warning" role="alert"
