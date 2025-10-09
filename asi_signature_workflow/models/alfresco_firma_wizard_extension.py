@@ -8,8 +8,8 @@ _logger = logging.getLogger(__name__)
 class AlfrescoFirmaWizardExtension(models.TransientModel):
     _inherit = 'alfresco.firma.wizard'
     
-    from_workflow = fields.Boolean(string='Desde Flujo de Trabajo', default=False)
-    workflow_id = fields.Many2one('signature.workflow', string='Flujo de Trabajo')
+    from_workflow = fields.Boolean(string='Desde Solicitud de Firma', default=False)
+    workflow_id = fields.Many2one('signature.workflow', string='Solicitud de Firma')
     readonly_signature_config = fields.Boolean(string='Configuración de Solo Lectura', default=False)
 
     @api.model
@@ -41,7 +41,7 @@ class AlfrescoFirmaWizardExtension(models.TransientModel):
                 if 'sign_all_pages' in fields_list:
                     res['sign_all_pages'] = workflow.sign_all_pages
                 
-                _logger.info(f"Wizard de Alfresco configurado desde flujo {workflow.id} con rol {workflow.signature_role_id.name if workflow.signature_role_id else 'N/A'} y posición {workflow.signature_position}")
+                _logger.info(f"Wizard de Alfresco configurado desde solicitud de firma {workflow.id} con rol {workflow.signature_role_id.name if workflow.signature_role_id else 'N/A'} y posición {workflow.signature_position}")
         
         return res
 
@@ -54,21 +54,21 @@ class AlfrescoFirmaWizardExtension(models.TransientModel):
             if self.from_workflow and self.workflow_id and self.status == 'completado':
                 try:
                     self.workflow_id.action_mark_as_signed()
-                    _logger.info(f"Flujo {self.workflow_id.id} marcado como firmado automáticamente")
+                    _logger.info(f"Solicitud {self.workflow_id.id} marcada como firmada automáticamente")
                 except Exception as e:
-                    _logger.error(f"Error marcando flujo como firmado: {e}")
+                    _logger.error(f"Error marcando solicitud como firmada: {e}")
                     # No re-lanzar el error para no afectar la firma exitosa
             
             return result
             
         except Exception as e:
-            _logger.error(f"Error en action_firmar_documentos desde flujo {self.workflow_id.id if self.workflow_id else 'N/A'}: {e}")
+            _logger.error(f"Error en action_firmar_documentos desde solicitud {self.workflow_id.id if self.workflow_id else 'N/A'}: {e}")
             # Re-lanzar el error original para que el usuario lo vea
             raise
 
     @api.onchange('signature_role', 'signature_position', 'signature_opaque_background', 'sign_all_pages')
     def _onchange_signature_config(self):
-        """Prevenir cambios en configuración cuando viene de flujo de trabajo"""
+        """Prevenir cambios en configuración cuando viene de solictud de firma"""
         if self.readonly_signature_config and self.from_workflow:
             if self.workflow_id:
                 if self.workflow_id.signature_role_id:
@@ -80,6 +80,6 @@ class AlfrescoFirmaWizardExtension(models.TransientModel):
                 return {
                     'warning': {
                         'title': _('Configuración Bloqueada'),
-                        'message': _('La configuración de firma está definida por el creador del flujo de trabajo y no puede ser modificada.')
+                        'message': _('La configuración de firma está definida por el creador del solicitud de firma y no puede ser modificada.')
                     }
                 }

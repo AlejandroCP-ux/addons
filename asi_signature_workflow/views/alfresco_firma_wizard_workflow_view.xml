@@ -38,11 +38,12 @@
             <div class="alert alert-info" position="after">
                 <div class="alert alert-warning" role="alert"
                     attrs="{'invisible': [('from_workflow', '=', False)]}">
-                    <h5><i class="fa fa-lock" /> Configuración del Flujo de Trabajo</h5>
-                    <p>El rol y posición de firma han sido definidos por el creador del flujo de
-                        trabajo y no pueden ser modificados.</p>
+                    <h5><i class="fa fa-lock" /> Configuración de la Solicitud de Firma</h5>
+                    <p>El rol y posición de firma han sido definidos por el creador de la solicitud
+                        de
+                        firma y no pueden ser modificados.</p>
                     <p>
-                        <strong>Flujo:</strong>
+                        <strong>Solicitud de Firma:</strong>
                         <field name="workflow_id" readonly="1"
                             attrs="{'invisible': [('workflow_id', '=', False)]}" />
                     </p>

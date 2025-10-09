@@ -261,7 +261,7 @@ class PdfSelectionWizard(models.TransientModel):
         # Cerrar este wizard y mostrar el principal
         return {
             'type': 'ir.actions.act_window',
-            'name': 'Iniciar Flujo de Firma',
+            'name': 'Iniciar Solicitud de Firma',
             'res_model': 'signature.workflow.wizard',
             'res_id': self.workflow_wizard_id.id,
             'view_mode': 'form',

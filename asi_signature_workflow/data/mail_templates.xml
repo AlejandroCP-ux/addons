@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data noupdate="1"> Template para solicitud de firma <record
+    <data> Template para solicitud de firma <record
             id="mail_template_signature_request" model="mail.template">
-            <field name="name">Solicitud de Firma Digital - Flujo de Trabajo</field>
+            <field name="name">Solicitud de Firma Digital - Solicitud de Trabajo</field>
             <field name="model_id" ref="model_signature_workflow" />
             <field name="subject">🖊️ Solicitud de Firma Digital: %(name)s</field>
             <field name="email_from">%(creator_id.email)s</field>

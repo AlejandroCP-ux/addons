@@ -4,62 +4,62 @@
 
     <!-- Submenú para Iniciar Flujo -->
     <menuitem id="menu_iniciar_flujo"
-        name="Iniciar Flujo"
+        name="Iniciar Solicitud de Firma"
         parent="asi_pdf_signature.menu_firma_digital_root"
         action="asi_signature_workflow.action_signature_workflow_wizard"
         sequence="15" />
 
     <!-- Submenú para Flujos Pendientes (solo los asignados al usuario actual) -->
     <record id="action_signature_workflow_pending" model="ir.actions.act_window">
-        <field name="name">Flujos Pendientes de Firma</field>
+        <field name="name">Solicitudes Pendientes de Firma</field>
         <field name="res_model">signature.workflow</field>
         <field name="view_mode">tree,form</field>
         <field name="domain">[('target_user_id', '=', uid), ('state', '=', 'sent')]</field>
         <field name="context">{'search_default_assigned_to_me': 1}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-                No tiene flujos pendientes de firma
+                No tiene solicitudes pendientes de firma
             </p>
             <p>
-                Aquí aparecerán los flujos de firma que otros usuarios le hayan enviado
+                Aquí aparecerán las solicitudes de firma que otros usuarios le hayan enviado
                 y que estén esperando su firma digital.
             </p>
         </field>
     </record>
 
     <menuitem id="menu_flujos_pendientes"
-        name="Flujos Pendientes"
+        name="Solicitudes Pendientes"
         parent="asi_pdf_signature.menu_firma_digital_root"
         action="asi_signature_workflow.action_signature_workflow_pending"
         sequence="25" />
 
     <!-- Submenú para Mis Flujos Creados -->
     <record id="action_signature_workflow_created" model="ir.actions.act_window">
-        <field name="name">Mis Flujos Creados</field>
+        <field name="name">Mis Solicitudes Creadas</field>
         <field name="res_model">signature.workflow</field>
         <field name="view_mode">tree,form</field>
         <field name="domain">[('creator_id', '=', uid)]</field>
         <field name="context">{'search_default_my_created': 1}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-                No ha creado ningún flujo de firma aún
+                No ha creado ninguna solicitud de firma aún
             </p>
             <p>
-                Aquí aparecerán todos los flujos de firma que usted haya creado
+                Aquí aparecerán todas las solicitudes de firma que usted haya creado
                 y enviado a otros usuarios para su firma.
             </p>
         </field>
     </record>
 
     <menuitem id="menu_mis_flujos_creados"
-        name="Mis Flujos Creados"
+        name="Mis Solicitudes Creadas"
         parent="asi_pdf_signature.menu_firma_digital_root"
         action="asi_signature_workflow.action_signature_workflow_created"
         sequence="30" />
 
     <!-- Dashboard/Resumen de Flujos -->
     <record id="action_signature_workflow_dashboard" model="ir.actions.act_window">
-        <field name="name">Dashboard de Flujos</field>
+        <field name="name">Dashboard de Solicitudes de Firma</field>
         <field name="res_model">signature.workflow</field>
         <field name="view_mode">kanban,tree,form</field>
         <field name="context">{
@@ -68,10 +68,10 @@
             }</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-                ¡Bienvenido al Dashboard de Flujos de Firma!
+                ¡Bienvenido al Dashboard de Solicitudes de Firma!
             </p>
             <p>
-                Desde aquí puede ver todos sus flujos de firma, tanto los que ha creado
+                Desde aquí puede ver todas sus solicitudes de firma, tanto los que ha creado
                 como los que le han sido asignados para firmar.
             </p>
         </field>
@@ -186,7 +186,7 @@
 
     <!-- Separador visual en el menú -->
     <menuitem id="menu_separator_workflow"
-        name="─── Flujos de Trabajo ───"
+        name="─── Solicitudes de Firma ───"
         parent="asi_pdf_signature.menu_firma_digital_root"
         sequence="12" />
 </odoo>

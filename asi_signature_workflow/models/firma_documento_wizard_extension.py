@@ -8,8 +8,8 @@ _logger = logging.getLogger(__name__)
 class FirmaDocumentoWizardExtension(models.TransientModel):
     _inherit = 'firma.documento.wizard'
     
-    from_workflow = fields.Boolean(string='Desde Flujo de Trabajo', default=False)
-    workflow_id = fields.Many2one('signature.workflow', string='Flujo de Trabajo')
+    from_workflow = fields.Boolean(string='Desde Solicitud de Firma', default=False)
+    workflow_id = fields.Many2one('signature.workflow', string='Solicitud de Firma')
     readonly_signature_config = fields.Boolean(string='Configuración de Solo Lectura', default=False)
 
     @api.model
@@ -41,7 +41,7 @@ class FirmaDocumentoWizardExtension(models.TransientModel):
                 if 'sign_all_pages' in fields_list:
                     res['sign_all_pages'] = workflow.sign_all_pages
                 
-                _logger.info(f"Wizard de firma local configurado desde flujo {workflow.id} con rol {workflow.signature_role_id.name if workflow.signature_role_id else 'N/A'} y posición {workflow.signature_position}")
+                _logger.info(f"Wizard de firma local configurado desde solicitud de firma {workflow.id} con rol {workflow.signature_role_id.name if workflow.signature_role_id else 'N/A'} y posición {workflow.signature_position}")
         
         return res
 
@@ -56,15 +56,15 @@ class FirmaDocumentoWizardExtension(models.TransientModel):
                     self._upload_signed_documents_to_alfresco()
                     
                     self.workflow_id.action_mark_as_signed()
-                    _logger.info(f"Flujo {self.workflow_id.id} marcado como firmado automáticamente")
+                    _logger.info(f"Solicitud de firma {self.workflow_id.id} marcada como firmada automáticamente")
                 except Exception as e:
-                    _logger.error(f"Error marcando flujo como firmado: {e}")
+                    _logger.error(f"Error marcando solicitud como firmado: {e}")
                     # No re-lanzar el error para no afectar la firma exitosa
             
             return result
             
         except Exception as e:
-            _logger.error(f"Error en action_firmar_documentos desde flujo {self.workflow_id.id if self.workflow_id else 'N/A'}: {e}")
+            _logger.error(f"Error en action_firmar_documentos desde solicitud de firma {self.workflow_id.id if self.workflow_id else 'N/A'}: {e}")
             # Re-lanzar el error original para que el usuario lo vea
             raise
 
@@ -73,7 +73,7 @@ class FirmaDocumentoWizardExtension(models.TransientModel):
         if not self.from_workflow or not self.workflow_id:
             return
             
-        _logger.info(f"Iniciando subida de documentos firmados a Alfresco para flujo {self.workflow_id.id}")
+        _logger.info(f"Iniciando subida de documentos firmados a Alfresco para solicitud de firma {self.workflow_id.id}")
         
         try:
             config = self.env['ir.config_parameter'].sudo()
@@ -89,10 +89,10 @@ class FirmaDocumentoWizardExtension(models.TransientModel):
             import base64
             
             _logger.info(f"Documentos firmados encontrados: {len(self.document_ids.filtered(lambda d: d.pdf_signed))}")
-            _logger.info(f"Documentos en el flujo: {len(self.workflow_id.document_ids)}")
+            _logger.info(f"Documentos en la solicitud de firma: {len(self.workflow_id.document_ids)}")
             
             for workflow_doc in self.workflow_id.document_ids:
-                _logger.info(f"Documento flujo: {workflow_doc.name}, tiene alfresco_file_id: {bool(workflow_doc.alfresco_file_id)}")
+                _logger.info(f"Documento solicitado: {workflow_doc.name}, tiene alfresco_file_id: {bool(workflow_doc.alfresco_file_id)}")
                 if workflow_doc.alfresco_file_id:
                     _logger.info(f"  - alfresco_node_id actual: {workflow_doc.alfresco_file_id.alfresco_node_id}")
                     _logger.info(f"  - nombre: {workflow_doc.alfresco_file_id.name}")
@@ -114,14 +114,14 @@ class FirmaDocumentoWizardExtension(models.TransientModel):
                     workflow_doc = self.workflow_id.document_ids.filtered(lambda wd: wd.name == doc_line.document_name)
                     
                     if not workflow_doc:
-                        _logger.warning(f"No se encontró documento del flujo para {doc_line.document_name}")
+                        _logger.warning(f"No se encontró documento de la solicitud para {doc_line.document_name}")
                         base_name = doc_line.document_name.replace('.pdf', '') if doc_line.document_name.endswith('.pdf') else doc_line.document_name
                         workflow_doc = self.workflow_id.document_ids.filtered(lambda wd: wd.name.replace('.pdf', '') == base_name)
                         
                         if workflow_doc:
                             _logger.info(f"Encontrado documento por nombre base: {workflow_doc[0].name}")
                         else:
-                            _logger.error(f"No se pudo encontrar documento del flujo para {doc_line.document_name}")
+                            _logger.error(f"No se pudo encontrar documento de la solicitud para {doc_line.document_name}")
                             continue
                     
                     workflow_doc = workflow_doc[0]  # Tomar el primero si hay múltiples
@@ -182,7 +182,7 @@ class FirmaDocumentoWizardExtension(models.TransientModel):
                     _logger.error(f"Traceback: {traceback.format_exc()}")
                     continue
             
-            _logger.info(f"Proceso de subida de documentos firmados completado para flujo {self.workflow_id.id}")
+            _logger.info(f"Proceso de subida de documentos firmados completado para solicitud de firma {self.workflow_id.id}")
             
         except Exception as e:
             _logger.error(f"Error general subiendo documentos firmados a Alfresco: {e}")
@@ -193,7 +193,7 @@ class FirmaDocumentoWizardExtension(models.TransientModel):
     def _find_real_alfresco_node_id(self, file_name, workflow_folder):
         """Busca el ID real del documento en Alfresco por nombre y carpeta"""
         if not workflow_folder:
-            _logger.warning(f"No hay carpeta de flujo para buscar {file_name}")
+            _logger.warning(f"No hay carpeta de solicitud de firma para buscar {file_name}")
             return None
             
         try:
@@ -237,7 +237,7 @@ class FirmaDocumentoWizardExtension(models.TransientModel):
                         _logger.info(f"ID real encontrado para {file_name}: {real_node_id}")
                         return real_node_id
                 
-                _logger.warning(f"No se encontró archivo {file_name} en la carpeta del flujo")
+                _logger.warning(f"No se encontró archivo {file_name} en la carpeta de la solicitud de firma")
                 for entry in search_data.get('list', {}).get('entries', []):
                     file_info = entry['entry']
                     _logger.info(f"  - Archivo encontrado: {file_info.get('name')} (ID: {file_info.get('id')})")
@@ -252,7 +252,7 @@ class FirmaDocumentoWizardExtension(models.TransientModel):
 
     @api.onchange('signature_role', 'signature_position', 'signature_opaque_background', 'sign_all_pages')
     def _onchange_signature_config(self):
-        """Prevenir cambios en configuración cuando viene de flujo de trabajo"""
+        """Prevenir cambios en configuración cuando viene de solicitud de firma"""
         if self.readonly_signature_config and self.from_workflow:
             if self.workflow_id:
                 if self.workflow_id.signature_role_id:
@@ -264,6 +264,6 @@ class FirmaDocumentoWizardExtension(models.TransientModel):
                 return {
                     'warning': {
                         'title': _('Configuración Bloqueada'),
-                        'message': _('La configuración de firma está definida por el creador del flujo de trabajo y no puede ser modificada.')
+                        'message': _('La configuración de firma está definida por el creador de la solicitud de firma y no puede ser modificada.')
                     }
                 }

@@ -4,13 +4,13 @@
         <field name="name">signature.workflow.wizard.form</field>
         <field name="model">signature.workflow.wizard</field>
         <field name="arch" type="xml">
-            <form string="Iniciar Flujo de Firma Digital">
+            <form string="Iniciar Solicitud de Firma Digital">
                 <field name="has_alfresco_config" invisible="1" />
                 <field name="document_count" invisible="1" />
 
                 <div class="alert alert-info" role="alert">
-                    <h4><i class="fa fa-cogs" /> Configuración del Flujo de Firma</h4>
-                    <p>Configure los parámetros básicos para el flujo de trabajo de firma digital
+                    <h4><i class="fa fa-cogs" /> Configuración de la Solicitud de Firma</h4>
+                    <p>Configure los parámetros básicos para la solicitud de firma digital
                         con hasta 4 destinatarios.</p>
                 </div>
 
@@ -110,13 +110,13 @@
                         "Seleccionar Documentos" para agregar archivos PDF.</p>
                 </div>
 
-                <group string="Notas del Flujo" col="1">
+                <group string="Notas de la Solicitud" col="1">
                     <field name="notes" nolabel="1"
                         placeholder="Agregue notas o instrucciones para los usuarios destinatarios..." />
                 </group>
 
                 <footer>
-                    <button name="create_workflow" string="Crear y Enviar Flujo"
+                    <button name="create_workflow" string="Crear y Enviar Solicitud"
                         type="object" class="btn-primary"
                         attrs="{'invisible': [('document_count', '=', 0)]}" />
                     <button name="open_document_selection" string="Seleccionar Documentos"
@@ -128,7 +128,7 @@
     </record>
 
     <record id="action_signature_workflow_wizard" model="ir.actions.act_window">
-        <field name="name">Iniciar Flujo de Firma</field>
+        <field name="name">Iniciar Solicitud de Firma</field>
         <field name="res_model">signature.workflow.wizard</field>
         <field name="view_mode">form</field>
         <field name="target">new</field>

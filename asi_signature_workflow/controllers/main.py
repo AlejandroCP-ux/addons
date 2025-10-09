@@ -30,7 +30,7 @@ class SignatureWorkflowController(http.Controller):
             })
             
         except Exception as e:
-            _logger.error(f"Error accediendo a documentos del flujo {workflow_id}: {e}")
+            _logger.error(f"Error accediendo a documentos de la solicitud {workflow_id}: {e}")
             return request.not_found()
 
     @http.route('/signature_workflow/document/<int:document_id>/download', type='http', auth='user')

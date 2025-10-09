@@ -8,11 +8,11 @@ _logger = logging.getLogger(__name__)
 
 class SignatureWorkflow(models.Model):
     _name = 'signature.workflow'
-    _description = 'Flujo de Trabajo de Firma Digital'
+    _description = 'Solicitud de Firma Digital'
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _order = 'create_date desc'
 
-    name = fields.Char(string='Nombre del Flujo', required=True)
+    name = fields.Char(string='Nombre de la Solicitud', required=True)
     creator_id = fields.Many2one('res.users', string='Creador', required=True, default=lambda self: self.env.user)
     
     target_user_id_1 = fields.Many2one('res.users', string='Destinatario 1')
@@ -99,7 +99,7 @@ class SignatureWorkflow(models.Model):
     document_ids = fields.One2many('signature.workflow.document', 'workflow_id', string='Documentos')
     document_count = fields.Integer(string='Cantidad de Documentos', compute='_compute_document_count')
     
-    alfresco_folder_id = fields.Many2one('alfresco.folder', string='Carpeta del Flujo en Alfresco', readonly=True)
+    alfresco_folder_id = fields.Many2one('alfresco.folder', string='Carpeta de la Solicitud en Alfresco', readonly=True)
     
     # Fechas importantes
     sent_date = fields.Datetime(string='Fecha de Envío')
@@ -128,7 +128,7 @@ class SignatureWorkflow(models.Model):
             active_users = [u for u in active_users if u]
             
             if not active_users:
-                raise ValidationError(_('Debe especificar al menos un destinatario para el flujo.'))
+                raise ValidationError(_('Debe especificar al menos un destinatario para la solicitud de firma.'))
             
             # Obtener destinatarios activos con sus datos
             recipients = []
@@ -221,7 +221,7 @@ class SignatureWorkflow(models.Model):
             # Crear carpeta del flujo en Alfresco
             workflow_folder = self._create_workflow_folder_in_alfresco()
             if not workflow_folder:
-                raise UserError(_('No se pudo crear la carpeta del flujo en Alfresco'))
+                raise UserError(_('No se pudo crear la carpeta de la solicitud en Alfresco'))
             
             uploaded_count = 0
             failed_count = 0
@@ -235,7 +235,7 @@ class SignatureWorkflow(models.Model):
                         'download_url': f'/alfresco/file/{alfresco_file.id}/download'
                     })
                     uploaded_count += 1
-                    _logger.info(f"Documento {doc.name} subido a Alfresco en carpeta del flujo")
+                    _logger.info(f"Documento {doc.name} subido a Alfresco en carpeta de la solicitud")
                 else:
                     failed_count += 1
                     _logger.error(f"Error subiendo documento {doc.name} a Alfresco")
@@ -245,14 +245,14 @@ class SignatureWorkflow(models.Model):
             elif failed_count > 0:
                 _logger.warning(f"Se subieron {uploaded_count} documentos exitosamente, {failed_count} fallaron")
             
-            _logger.info(f"Documentos locales del flujo {self.id} subidos exitosamente a Alfresco ({uploaded_count}/{uploaded_count + failed_count})")
+            _logger.info(f"Documentos locales de la solicitud {self.id} subidos exitosamente a Alfresco ({uploaded_count}/{uploaded_count + failed_count})")
             
         except Exception as e:
-            _logger.error(f"Error subiendo documentos locales del flujo {self.id}: {e}")
+            _logger.error(f"Error subiendo documentos locales de la solicitud {self.id}: {e}")
             raise UserError(_('Error subiendo documentos a Alfresco: %s') % str(e))
 
     def _create_workflow_folder_in_alfresco(self):
-        """Crea la carpeta del flujo en la ruta /Sites/Flujos/<usuario>/<nombre_flujo>/"""
+        """Crea la carpeta de la solicitud en la ruta /Sites/Flujos/<usuario>/<nombre_flujo>/"""
         self.ensure_one()
         
         try:
@@ -288,16 +288,16 @@ class SignatureWorkflow(models.Model):
             workflow_folder_name = self.name
             workflow_folder = self._get_or_create_alfresco_folder(workflow_folder_name, user_folder.node_id, user_folder)
             if not workflow_folder:
-                raise UserError(_('No se pudo crear carpeta del flujo'))
+                raise UserError(_('No se pudo crear carpeta de la solicitud'))
             
             # Actualizar el flujo con la carpeta creada
             self.write({'alfresco_folder_id': workflow_folder.id})
             
-            _logger.info(f"Carpeta del flujo creada en: /Sites/Flujos/{user_folder_name}/{workflow_folder_name}/")
+            _logger.info(f"Carpeta de la solicitud creada en: /Sites/Flujos/{user_folder_name}/{workflow_folder_name}/")
             return workflow_folder
             
         except Exception as e:
-            _logger.error(f"Error creando carpeta del flujo en Alfresco: {e}")
+            _logger.error(f"Error creando carpeta de la solicitud en Alfresco: {e}")
             raise UserError(_('Error creando carpeta en Alfresco: %s') % str(e))
 
     def _get_or_create_alfresco_folder(self, folder_name, parent_node_id, parent_folder):
@@ -356,7 +356,7 @@ class SignatureWorkflow(models.Model):
                 "nodeType": "cm:folder",
                 "properties": {
                     "cm:title": folder_name,
-                    "cm:description": f"Carpeta para flujos de firma - {folder_name}"
+                    "cm:description": f"Carpeta para solicitudes de firma - {folder_name}"
                 }
             }
             
@@ -420,7 +420,7 @@ class SignatureWorkflow(models.Model):
             return False
 
     def _upload_document_to_workflow_folder(self, document, workflow_folder):
-        """Sube un documento a la carpeta del flujo en Alfresco"""
+        """Sube un documento a la carpeta de la solicitud en Alfresco"""
         try:
             config = self.env['ir.config_parameter'].sudo()
             url = config.get_param('asi_alfresco_integration.alfresco_server_url')
@@ -445,7 +445,7 @@ class SignatureWorkflow(models.Model):
             # Propiedades del documento
             properties = {
                 'cm:title': document.name,
-                'cm:description': f'Documento del flujo: {self.name}',
+                'cm:description': f'Documento de la solicitud: {self.name}',
                 'cm:author': self.creator_id.name,
                 'asi:workflow_id': str(self.id),
                 'asi:workflow_name': self.name,
@@ -521,14 +521,14 @@ class SignatureWorkflow(models.Model):
             return False
 
     def action_send_for_signature(self):
-        """Envía el flujo para firma a todos los usuarios destinatarios"""
+        """Envía la solicitud para firma a todos los usuarios destinatarios"""
         self.ensure_one()
         if not self.document_ids:
-            raise UserError(_('Debe agregar al menos un documento al flujo.'))
+            raise UserError(_('Debe agregar al menos un documento a la solicitud.'))
         
         recipients = self._get_active_recipients()
         if not recipients:
-            raise UserError(_('Debe especificar al menos un destinatario para el flujo.'))
+            raise UserError(_('Debe especificar al menos un destinatario para la solicitud.'))
         
         if self.document_source == 'local':
             local_docs_without_alfresco = self.document_ids.filtered(lambda d: not d.alfresco_file_id)
@@ -559,13 +559,13 @@ class SignatureWorkflow(models.Model):
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
-                'message': f'Flujo enviado exitosamente a: {recipient_names}',
+                'message': f'Solicitud enviada exitosamente a: {recipient_names}',
                 'type': 'success',
             }
         }
 
     def _create_signature_activity(self, recipient_data):
-        """Crea una actividad para un destinatario específico cuando se envía el flujo"""
+        """Crea una actividad para un destinatario específico cuando se envía la solicitud"""
         self.ensure_one()
         
         try:
@@ -589,7 +589,7 @@ class SignatureWorkflow(models.Model):
                 'user_id': recipient_data['user'].id,
                 'date_deadline': fields.Date.today() + timedelta(days=7),  # 7 días para firmar
             })
-            _logger.info(f"Actividad de firma creada para usuario {recipient_data['user'].name} (destinatario {recipient_data['index']}) en flujo {self.id}")
+            _logger.info(f"Actividad de firma creada para usuario {recipient_data['user'].name} (destinatario {recipient_data['index']}) en solicitud {self.id}")
         except Exception as e:
             _logger.error(f"Error creando actividad de firma: {e}")
 
@@ -607,14 +607,14 @@ class SignatureWorkflow(models.Model):
                     'body': f'''
                     <p>Se ha creado una nueva solicitud de firma que requiere su atención:</p>
                     <ul>
-                        <li><strong>Flujo:</strong> {self.name}</li>
+                        <li><strong>Solicitud de firma:</strong> {self.name}</li>
                         <li><strong>Creado por:</strong> {self.creator_id.name}</li>
                         <li><strong>Documentos:</strong> {self.document_count} archivo(s)</li>
                         <li><strong>Su rol de firma:</strong> {recipient['role'].name}</li>
                         <li><strong>Su posición:</strong> {dict(self._fields['signature_position_1'].selection)[recipient['position']]}</li>
                     </ul>
                     {f'<p><strong>Notas:</strong> {self.notes}</p>' if self.notes else ''}
-                    <p>Por favor, acceda al flujo para revisar y firmar los documentos.</p>
+                    <p>Por favor, acceda la solicitud para revisar y firmar los documentos.</p>
                     ''',
                     'message_type': 'notification',
                     'model': self._name,
@@ -622,25 +622,25 @@ class SignatureWorkflow(models.Model):
                     'partner_ids': [(4, recipient['user'].partner_id.id)],
                     'author_id': self.creator_id.partner_id.id,
                 })
-                _logger.info(f"Notificación interna de solicitud creada para destinatario {recipient['index']} en flujo {self.id}")
+                _logger.info(f"Notificación interna de solicitud creada para destinatario {recipient['index']} en solicitud {self.id}")
             except Exception as e:
                 _logger.error(f"Error creando notificación interna de solicitud para destinatario {recipient['index']}: {e}")
 
     def action_reject_workflow(self):
-        """Acción para que un usuario destinatario rechace el flujo"""
+        """Acción para que un usuario destinatario rechace la solicitud"""
         self.ensure_one()
         
         recipient_data = self._get_current_user_recipient_data()
         if not recipient_data:
-            raise UserError(_('Solo los usuarios destinatarios pueden rechazar este flujo.'))
+            raise UserError(_('Solo los usuarios destinatarios pueden rechazar esta solicitud.'))
         
         if self.state != 'sent':
-            raise UserError(_('Este flujo no está disponible para rechazo.'))
+            raise UserError(_('Esta solicitud no está disponible para rechazo.'))
         
         # Abrir wizard de confirmación de rechazo
         return {
             'type': 'ir.actions.act_window',
-            'name': 'Rechazar Flujo de Firma',
+            'name': 'Rechazar Solicitud de Firma',
             'res_model': 'signature.workflow.reject.wizard',
             'view_mode': 'form',
             'target': 'new',
@@ -650,7 +650,7 @@ class SignatureWorkflow(models.Model):
         }
 
     def _process_rejection(self, rejection_notes):
-        """Procesa el rechazo del flujo con las notas proporcionadas"""
+        """Procesa el rechazo de la solicitud con las notas proporcionadas"""
         self.ensure_one()
         
         recipient_data = self._get_current_user_recipient_data()
@@ -671,19 +671,19 @@ class SignatureWorkflow(models.Model):
         
         if activities:
             activities.action_done()
-            _logger.info(f"Actividades completadas después del rechazo del flujo {self.id}")
+            _logger.info(f"Actividades completadas después del rechazo de la solicitud {self.id}")
         
         # Crear actividad para el creador notificando el rechazo
         self.env['mail.activity'].create({
             'activity_type_id': self.env.ref('mail.mail_activity_data_warning').id,
-            'summary': f'Flujo rechazado: {self.name}',
+            'summary': f'Solicitud rechazada: {self.name}',
             'note': f'''
-            <p>Su flujo de firma ha sido rechazado por <strong>{rejecting_user.name}</strong></p>
+            <p>Su solicitud de firma ha sido rechazada por <strong>{rejecting_user.name}</strong></p>
             <p><strong>Motivo del rechazo:</strong></p>
             <div style="background-color: #ffebee; padding: 10px; border-radius: 5px; border-left: 4px solid #f44336; margin: 10px 0;">
                 <p>{rejection_notes}</p>
             </div>
-            <p>Puede revisar el flujo y crear uno nuevo si es necesario.</p>
+            <p>Puede revisar la solicitud y crear una nueva si es necesario.</p>
             ''',
             'res_model_id': self.env['ir.model']._get(self._name).id,
             'res_id': self.id,
@@ -694,7 +694,7 @@ class SignatureWorkflow(models.Model):
         # Enviar notificación por email al creador
         self._send_rejection_notification(rejecting_user)
         
-        _logger.info(f"Flujo {self.id} rechazado por {rejecting_user.name}")
+        _logger.info(f"Solicitud {self.id} rechazado por {rejecting_user.name}")
 
     def _send_rejection_notification(self, rejecting_user):
         """Crea notificación interna de rechazo"""
@@ -703,11 +703,11 @@ class SignatureWorkflow(models.Model):
         try:
             # Crear mensaje interno
             self.env['mail.message'].create({
-                'subject': f'Flujo rechazado: {self.name}',
+                'subject': f'Solicitud rechazada: {self.name}',
                 'body': f'''
-                <p>Su flujo de firma ha sido rechazado:</p>
+                <p>Su solicitud de firma ha sido rechazada:</p>
                 <ul>
-                    <li><strong>Flujo:</strong> {self.name}</li>
+                    <li><strong>Solicitud de firma:</strong> {self.name}</li>
                     <li><strong>Rechazado por:</strong> {rejecting_user.name}</li>
                     <li><strong>Fecha de rechazo:</strong> {self.rejection_date}</li>
                 </ul>
@@ -715,7 +715,7 @@ class SignatureWorkflow(models.Model):
                     <p><strong>Motivo del rechazo:</strong></p>
                     <p>{self.rejection_notes}</p>
                 </div>
-                <p>Puede revisar el flujo y crear uno nuevo si es necesario.</p>
+                <p>Puede revisar la solicitud y crear una nueva si es necesario.</p>
                 ''',
                 'message_type': 'notification',
                 'model': self._name,
@@ -723,16 +723,16 @@ class SignatureWorkflow(models.Model):
                 'partner_ids': [(4, self.creator_id.partner_id.id)],
                 'author_id': rejecting_user.partner_id.id,
             })
-            _logger.info(f"Notificación interna de rechazo creada para flujo {self.id}")
+            _logger.info(f"Notificación interna de rechazo creada para solicitud {self.id}")
         except Exception as e:
             _logger.error(f"Error creando notificación interna de rechazo: {e}")
 
     def action_mark_as_completed(self):
-        """Acción manual para marcar el flujo como completado"""
+        """Acción manual para marcar la solicitud como completada"""
         self.ensure_one()
         
         if self.state not in ['signed', 'completed']:
-            raise UserError(_('Solo se pueden completar flujos que estén firmados.'))
+            raise UserError(_('Solo se pueden completar solicitudes que estén firmadas.'))
         
         self.write({
             'state': 'completed',
@@ -743,7 +743,7 @@ class SignatureWorkflow(models.Model):
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
-                'message': 'Flujo marcado como completado',
+                'message': 'Solicitud marcada como completada',
                 'type': 'success',
             }
         }
@@ -761,7 +761,7 @@ class SignatureWorkflow(models.Model):
             raise UserError(_('Usted ya ha firmado estos documentos.'))
 
         if self.state != 'sent':
-            raise UserError(_('Este flujo no está disponible para firma.'))
+            raise UserError(_('Esta solicitud no está disponible para firma.'))
         
         if self.document_source == 'local':
             return self._process_local_signature(recipient_data)
@@ -797,7 +797,7 @@ class SignatureWorkflow(models.Model):
         
         return {
             'type': 'ir.actions.act_window',
-            'name': f'Firmar Documentos del Flujo - {recipient_data["user"].name}',
+            'name': f'Firmar Documentos de la Solicitud - {recipient_data["user"].name}',
             'res_model': 'firma.documento.wizard',
             'res_id': wizard.id,
             'view_mode': 'form',
@@ -835,7 +835,7 @@ class SignatureWorkflow(models.Model):
         
         # Si aún no hay archivos, buscar todos los PDFs en la carpeta del flujo
         if not alfresco_files and self.alfresco_folder_id:
-            _logger.info(f"Buscando todos los archivos PDF en carpeta del flujo {self.alfresco_folder_id.name}")
+            _logger.info(f"Buscando todos los archivos PDF en carpeta de la solicitud {self.alfresco_folder_id.name}")
             all_pdf_files = self.env['alfresco.file'].search([
                 ('folder_id', '=', self.alfresco_folder_id.id),
                 ('name', 'ilike', '%.pdf')
@@ -843,7 +843,7 @@ class SignatureWorkflow(models.Model):
             
             if all_pdf_files:
                 alfresco_files = all_pdf_files
-                _logger.info(f"Encontrados {len(all_pdf_files)} archivos PDF en la carpeta del flujo")
+                _logger.info(f"Encontrados {len(all_pdf_files)} archivos PDF en la carpeta de la solicitud")
                 
                 # Intentar asociar archivos con documentos por nombre
                 for doc in self.document_ids.filtered(lambda d: not d.alfresco_file_id):
@@ -854,9 +854,9 @@ class SignatureWorkflow(models.Model):
         if not alfresco_files:
             error_msg = f'No hay archivos de Alfresco disponibles para firmar.'
             if self.alfresco_folder_id:
-                error_msg += f' Carpeta del flujo: {self.alfresco_folder_id.name}'
+                error_msg += f' Carpeta de la solicitud: {self.alfresco_folder_id.name}'
             else:
-                error_msg += ' No se encontró carpeta del flujo en Alfresco.'
+                error_msg += ' No se encontró carpeta de la solicitud en Alfresco.'
             
             _logger.warning(error_msg)
             raise UserError(_(error_msg))
@@ -876,7 +876,7 @@ class SignatureWorkflow(models.Model):
         
         return {
             'type': 'ir.actions.act_window',
-            'name': f'Firmar Documentos del Flujo - {recipient_data["user"].name}',
+            'name': f'Firmar Documentos de la Solicitud - {recipient_data["user"].name}',
             'res_model': 'alfresco.firma.wizard',
             'res_id': wizard.id,
             'view_mode': 'form',
@@ -889,7 +889,7 @@ class SignatureWorkflow(models.Model):
         }
 
     def action_mark_as_signed(self):
-        """Marca el flujo como firmado por el usuario actual y verifica si todos firmaron"""
+        """Marca la solicitud como firmada por el usuario actual y verifica si todos firmaron"""
         self.ensure_one()
         
         recipient_data = self._get_current_user_recipient_data()
@@ -897,11 +897,11 @@ class SignatureWorkflow(models.Model):
             raise UserError(_('Solo los usuarios destinatarios pueden marcar como firmado.'))
         
         if recipient_data['signed']:
-            _logger.warning(f"Usuario {recipient_data['user'].name} ya había firmado el flujo {self.id}")
+            _logger.warning(f"Usuario {recipient_data['user'].name} ya había firmado la solicitud {self.id}")
             return True
 
         if self.state != 'sent':
-            raise UserError(_('Este flujo no está disponible para firma.'))
+            raise UserError(_('Esta solicitud no está disponible para firma.'))
         
         # 1. Marcar usuario como firmado
         field_name = f'signed_by_user_{recipient_data["index"]}'
@@ -912,7 +912,7 @@ class SignatureWorkflow(models.Model):
             date_field_name: fields.Datetime.now()
         })
         
-        _logger.info(f"[SIGN] Usuario {recipient_data['user'].name} (destinatario {recipient_data['index']}) marcó como firmado el flujo {self.id}")
+        _logger.info(f"[SIGN] Usuario {recipient_data['user'].name} (destinatario {recipient_data['index']}) marcó como firmado la solicitud {self.id}")
         
         # 2. Completar actividad del usuario SIN enviar correos
         try:
@@ -945,7 +945,7 @@ class SignatureWorkflow(models.Model):
         _logger.info(f"[SIGN] Todos firmaron: {all_signed}")
         
         if all_signed:
-            _logger.info(f"[SIGN] Todos firmaron - Procesando finalización del flujo {self.id}")
+            _logger.info(f"[SIGN] Todos firmaron - Procesando finalización de la solicitud {self.id}")
             
             try:
                 # 5. Marcar TODOS los documentos como firmados
@@ -968,7 +968,7 @@ class SignatureWorkflow(models.Model):
                     'completed_date': fields.Datetime.now()
                 })
                 
-                _logger.info(f"[SIGN] Flujo {self.id} marcado como completado")
+                _logger.info(f"[SIGN] Solicitud {self.id} marcada como completada")
                 
                 # 7. Crear actividad simple para el creador SIN enviar correos
                 try:
@@ -976,7 +976,7 @@ class SignatureWorkflow(models.Model):
                     
                     self.env['mail.activity'].sudo().create({
                         'activity_type_id': self.env.ref('mail.mail_activity_data_call').id,
-                        'summary': f'Flujo completado: {self.name}',
+                        'summary': f'Solicitud de Firma completada: {self.name}',
                         'note': f'Todos los destinatarios han firmado: {signed_users}',
                         'res_model_id': self.env['ir.model']._get(self._name).id,
                         'res_id': self.id,
@@ -988,7 +988,7 @@ class SignatureWorkflow(models.Model):
                     _logger.error(f"[SIGN] Error creando actividad de completado: {e}")
                     # No fallar si hay error
                 
-                _logger.info(f"[SIGN] Flujo {self.id} completado exitosamente")
+                _logger.info(f"[SIGN] Solicitud de firma {self.id} completada exitosamente")
                 
             except Exception as e:
                 _logger.error(f"[SIGN] Error en proceso de finalización: {e}")
@@ -1011,16 +1011,16 @@ class SignatureWorkflow(models.Model):
             self.env['mail.message'].create({
                 'subject': f'Firma parcial completada: {self.name}',
                 'body': f'''
-                <p><strong>{signed_recipient['user'].name}</strong> ha firmado los documentos del flujo.</p>
+                <p><strong>{signed_recipient['user'].name}</strong> ha firmado los documentos de la solicitud.</p>
                 <ul>
-                    <li><strong>Flujo:</strong> {self.name}</li>
+                    <li><strong>Solicitud:</strong> {self.name}</li>
                     <li><strong>Fecha de firma:</strong> {fields.Datetime.now()}</li>
                 </ul>
                 <p><strong>Usuarios pendientes de firma:</strong></p>
                 <ul>
                     {''.join([f'<li>{user}</li>' for user in pending_users])}
                 </ul>
-                <p>El flujo se completará automáticamente cuando todos los destinatarios hayan firmado.</p>
+                <p>La solicitud se completará automáticamente cuando todos los destinatarios hayan firmado.</p>
                 ''',
                 'message_type': 'notification',
                 'model': self._name,
@@ -1028,7 +1028,7 @@ class SignatureWorkflow(models.Model):
                 'partner_ids': [(4, self.creator_id.partner_id.id)],
                 'author_id': signed_recipient['user'].partner_id.id,
             })
-            _logger.info(f"Notificación de firma parcial enviada para flujo {self.id}")
+            _logger.info(f"Notificación de firma parcial enviada para la solicitud {self.id}")
         except Exception as e:
             _logger.error(f"Error enviando notificación de firma parcial: {e}")
 
@@ -1036,7 +1036,7 @@ class SignatureWorkflow(models.Model):
         """Procesa documentos firmados actualizando URLs de descarga y marcándolos como firmados"""
         self.ensure_one()
         
-        _logger.info(f"[PROCESS_SIGNED] Procesando documentos del flujo {self.id}")
+        _logger.info(f"[PROCESS_SIGNED] Procesando documentos de la solicitud {self.id}")
         _logger.info(f"[PROCESS_SIGNED] Total documentos: {len(self.document_ids)}")
         
         for doc in self.document_ids:
@@ -1096,15 +1096,15 @@ class SignatureWorkflow(models.Model):
             self.env['mail.message'].create({
                 'subject': f'Documentos firmados disponibles: {self.name}',
                 'body': f'''
-                <p>Su flujo de firma digital ha sido completado exitosamente:</p>
+                <p>Su solicitud de firma digital ha sido completado exitosamente:</p>
                 <ul>
-                    <li><strong>Flujo:</strong> {self.name}</li>
+                    <li><strong>Solicitud:</strong> {self.name}</li>
                     <li><strong>Firmado por:</strong> {signed_users}</li>
                     <li><strong>Documentos:</strong> {self.document_count} archivo(s) firmados</li>
                     <li><strong>Fecha:</strong> {self.completed_date}</li>
                     <li><strong>Carpeta Alfresco:</strong> /Sites/Flujos/{self.creator_id.login}/{self.name}/</li>
                 </ul>
-                <p>Los documentos firmados están disponibles para descarga individual desde el flujo.</p>
+                <p>Los documentos firmados están disponibles para descarga individual desde la solicitud.</p>
                 ''',
                 'message_type': 'notification',
                 'model': self._name,
@@ -1128,11 +1128,11 @@ class SignatureWorkflow(models.Model):
                 'activity_type_id': self.env.ref('mail.mail_activity_data_call').id,
                 'summary': f'Documentos firmados disponibles: {self.name}',
                 'note': f'''
-                <p>Los documentos del flujo han sido firmados por todos los destinatarios y están listos para descarga.</p>
+                <p>Los documentos de la solicitud han sido firmados por todos los destinatarios y están listos para descarga.</p>
                 <p><strong>Firmantes:</strong> {signed_users}</p>
                 <p><strong>Documentos:</strong> {self.document_count} archivo(s)</p>
                 <p><strong>Carpeta:</strong> /Sites/Flujos/{self.creator_id.login}/{self.name}/</p>
-                <p>Acceda al flujo para descargar los documentos firmados individualmente.</p>
+                <p>Acceda a la solicitud para descargar los documentos firmados individualmente.</p>
                 ''',
                 'res_model_id': self.env['ir.model']._get(self._name).id,
                 'res_id': self.id,
@@ -1140,7 +1140,7 @@ class SignatureWorkflow(models.Model):
                 'date_deadline': fields.Date.today(),
             })
             
-            _logger.info(f"Notificación interna de finalización creada para flujo {self.id}")
+            _logger.info(f"Notificación interna de finalización creada para la solicitud {self.id}")
             
         except Exception as e:
             _logger.error(f"Error creando notificación interna de finalización: {e}")
@@ -1150,7 +1150,7 @@ class SignatureWorkflow(models.Model):
         self.ensure_one()
         
         if self.state != 'sent':
-            raise UserError(_('Solo se pueden enviar recordatorios para flujos enviados.'))
+            raise UserError(_('Solo se pueden enviar recordatorios para las solicitudes enviadas.'))
         
         try:
             # Crear mensaje de recordatorio
@@ -1159,7 +1159,7 @@ class SignatureWorkflow(models.Model):
                 'body': f'''
                 <p><strong>Recordatorio:</strong> Tiene pendiente la firma de documentos.</p>
                 <ul>
-                    <li><strong>Flujo:</strong> {self.name}</li>
+                    <li><strong>Solicitud:</strong> {self.name}</li>
                     <li><strong>Enviado:</strong> {self.sent_date}</li>
                     <li><strong>Documentos:</strong> {self.document_count} archivo(s)</li>
                 </ul>
@@ -1203,9 +1203,9 @@ class SignatureWorkflow(models.Model):
         }
 
     def _get_signed_local_wizard(self):
-        """Obtiene el wizard de firma local asociado a este flujo"""
+        """Obtiene el wizard de firma local asociado a esta solicitud"""
         if not self.sent_date:
-            _logger.warning(f"Flujo {self.id} no tiene fecha de envío")
+            _logger.warning(f"Solicitud de firma {self.id} no tiene fecha de envío")
             return False
             
         # Buscar wizard de firma que tenga el contexto de este workflow
@@ -1230,10 +1230,10 @@ class SignatureWorkflow(models.Model):
             workflow_doc_names = set(self.document_ids.mapped('name'))
             
             if wizard_doc_names == workflow_doc_names:
-                _logger.info(f"Encontrado wizard {wizard.id} por coincidencia de nombres para flujo {self.id}")
+                _logger.info(f"Encontrado wizard {wizard.id} por coincidencia de nombres para la solicitud {self.id}")
                 return wizard
         
-        _logger.warning(f"No se encontró wizard de firma para el flujo {self.id}")
+        _logger.warning(f"No se encontró wizard de firma para la solicitud {self.id}")
         return False
 
     def unlink(self):
@@ -1246,7 +1246,7 @@ class SignatureWorkflow(models.Model):
             # Verificar si el usuario es el creador del flujo
             if record.creator_id != self.env.user:
                 raise UserError(_(
-                    'Solo el creador del flujo (%s) puede eliminar este registro. '
+                    'Solo el creador de la solicitud (%s) puede eliminar este registro. '
                     'Usuario actual: %s'
                 ) % (record.creator_id.name, self.env.user.name))
         
@@ -1254,7 +1254,7 @@ class SignatureWorkflow(models.Model):
 
 class SignatureWorkflowDocument(models.Model):
     _name = 'signature.workflow.document'
-    _description = 'Documento del Flujo de Firma'
+    _description = 'Documento de la Solicitud de Firma'
 
     workflow_id = fields.Many2one('signature.workflow', string='Flujo', required=True, ondelete='cascade')
     name = fields.Char(string='Nombre del Documento', required=True)

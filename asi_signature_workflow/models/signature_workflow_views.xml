@@ -7,7 +7,7 @@
         <field name="name">signature.workflow.form</field>
         <field name="model">signature.workflow</field>
         <field name="arch" type="xml">
-            <form string="Flujo de Firma Digital">
+            <form string="Solicitud de Firma Digital">
                 <header>
                     <button name="action_send_for_signature" string="Enviar para Firma"
                         type="object" class="btn-primary"
@@ -15,7 +15,7 @@
                     <button name="action_sign_documents" string="Firmar Documentos"
                         type="object" class="btn-success"
                         attrs="{'invisible': [('state', '!=', 'sent')]}" />
-                    <button name="action_reject_workflow" string="Rechazar Flujo"
+                    <button name="action_reject_workflow" string="Rechazar Solicitud"
                         type="object" class="btn-danger"
                         attrs="{'invisible': [('state', '!=', 'sent')]}" />
                     <button name="action_send_reminder" string="Enviar Recordatorio"
@@ -34,7 +34,7 @@
                 <sheet>
                     <div class="oe_title">
                         <h1>
-                            <field name="name" placeholder="Nombre del Flujo de Firma" />
+                            <field name="name" placeholder="Nombre de la Solicitud de Firma" />
                         </h1>
                     </div>
 
@@ -60,7 +60,7 @@
                     </group>
                     <!--Nueva
                     sección para mostrar destinatarios de forma clara-->
-                    <group string="Destinatarios del Flujo">
+                    <group string="Destinatarios de la Solicitud">
                         <group string="Destinatario 1"
                             attrs="{'invisible': [('target_user_id_1', '=', False)]}">
                             <field name="target_user_id_1" readonly="1" />
@@ -165,7 +165,7 @@
         <field name="name">signature.workflow.tree</field>
         <field name="model">signature.workflow</field>
         <field name="arch" type="xml">
-            <tree string="Flujos de Firma Digital">
+            <tree string="Solicitudes de Firma Digital">
                 <field name="name" />
                 <field name="creator_id" />
                 <!--Mostrar
@@ -193,7 +193,7 @@
         <field name="name">signature.workflow.search</field>
         <field name="model">signature.workflow</field>
         <field name="arch" type="xml">
-            <search string="Buscar Flujos de Firma">
+            <search string="Buscar Solicitudes de Firma">
                 <field name="name" />
                 <field name="creator_id" />
                 <!--Buscar
@@ -209,12 +209,12 @@
                     name="signature_role_id_1" string="Rol de Firma" />
 
                 <filter
-                    string="Mis Flujos Creados" name="my_created"
+                    string="Mis Solicitudes Creados" name="my_created"
                     domain="[('creator_id', '=', uid)]" />
                 <!--Filtro
                 mejorado para flujos asignados-->
                 <filter
-                    string="Flujos Asignados a Mí" name="assigned_to_me"
+                    string="Solicitudes Asignados a Mí" name="assigned_to_me"
                     domain="['|', '|', '|', ('target_user_id_1', '=', uid), ('target_user_id_2', '=', uid), ('target_user_id_3', '=', uid), ('target_user_id_4', '=', uid)]" />
 
                 <separator />
@@ -251,16 +251,16 @@
     <record
         id="action_signature_workflow"
         model="ir.actions.act_window">
-        <field name="name">Flujos de Firma Digital</field>
+        <field name="name">Solicitudes de Firma Digital</field>
         <field name="res_model">signature.workflow</field>
         <field name="view_mode">tree,form</field>
         <field name="context">{'search_default_my_created': 1}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-                ¡Cree su primer flujo de firma digital!
+                ¡Cree su primer solicitud de firma digital!
             </p>
             <p>
-                Los flujos de firma le permiten enviar documentos a otros usuarios
+                Las solicitudes de firma le permiten enviar documentos a otros usuarios
                 para que los firmen digitalmente de manera organizada y controlada.
             </p>
         </field>

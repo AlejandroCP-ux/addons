@@ -4,14 +4,14 @@ from odoo.exceptions import UserError
 
 class SignatureWorkflowRejectWizard(models.TransientModel):
     _name = 'signature.workflow.reject.wizard'
-    _description = 'Wizard para Rechazar Flujo de Firma'
+    _description = 'Wizard para Rechazar Solicitud de Firma'
 
     workflow_id = fields.Many2one('signature.workflow', string='Flujo', required=True)
     rejection_notes = fields.Text(string='Motivo del Rechazo', required=True, 
                                  placeholder='Por favor, explique el motivo del rechazo...')
 
     def action_confirm_rejection(self):
-        """Confirma el rechazo del flujo"""
+        """Confirma el rechazo de la solicitud"""
         self.ensure_one()
         
         if not self.rejection_notes.strip():
@@ -24,7 +24,7 @@ class SignatureWorkflowRejectWizard(models.TransientModel):
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
-                'message': f'Flujo "{self.workflow_id.name}" rechazado exitosamente',
+                'message': f'Solicitud de Firma "{self.workflow_id.name}" rechazada exitosamente',
                 'type': 'success',
                 'next': {
                 'type': 'ir.actions.act_window_close'

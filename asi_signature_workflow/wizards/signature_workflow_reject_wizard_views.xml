@@ -5,10 +5,10 @@
         <field name="name">signature.workflow.reject.wizard.form</field>
         <field name="model">signature.workflow.reject.wizard</field>
         <field name="arch" type="xml">
-            <form string="Rechazar Flujo de Firma">
+            <form string="Rechazar Solicitud de Firma">
                 <div class="alert alert-warning" role="alert">
-                    <strong>⚠️ Confirmación de Rechazo</strong><br /> Está a punto de rechazar el
-                    flujo de firma. Esta acción notificará al creador del flujo. </div>
+                    <strong>⚠️ Confirmación de Rechazo</strong><br /> Está a punto de rechazar la
+                    solicitud de firma. Esta acción notificará al creador de la solicitud. </div>
 
                 <group>
                     <field name="workflow_id" readonly="1" />

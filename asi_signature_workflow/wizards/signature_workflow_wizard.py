@@ -7,11 +7,11 @@ _logger = logging.getLogger(__name__)
 
 class SignatureWorkflowWizard(models.TransientModel):
     _name = 'signature.workflow.wizard'
-    _description = 'Asistente para Iniciar Flujo de Firma Digital'
+    _description = 'Asistente para Iniciar Solicitud de Firma Digital'
 
     # Información básica del flujo
-    name = fields.Char(string='Nombre del Flujo', 
-                      default=lambda self: f'Flujo de Firma - {fields.Datetime.now().strftime("%Y-%m-%d - %H-%M")}')
+    name = fields.Char(string='Nombre de la Solicitud', 
+                      default=lambda self: f'Solicitud de Firma - {fields.Datetime.now().strftime("%Y-%m-%d - %H-%M")}')
     
     # Destinatario 1
     target_user_id_1 = fields.Many2one('res.users', string='Usuario Destinatario 1')
@@ -91,7 +91,7 @@ class SignatureWorkflowWizard(models.TransientModel):
                                   compute='_compute_document_count')
     
     # Notas del flujo
-    notes = fields.Text(string='Notas del Flujo')
+    notes = fields.Text(string='Notas de la Solicitud',)
     
     # Validaciones de configuración
     has_alfresco_config = fields.Boolean(string='Alfresco Configurado', 
@@ -334,7 +334,7 @@ class SignatureWorkflowWizard(models.TransientModel):
         return action
 
     def create_workflow(self):
-        """Crea el flujo de trabajo final con múltiples destinatarios"""
+        """Crea la solicitud de firma final con múltiples destinatarios"""
         self.ensure_one()
         
         if not self.target_user_id_1:
@@ -398,7 +398,7 @@ class SignatureWorkflowWizard(models.TransientModel):
             
             return {
                 'type': 'ir.actions.act_window',
-                'name': 'Flujo Creado Exitosamente',
+                'name': 'Solicitud Creada Exitosamente',
                 'res_model': 'signature.workflow',
                 'res_id': workflow.id,
                 'view_mode': 'form',
@@ -408,8 +408,8 @@ class SignatureWorkflowWizard(models.TransientModel):
         except UserError:
             raise
         except Exception as e:
-            _logger.error(f"Error inesperado creando flujo: {e}")
-            raise UserError(_('Error inesperado al crear el flujo: %s') % str(e))
+            _logger.error(f"Error inesperado creando la solicitud: {e}")
+            raise UserError(_('Error inesperado al crear la solicitud: %s') % str(e))
 
     def _get_default_signature_role(self):
         """Get the first available signature role as default"""
@@ -432,7 +432,7 @@ class SignatureWorkflowWizard(models.TransientModel):
         # Hacer campos de rol y posición de solo lectura para el destinatario
         return {
             'type': 'ir.actions.act_window',
-            'name': 'Firmar Documentos del Flujo',
+            'name': 'Firmar Documentos de la Solicitud',
             'res_model': 'alfresco.firma.wizard',
             'res_id': wizard.id,
             'view_mode': 'form',
@@ -465,7 +465,7 @@ class SignatureWorkflowWizard(models.TransientModel):
         
         return {
             'type': 'ir.actions.act_window',
-            'name': 'Firmar Documentos del Flujo',
+            'name': 'Firmar Documentos de la Solicitud',
             'res_model': 'firma.documento.wizard',
             'res_id': wizard.id,
             'view_mode': 'form',
@@ -479,7 +479,7 @@ class SignatureWorkflowWizard(models.TransientModel):
 
 class SignatureWorkflowDocumentTemp(models.TransientModel):
     _name = 'signature.workflow.document.temp'
-    _description = 'Documento Temporal para Flujo de Firma'
+    _description = 'Documento Temporal para la Solicitud de Firma'
 
     name = fields.Char(string='Nombre', required=True)
     

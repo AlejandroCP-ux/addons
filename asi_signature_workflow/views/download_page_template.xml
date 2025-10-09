@@ -11,7 +11,7 @@
                                     <i class="fa fa-check-circle"></i> Documentos Firmados Listos </h4>
                             </div>
                             <div class="card-body">
-                                <h5>Flujo: <t t-esc="workflow.name" /></h5>
+                                <h5>Solicitud de Firma: <t t-esc="workflow.name" /></h5>
                                 <p class="text-muted"> Firmado por: <strong>
                                         <t t-esc="workflow.target_user_id.name" />
                                     </strong><br />
